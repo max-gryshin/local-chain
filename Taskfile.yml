@@ -1,0 +1,25 @@
+version: '3' # https://taskfile.dev/#/usage
+
+dotenv: ['.env']
+
+vars:
+  MIGRATION_COMMAND: docker run --rm -v $PWD/backend/internal/db/migrations:/migrations --network host migrate/migrate -path=/migrations -database $DATABASE_URL #postgresql://localhost:5432/postgres?user=postgres&password=postgres?sslmode=disable
+
+tasks:
+  lint-local: golangci-lint run
+
+  lint: docker run --rm -v $PWD/backend:/app -w /app golangci/golangci-lint:v1.35.2 golangci-lint run -v --fix --timeout 5m
+
+  clean-deps: go mod tidy
+
+  up: docker-compose up --no-deps --build
+
+  down: docker-compose down
+
+  build: go build -v
+
+  test: go test ./...
+
+  migration-up: '{{.MIGRATION_COMMAND}} up'
+
+  migration-down: '{{.MIGRATION_COMMAND}} down 1'

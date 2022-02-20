@@ -1,0 +1,85 @@
+version: "3.7"
+
+services:
+  app:
+    build:
+      dockerfile: backend/Dockerfile
+      context: ./
+    image: "${APP_IMAGE}:${APP_IMAGE_TAG}"
+    container_name: "${APP_SERVICE}"
+    environment:
+      ETH_RPC_PORT:
+      ETH_PORT:
+      HOST:
+      PORT:
+      DATABASE_URL:
+      DATABASE_CONTAINER_URL:
+      JWT_SECRET:
+      ROOT_PATH:
+      SAVE_PATH:
+      LOG_PATH:
+      LOG_NAME:
+      LOG_EXT:
+    ports:
+      - "1323:1323"
+    tty: yes
+    hostname: app
+    #entrypoint: [ "/local-chain" ]
+    depends_on:
+      - db
+
+  db:
+    image: postgres:14.1-alpine
+    container_name: "${DB_SERVICE}"
+    volumes:
+      - local-chain-db-volume:/var/lib/postgresql/data
+    environment:
+     - POSTGRES_PASSWORD=postgres
+    ports:
+      - "5432:5432"
+
+  #########################################################################
+  # ethereum/client-go
+  # - https://geth.ethereum.org/docs/install-and-build/installing-geth#run-inside-docker-container
+  #------------------------------------------------------------------------
+  # Example of commands to container
+  # - Use console inside container
+  #  1. $ docker compose exec eth-node sh
+  #  2. # geth attach
+  #  3. > eth.syncing
+  # - Call JSON-RPC (https://eth.wiki/json-rpc/API)
+  #   $ curl -X POST -H "Content-Type: application/json" --data '{"jsonrpc":"2.0","method":"eth_syncing","params":[],"id":1}' http://localhost:8545
+  #########################################################################
+  ##node:
+  ##  image: ethereum/client-go:stable
+  ##  container_name: "${NODE_SERVICE}"
+  ##  ports:
+  ##    - "30303:30303"
+  ##  stdin_open: true
+  ##  tty: true
+  ##  command: --goerli --http --http.addr 0.0.0.0 --http.api admin,debug,web3,eth,txpool,net,personal
+
+    #########################################################################
+    # trufflesuite/ganache-cli
+    # - https://hub.docker.com/r/trufflesuite/ganache-cli
+    #------------------------------------------------------------------------
+    # Example of commands to container
+    # - run
+    #  $ docker compose -f docker-compose.eth.yml up ganache
+    # - cli command example
+    #  $ ganache-cli --mnemonic "toy echo orbit embrace opinion file client report history bomb regret life"
+    #
+  ##ganache:
+  ##  image: trufflesuite/ganache-cli:v6.12.2
+  ##  ports:
+  ##    - "${ETH_RPC_PORT:-8545}:${ETH_PORT}"
+  ##  volumes:
+  ##    - ./docker/nodes/eth/ganache-data:/ganache_data
+    # command adds into default ENTRYPOINT
+    # https://hub.docker.com/r/trufflesuite/ganache-cli/dockerfile
+    # todo: for what is this?
+    #command: --mnemonic "toy echo orbit embrace opinion file client report history bomb regret life"
+
+volumes:
+  local-chain-db-volume:
+    name: db-local-chain
