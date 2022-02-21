@@ -7,7 +7,7 @@ import (
 	"github.com/ZmaximillianZ/local-chain/internal/models"
 	"github.com/ZmaximillianZ/local-chain/internal/utils"
 	"github.com/doug-martin/goqu/v9"
-	_ "github.com/doug-martin/goqu/v9/dialect/postgres"
+	_ "github.com/doug-martin/goqu/v9/dialect/postgres" // need to import right dialect
 	"github.com/doug-martin/goqu/v9/exp"
 	"github.com/jmoiron/sqlx"
 )
