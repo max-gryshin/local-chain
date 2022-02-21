@@ -24,8 +24,10 @@ jobs:
 
       - name: Lint
         uses: golangci/golangci-lint-action@v2
+        working-directory: backend/
+        run: golangci-lint run -v --fix --timeout 5m
         with:
-          version: v1.31
+          version: v1.35.2
 
       - name: Build
         run: go build -v
