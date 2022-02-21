@@ -7,6 +7,7 @@ import (
 	"github.com/ZmaximillianZ/local-chain/internal/models"
 	"github.com/ZmaximillianZ/local-chain/internal/utils"
 	"github.com/doug-martin/goqu/v9"
+	_ "github.com/doug-martin/goqu/v9/dialect/postgres"
 	"github.com/doug-martin/goqu/v9/exp"
 	"github.com/jmoiron/sqlx"
 )
@@ -91,8 +92,8 @@ func (repo *UserRepository) Create(user *models.User) error {
 		baseQuery.
 		Insert().
 		Into(`user`).
-		Cols("email", "password_hash", "created_at").
-		Vals(goqu.Vals{user.Email, user.Password, user.CreatedAt})
+		Cols("email", "password_hash", "created_at", "updated_at").
+		Vals(goqu.Vals{user.Email, user.Password, user.CreatedAt, user.UpdatedAt})
 
 	return repo.execInsert(query)
 }

@@ -6,6 +6,7 @@ import (
 	"time"
 )
 
+//todo: move to profile
 const (
 	StateHalfRegistration = 1
 	StateRegistration     = 2
@@ -25,9 +26,9 @@ type User struct {
 	ID         int       `json:"id"          db:"id"`
 	Email      string    `json:"email"       db:"email"`
 	Password   string    `json:"password"    db:"password_hash"`
-	FirstName  int8      `json:"first_name"  db:"first_name"`
-	LastName   int8      `json:"last_name"   db:"last_name"`
-	MiddleName int8      `json:"middle_name" db:"middle_name"`
+	FirstName  *string   `json:"first_name"  db:"first_name"`
+	LastName   *string   `json:"last_name"   db:"last_name"`
+	MiddleName *string   `json:"middle_name" db:"middle_name"`
 	CreatedAt  time.Time `json:"created_at"  db:"created_at"`
 	UpdatedAt  time.Time `json:"updated_at"  db:"updated_at"`
 }

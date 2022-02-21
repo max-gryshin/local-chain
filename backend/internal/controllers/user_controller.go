@@ -106,7 +106,7 @@ func (ctr *UserController) Create(c echo.Context) error {
 	if userExist.ID != 0 {
 		return errors.New("user with email " + a.Email + " exists")
 	}
-	user = models.User{Email: a.Email, CreatedAt: time.Now()}
+	user = models.User{Email: a.Email, CreatedAt: time.Now(), UpdatedAt: time.Now()}
 	if errSetPassword := user.SetPassword(a.Password); errSetPassword != nil {
 		return errSetPassword
 	}

@@ -24,7 +24,6 @@ services:
       - "1323:1323"
     tty: yes
     hostname: app
-    #entrypoint: [ "/local-chain" ]
     depends_on:
       - db
 

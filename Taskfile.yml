@@ -12,7 +12,7 @@ tasks:
 
   clean-deps: go mod tidy
 
-  up: docker-compose up --no-deps --build
+  up: docker-compose up -d --no-deps --build
 
   down: docker-compose down
 
