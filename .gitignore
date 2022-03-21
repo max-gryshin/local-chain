@@ -15,3 +15,5 @@ backend/var/log
 backend/*.pem
 # Dependency directories (remove the comment below to include it)
 # vendor/
+
+todo.txt
