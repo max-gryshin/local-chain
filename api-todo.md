@@ -61,8 +61,8 @@
 ```
  - Constraints:
    - available only for account and wallet owner
- 
- orders:
+
+ #order:
  - Request: `GET /api/account/{id}/orders`
  - Response:
 ```
@@ -91,7 +91,8 @@
    - available for owner, manager super admin
  - Questions:
    - multiple wallets?
-   #transaction:
+
+#transaction:
  send money
  - Request: `POST /api/transaction/{userId}`
 ```
@@ -120,7 +121,7 @@
  transaction history certain user
  - Request: `GET /api/transaction/{userId}/all?page=1&limit=30`
 
- #manager:
+#manager
  create and modify user
  - Request: `POST|PATCH /api/manager/user`
 ```
