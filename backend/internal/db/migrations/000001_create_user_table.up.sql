@@ -7,7 +7,12 @@ CREATE TABLE "user"
     middle_name   varchar(50)  NULL,
     password_hash varchar(512) NOT NULL,
     created_at    timestamp    NOT NULL,
-    updated_at    timestamp    NOT NULL
+    updated_at    timestamp    NOT NULL,
+    created_by    int          NOT NULL,
+    updated_by    int          NOT NULL,
+    status        smallserial  NOT NULL
+        CONSTRAINT state_check CHECK (status > 0 and status <= 15),
+    roles         jsonb        NOT NULL
 );
 
 create unique index table_name_user_uindex
