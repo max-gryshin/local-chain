@@ -1,6 +1,6 @@
-##API
+## API
 
-#user
+# user
  user list.
  - Request: `GET /api/user/all?page=1&limit=30`
  - Response:
@@ -30,9 +30,9 @@
     ...
 }
 ```
- #account:
+ # account:
  user account
- - Request: `GET /api/user/{id}/account`
+ - Request: `GET /api/account/{userId}/`
  - Response:
 ```
 {
@@ -62,8 +62,8 @@
  - Constraints:
    - available only for account and wallet owner
 
- #order:
- - Request: `GET /api/account/{id}/orders`
+ # order:
+ - Request: `GET /api/order`
  - Response:
 ```
 {
@@ -76,9 +76,28 @@
     ]
 }
 ```
- #wallet:
+ - Constraints:
+    - available only for order owner and it's manager
+
+ - Request: `GET /api/order/{id}`
+ - Response:
+```
+{
+    "orders": [
+        {
+            "amount": 10.00,
+            "status": "Pending",
+            ...
+        }
+    ]
+}
+```
+- Constraints:
+    - available only for order owner and it's manager
+
+ # wallet:
  wallet balance
- - Request: `GET /api/wallet/{userId}/{walletId}`
+ - Request: `GET /api/wallet/{walletId}`
 ```
 {
     "id": 1,
@@ -92,12 +111,11 @@
  - Questions:
    - multiple wallets?
 
-#transaction:
+# transaction:
  send money
- - Request: `POST /api/transaction/{userId}`
+ - Request: `POST /api/transaction`
 ```
-{
-    "from": "walletSender"
+{    
     "to": "walletReceiver",
     "amount": 10.00
 }
@@ -121,7 +139,7 @@
  transaction history certain user
  - Request: `GET /api/transaction/{userId}/all?page=1&limit=30`
 
-#manager
+# manager
  create and modify user
  - Request: `POST|PATCH /api/manager/user`
 ```
@@ -147,7 +165,7 @@ create and modify user account
    - modifying available for manager that handle this user and super admin
 
 orders to cash out:
- - Request: `GET /api/manager/account/orders?page=1&limit=30&orderStatus=Pending|Done|Rejected`
+ - Request: `GET /api/manager/order?page=1&limit=30&orderStatus=Pending|Done|Rejected`
  - Response:
 ```
 {
