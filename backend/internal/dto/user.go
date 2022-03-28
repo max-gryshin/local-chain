@@ -6,10 +6,10 @@ import (
 	"github.com/ZmaximillianZ/local-chain/internal/models"
 )
 
-type Users []User
+type Users []*User
 
 type User struct {
-	ID        int       `json:"id" db:"id" validate:"required"`
+	ID        int       `json:"id" validate:"required"`
 	Password  string    `json:"password"   ` //validate:"gte=6,lte=50"`
 	CreatedAt time.Time `json:"created_at"`
 	Email     string    `json:"email"      validate:"email"`
@@ -33,11 +33,10 @@ func LoadUserModelFromDTO(dto *User) *models.User {
 	}
 }
 
-func LoadUserDTOCollectionFromModel(usersModel *models.Users) *Users {
+func LoadUserDTOCollectionFromModel(usersModel models.Users) Users {
 	var usersDTO Users
-	for _, user := range *usersModel {
-		userModel := user
-		usersDTO = append(usersDTO, *LoadUserDTOFromModel(&userModel))
+	for _, user := range usersModel {
+		usersDTO = append(usersDTO, LoadUserDTOFromModel(user))
 	}
-	return &usersDTO
+	return usersDTO
 }
