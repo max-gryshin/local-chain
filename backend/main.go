@@ -35,12 +35,28 @@ func main() {
 		panic(err)
 	}
 	userRepo := repository.NewUserRepository(dbContext.Connection, dbContext.QueryBuilder)
+	accountRepo := repository.NewAccountRepository(dbContext.Connection, dbContext.QueryBuilder)
+	orderRepo := repository.NewOrderRepository(dbContext.Connection, dbContext.QueryBuilder)
+	walletRepo := repository.NewWalletRepository(dbContext.Connection, dbContext.QueryBuilder)
 	eHandler := errorhandler.ErrorHandler{}
 	userController := controllers.NewUserController(userRepo, eHandler, validator.New())
+	managerController := controllers.NewManagerController(userRepo, eHandler, validator.New())
+	accountController := controllers.NewAccountController(accountRepo, eHandler, validator.New())
+	orderController := controllers.NewOrderController(orderRepo, eHandler, validator.New())
+	walletController := controllers.NewWalletController(walletRepo, eHandler, validator.New())
+	transactionController := controllers.NewTransactionController(eHandler, validator.New())
 	eco := echo.New()
 	router := eco.Group("/api/v1")
 	router.Use(eHandler.Handle)
-	routes.RegisterAPIV1(router, userController)
+	routes.RegisterAPI(
+		router,
+		userController,
+		managerController,
+		accountController,
+		orderController,
+		walletController,
+		transactionController,
+	)
 	// todo: use with TLS StartTLS(":1323", "cert.pem", "key.pem")
 	eco.Logger.Fatal(eco.Start(":1323"))
 }

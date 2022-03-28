@@ -32,7 +32,7 @@
 ```
  # account:
  user account
- - Request: `GET /api/account/{userId}/`
+ - Request: `GET /api/account/{id}/`
  - Response:
 ```
 {
@@ -43,11 +43,28 @@
     "managerId": 1
 }
 ```
- create an order to cash out
- - Request: `POST /api/account/{id}/{walletId}/cash`
+account list.
+- Request: `GET /api/account/all?page=1&limit=30`
+- Response:
 ```
 {
-    "amount": 10.00,
+    {
+        "userId": 1,
+        "walletId": 2                      
+    },
+    {
+        "userId": 1,
+        "walletId": 2                
+    },
+    ...
+}
+```
+ create an order to cash out
+ - Request: `POST /api/account/{id}/cash-out`
+```
+{
+    "wallet-id": 1,
+    "amount": 10.00,    
     ...
 }
 ```
@@ -78,6 +95,7 @@
 ```
  - Constraints:
     - available only for order owner and it's manager
+
 
  - Request: `GET /api/order/{id}`
  - Response:
@@ -110,6 +128,27 @@
    - available for owner, manager super admin
  - Questions:
    - multiple wallets?
+
+wallets
+- Request: `GET /api/wallet/all`
+```
+{
+    {
+        "id": 1,
+        "ballance": 100.00,
+        "status": "active",
+        ...
+    },
+    {
+        "id": 2,
+        "ballance": 1.00,
+        "status": "inactive",
+        ...
+    }
+}
+```
+- Constraints:
+    - available for owner, manager super admin
 
 # transaction:
  send money
@@ -198,8 +237,9 @@ handle an order to cash out
 - Constraints:
   - managers can handle orders only those users, that they handle, but super admin all.
 
-Debet amount from user wallet
-- Request: `POST /api/manager/wallet/{walletId}/debet`
+Debit|Credit amount from user wallet
+- Request: `POST /api/manager/wallet/{walletId}/debit`
+- Request: `POST /api/manager/wallet/{walletId}/credit`
 ```
 {
     "amount": 10.00,
@@ -208,5 +248,5 @@ Debet amount from user wallet
 ```
 - Notes:
     - During this request system create a transaction and transfer money to manager's wallet 
-    - Super admin can debet money from manager's wallets.
-    - Managers can debet money only from those users that they handle
+    - Super admin can debit|credit money from manager's wallets.
+    - Managers can debit|credit money only from those users that they handle
