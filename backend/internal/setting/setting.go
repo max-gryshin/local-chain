@@ -68,7 +68,7 @@ func LoadSetting() *Setting {
 		},
 		DBConfig: db.ConnectionSettions{
 			Database:    "postgres",
-			URL:         getEnv("DATABASE_CONTAINER_URL"),
+			URL:         getEnv("DATABASE_URL"), // for production DATABASE_CONTAINER_URL
 			MaxIdleCons: 100,
 			MaxOpenCons: 10,
 		},

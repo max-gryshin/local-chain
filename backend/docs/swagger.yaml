@@ -1,0 +1,659 @@
+basePath: /
+definitions:
+  dto.Account:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      dob:
+        type: string
+      id:
+        type: integer
+      phone:
+        type: string
+      status:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+      user_id:
+        type: integer
+    required:
+    - id
+    type: object
+  dto.Order:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      request_reason:
+        items:
+          type: string
+        type: array
+      status:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+      wallet_id:
+        type: integer
+    required:
+    - id
+    type: object
+  dto.User:
+    properties:
+      created_at:
+        type: string
+      email:
+        type: string
+      id:
+        type: integer
+      password:
+        description: validate:"gte=6,lte=50"`
+        type: string
+    required:
+    - id
+    type: object
+  dto.Wallet:
+    properties:
+      account_id:
+        type: integer
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      id:
+        type: integer
+      private_key:
+        type: string
+      status:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+      wallet_id:
+        type: string
+    required:
+    - id
+    type: object
+host: local-chain.lh
+info:
+  contact:
+    email: goooglemax1993@gmail.com
+    name: Maxim Hryshyn
+  description: This is a local chain server.
+  title: Local chain API
+  version: "1.0"
+paths:
+  /api/account:
+    get:
+      consumes:
+      - application/json
+      description: get accounts
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.Account'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: get accounts
+      tags:
+      - account
+  /api/account/{accountId}:
+    get:
+      consumes:
+      - application/json
+      description: get account by id
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Account'
+      security:
+      - ApiKeyAuth: []
+      summary: get account
+      tags:
+      - account
+  /api/account/{accountId}/:
+    patch:
+      consumes:
+      - application/json
+      description: update own account by id
+      parameters:
+      - description: Account
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Account'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Account'
+      security:
+      - ApiKeyAuth: []
+      summary: update account
+      tags:
+      - account
+  /api/account/{id}/cash-out:
+    post:
+      consumes:
+      - application/json
+      description: create an order to cash out money
+      parameters:
+      - description: Order
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Order'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Order'
+      security:
+      - ApiKeyAuth: []
+      summary: cash out
+      tags:
+      - account
+  /api/auth:
+    post:
+      consumes:
+      - application/json
+      description: authenticate user
+      parameters:
+      - description: email
+        in: path
+        name: email
+        required: true
+        type: string
+      - description: password
+        in: path
+        name: password
+        required: true
+        type: string
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.User'
+      summary: authenticate
+      tags:
+      - auth
+  /api/manager/account/{accountId}:
+    patch:
+      consumes:
+      - application/json
+      description: updating an account by manager
+      parameters:
+      - description: Account
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Account'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Account'
+      security:
+      - ApiKeyAuth: []
+      summary: update an account
+      tags:
+      - manager
+  /api/manager/account/{userid}:
+    post:
+      consumes:
+      - application/json
+      description: creating an account by manager
+      parameters:
+      - description: Account
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Account'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Account'
+      security:
+      - ApiKeyAuth: []
+      summary: create an account
+      tags:
+      - manager
+  /api/manager/order:
+    get:
+      consumes:
+      - application/json
+      description: get orders by manager
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.Order'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: get orders
+      tags:
+      - order
+  /api/manager/order/{orderId}:
+    patch:
+      consumes:
+      - application/json
+      description: handle order by manager
+      parameters:
+      - description: Order
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Order'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Order'
+      security:
+      - ApiKeyAuth: []
+      summary: handle order
+      tags:
+      - manager
+  /api/manager/user:
+    post:
+      consumes:
+      - application/json
+      description: create user by manager
+      parameters:
+      - description: User
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/dto.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.User'
+      security:
+      - ApiKeyAuth: []
+      summary: create user
+      tags:
+      - manager
+  /api/manager/user/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: update user by manager
+      parameters:
+      - description: User
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/dto.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.User'
+      security:
+      - ApiKeyAuth: []
+      summary: update user
+      tags:
+      - manager
+  /api/manager/wallet:
+    post:
+      consumes:
+      - application/json
+      description: creating a wallet by manager
+      parameters:
+      - description: Wallet
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Wallet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Wallet'
+      security:
+      - ApiKeyAuth: []
+      summary: create a wallet
+      tags:
+      - manager
+  /api/manager/wallet/{walletId}:
+    patch:
+      consumes:
+      - application/json
+      description: updating a wallet by manager
+      parameters:
+      - description: Wallet
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Wallet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Wallet'
+      security:
+      - ApiKeyAuth: []
+      summary: update a wallet
+      tags:
+      - manager
+  /api/manager/wallet/{walletId}/credit:
+    post:
+      consumes:
+      - application/json
+      description: credit amount from user wallet
+      parameters:
+      - description: Wallet
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Wallet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Wallet'
+      security:
+      - ApiKeyAuth: []
+      summary: credit
+      tags:
+      - manager
+  /api/manager/wallet/{walletId}/debit:
+    post:
+      consumes:
+      - application/json
+      description: debit amount from user wallet
+      parameters:
+      - description: Wallet
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Wallet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Wallet'
+      security:
+      - ApiKeyAuth: []
+      summary: debit
+      tags:
+      - manager
+  /api/order:
+    get:
+      consumes:
+      - application/json
+      description: get orders
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.Order'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: get orders
+      tags:
+      - order
+  /api/order/{id}:
+    get:
+      consumes:
+      - application/json
+      description: get order by id
+      parameters:
+      - description: Order ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Order'
+      security:
+      - ApiKeyAuth: []
+      summary: get order
+      tags:
+      - order
+  /api/transaction:
+    get:
+      consumes:
+      - application/json
+      description: getting all transaction history
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.Order'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: get transactions
+      tags:
+      - transaction
+    post:
+      consumes:
+      - application/json
+      description: sending transaction
+      parameters:
+      - description: Wallet
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/dto.Wallet'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Wallet'
+      security:
+      - ApiKeyAuth: []
+      summary: send transaction
+      tags:
+      - transaction
+  /api/transaction/{userId}:
+    get:
+      consumes:
+      - application/json
+      description: getting transactions certain user
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.Order'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: get user transactions
+      tags:
+      - transaction
+  /api/user:
+    get:
+      consumes:
+      - application/json
+      description: get users
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.User'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: get users
+      tags:
+      - user
+  /api/user/{id}:
+    get:
+      consumes:
+      - application/json
+      description: get user by id
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.User'
+      security:
+      - ApiKeyAuth: []
+      summary: get user
+      tags:
+      - user
+    patch:
+      consumes:
+      - application/json
+      description: update user
+      parameters:
+      - description: User
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/dto.User'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.User'
+      security:
+      - ApiKeyAuth: []
+      summary: update user
+      tags:
+      - user
+  /api/wallet:
+    get:
+      consumes:
+      - application/json
+      description: get wallets
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.Wallet'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: get wallets
+      tags:
+      - wallet
+  /api/wallet/{walletId}:
+    get:
+      consumes:
+      - application/json
+      description: get wallet by id
+      parameters:
+      - description: Wallet ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.Wallet'
+      security:
+      - ApiKeyAuth: []
+      summary: get wallet
+      tags:
+      - wallet
+schemes:
+- http
+securityDefinitions:
+  BasicAuth:
+    type: basic
+swagger: "2.0"

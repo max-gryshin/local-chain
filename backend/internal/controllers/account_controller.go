@@ -27,7 +27,15 @@ func NewAccountController(repo contractions.AccountRepository, errorHandler e.Er
 	}
 }
 
-// GetByID example: /api/account/{id}/
+// GetByID godoc
+// @Summary      get account
+// @Description  get account by id
+// @Tags         account
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}            dto.Account
+// @Security     ApiKeyAuth
+// @Router       /api/account/{accountId} [get]
 func (ctr *AccountController) GetByID(c echo.Context) error {
 	var (
 		err     error
@@ -39,8 +47,15 @@ func (ctr *AccountController) GetByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, dto.LoadAccountDTOFromModel(&account))
 }
 
-// GetAccounts return list of accounts
-// example: /api/account/all
+// GetAccounts   godoc
+// @Summary      get accounts
+// @Description  get accounts
+// @Tags         account
+// @Accept       json
+// @Produce      json
+// @Success      200  {object}    dto.Accounts
+// @Security     ApiKeyAuth
+// @Router       /api/account [get]
 func (ctr *AccountController) GetAccounts(c echo.Context) error {
 	var (
 		accounts models.Accounts
@@ -53,7 +68,31 @@ func (ctr *AccountController) GetAccounts(c echo.Context) error {
 	return c.JSON(http.StatusOK, dto.LoadAccountDTOCollectionFromModel(accounts))
 }
 
-// CashOut example: /api/account/{id}/cash-out
+// UpdateAccount godoc
+// @Summary      update account
+// @Description  update own account by id
+// @Tags         account
+// @Accept       json
+// @Produce      json
+// @Param        message  body  dto.Account  true  "Account"
+// @Success      200  {object}  dto.Account
+// @Security     ApiKeyAuth
+// @Router       /api/account/{accountId}/ [patch]
+func (ctr *AccountController) UpdateAccount(c echo.Context) error {
+	return c.JSON(http.StatusOK, []string{"1", "two", "110"})
+}
+
+// CashOut       godoc
+// @Summary      cash out
+// @Description  create an order to cash out money
+// @Tags         account
+// @Accept       json
+// @Produce      json
+// @Param        message  body  dto.Order  true  "Order"
+// @Success      200  {object}  dto.Order
+// @Security     ApiKeyAuth
+// @Router       /api/account/{id}/cash-out [post]
+// todo: create dto
 func (ctr *AccountController) CashOut(c echo.Context) error {
 	return c.JSON(http.StatusOK, "ok")
 }

@@ -27,7 +27,16 @@ func NewWalletController(repo contractions.WalletRepository, errorHandler e.Erro
 	}
 }
 
-// GetByID example: /api/wallet/{id}/
+// GetByID       godoc
+// @Summary      get wallet
+// @Description  get wallet by id
+// @Tags         wallet
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "Wallet ID"
+// @Success      200  {object}  dto.Wallet
+// @Security     ApiKeyAuth
+// @Router      /api/wallet/{walletId} [get]
 func (ctr *WalletController) GetByID(c echo.Context) error {
 	var (
 		err    error
@@ -39,8 +48,15 @@ func (ctr *WalletController) GetByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, dto.LoadWalletDTOFromModel(&wallet))
 }
 
-// GetWallets return list of users
-// example: /api/wallet
+// GetWallets    godoc
+// @Summary      get wallets
+// @Description  get wallets
+// @Tags         wallet
+// @Accept       json
+// @Produce      json
+// @Success      200  {object} dto.Wallets
+// @Security     ApiKeyAuth
+// @Router       /api/wallet [get]
 func (ctr *WalletController) GetWallets(c echo.Context) error {
 	var (
 		wallets models.Wallets

@@ -1,32 +1,33 @@
 version: "3.7"
 
 services:
-  app:
-    build:
-      dockerfile: backend/Dockerfile
-      context: ./
-    image: "${APP_IMAGE}:${APP_IMAGE_TAG}"
-    container_name: "${APP_SERVICE}"
-    environment:
-      ETH_RPC_PORT:
-      ETH_PORT:
-      HOST:
-      PORT:
-      DATABASE_URL:
-      DATABASE_CONTAINER_URL:
-      JWT_SECRET:
-      ROOT_PATH:
-      SAVE_PATH:
-      LOG_PATH:
-      LOG_NAME:
-      LOG_EXT:
-    ports:
-      - "1323:1323"
-    tty: yes
-    hostname: app
-    depends_on:
-      - db
-
+  ######### for development using a native go ##############################
+  #app:
+  #  build:
+  #    dockerfile: backend/Dockerfile
+  #    context: ./
+  #  image: "${APP_IMAGE}:${APP_IMAGE_TAG}"
+  #  container_name: "${APP_SERVICE}"
+  #  environment:
+  #    ETH_RPC_PORT:
+  #    ETH_PORT:
+  #    HOST:
+  #    PORT:
+  #    DATABASE_URL:
+  #    DATABASE_CONTAINER_URL:
+  #    JWT_SECRET:
+  #    ROOT_PATH:
+  #    SAVE_PATH:
+  #    LOG_PATH:
+  #    LOG_NAME:
+  #    LOG_EXT:
+  #  ports:
+  #    - "1323:1323"
+  #  tty: yes
+  #  hostname: app
+  #  depends_on:
+  #    - db
+  ######### for development using a native go #############################
   db:
     image: postgres:14.1-alpine
     container_name: "${DB_SERVICE}"

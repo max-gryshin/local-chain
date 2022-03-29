@@ -22,17 +22,45 @@ func NewTransactionController(errorHandler e.ErrorHandler, v *validator.Validate
 	}
 }
 
-// GetTransactions example: /api/transaction/all
+// GetTransactions godoc
+// @Summary        get transactions
+// @Description    getting all transaction history
+// @Tags           transaction
+// @Accept         json
+// @Produce        json
+// @Success        200  {object} dto.Orders
+// @Security       ApiKeyAuth
+// @Router         /api/transaction [get]
+// todo: create dto
 func (ctr *TransactionController) GetTransactions(c echo.Context) error {
 	return c.JSON(http.StatusOK, []string{"1", "2", "3"})
 }
 
-// GetUserTransactions example: /api/transaction/{userId}/all
+// GetUserTransactions godoc
+// @Summary            get user transactions
+// @Description        getting transactions certain user
+// @Tags               transaction
+// @Accept             json
+// @Produce            json
+// @Success            200  {object} dto.Orders
+// @Security           ApiKeyAuth
+// @Router             /api/transaction/{userId} [get]
+// todo: create dto
 func (ctr *TransactionController) GetUserTransactions(c echo.Context) error {
 	return c.JSON(http.StatusOK, []string{"1", "2", "3"})
 }
 
-// SendTransaction example: /api/transaction
+// SendTransaction  godoc
+// @Summary         send transaction
+// @Description     sending transaction
+// @Tags            transaction
+// @Accept          json
+// @Produce         json
+// @Param           message  body  dto.Wallet  true  "Wallet"
+// @Success         200  {object} dto.Wallet
+// @Security        ApiKeyAuth
+// @Router          /api/transaction [post]
+// todo: create dto
 func (ctr *TransactionController) SendTransaction(c echo.Context) error {
 	return c.JSON(http.StatusOK, "ok")
 }

@@ -1,8 +1,17 @@
 ## API
 
+# auth
+ authenticate user
+- Request: `POST /api/auth?email=username@mail.com&password=qwerty123`
+- Response:
+```
+{
+    "jwt": "df34f52454t.."
+}
+```
 # user
  user list.
- - Request: `GET /api/user/all?page=1&limit=30`
+ - Request: `GET /api/user?page=1&limit=30`
  - Response:
 ```
 {
@@ -32,7 +41,7 @@
 ```
  # account:
  user account
- - Request: `GET /api/account/{id}/`
+ - Request: `GET /api/account/{id}`
  - Response:
 ```
 {
@@ -44,7 +53,7 @@
 }
 ```
 account list.
-- Request: `GET /api/account/all?page=1&limit=30`
+- Request: `GET /api/account?page=1&limit=30`
 - Response:
 ```
 {
@@ -59,6 +68,18 @@ account list.
     ...
 }
 ```
+modify user account
+- Request: `PATCH /api/account/{accountId}`
+```
+{
+    "userId": "1",
+    "ballance": "10"
+    ...
+}
+```
+- Constraints:
+    - modifying available for owner
+
  create an order to cash out
  - Request: `POST /api/account/{id}/cash-out`
 ```
@@ -80,6 +101,7 @@ account list.
    - available only for account and wallet owner
 
  # order:
+ get all orders
  - Request: `GET /api/order`
  - Response:
 ```
@@ -130,7 +152,7 @@ account list.
    - multiple wallets?
 
 wallets
-- Request: `GET /api/wallet/all`
+- Request: `GET /api/wallet`
 ```
 {
     {
@@ -165,7 +187,7 @@ wallets
    - transfer status? (If yes, then we need additional API method to get transfer status)
  
  transaction history
- - Request: `GET /api/transaction/all/?page=1&limit=30`
+ - Request: `GET /api/transaction?page=1&limit=30`
 ```
 {
     "from": "123",
@@ -176,11 +198,11 @@ wallets
 }
 ```
  transaction history certain user
- - Request: `GET /api/transaction/{userId}/all?page=1&limit=30`
+ - Request: `GET /api/transaction/{userId}?page=1&limit=30`
 
 # manager
  create and modify user
- - Request: `POST|PATCH /api/manager/user`
+ - Request: `POST|PATCH /api/manager/user|/{userId}`
 ```
 {
     "name": "Max",
@@ -192,7 +214,7 @@ wallets
    - modifying available for managers that handle their user and super admin
  
 create and modify user account
- - Request: `POST|PATCH /api/manager/account`
+ - Request: `POST|PATCH /api/manager/account|/{accountId}`
 ```
 {
     "userId": "1",

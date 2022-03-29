@@ -3,6 +3,9 @@ package main
 import (
 	"log"
 
+	echoSwagger "github.com/swaggo/echo-swagger"
+
+	_ "github.com/ZmaximillianZ/local-chain/docs"
 	"github.com/ZmaximillianZ/local-chain/internal/controllers"
 	"github.com/ZmaximillianZ/local-chain/internal/db"
 	errorhandler "github.com/ZmaximillianZ/local-chain/internal/e"
@@ -15,6 +18,17 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
+// @title        Local chain API
+// @version      1.0
+// @description  This is a local chain server.
+
+// @contact.name   Maxim Hryshyn
+// @contact.email  goooglemax1993@gmail.com
+// @schemes http
+// @host      local-chain.lh
+// @BasePath  /
+
+// @securityDefinitions.basic BasicAuth
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Print(err.Error())
@@ -46,7 +60,8 @@ func main() {
 	walletController := controllers.NewWalletController(walletRepo, eHandler, validator.New())
 	transactionController := controllers.NewTransactionController(eHandler, validator.New())
 	eco := echo.New()
-	router := eco.Group("/api/v1")
+	eco.GET("/swagger/*", echoSwagger.WrapHandler)
+	router := eco.Group("/")
 	router.Use(eHandler.Handle)
 	routes.RegisterAPI(
 		router,

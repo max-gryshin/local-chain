@@ -29,8 +29,16 @@ func NewManagerController(repo contractions.UserRepository, errorHandler e.Error
 	}
 }
 
-// Create create user
-// example: /api/manager/user
+// Create        godoc
+// @Summary      create user
+// @Description  create user by manager
+// @Tags         manager
+// @Accept       json
+// @Produce      json
+// @Param        message  body  dto.User  true  "User"
+// @Success      200  {object}  dto.User
+// @Security     ApiKeyAuth
+// @Router       /api/manager/user [post]
 func (ctr *ManagerController) Create(c echo.Context) error {
 	email := c.QueryParam("email")
 	password := c.QueryParam("password")
@@ -59,27 +67,151 @@ func (ctr *ManagerController) Create(c echo.Context) error {
 	return c.JSON(http.StatusOK, dto.LoadUserDTOFromModel(&user))
 }
 
-// GetOrders example: /api/manager/order
-func (ctr *ManagerController) GetOrders(c echo.Context) error {
-	return c.JSON(http.StatusOK, []string{"1", "two", "110"})
+// UpdateUser    godoc
+// @Summary      update user
+// @Description  update user by manager
+// @Tags         manager
+// @Accept       json
+// @Produce      json
+// @Param        message  body  dto.User  true  "User"
+// @Success      200  {object}  dto.User
+// @Security     ApiKeyAuth
+// @Router       /api/manager/user/{id} [patch]
+func (ctr *UserController) UpdateUser(c echo.Context) error {
+	var (
+		err  error
+		user models.User
+	)
+	if user, err = ctr.getUserByID(c); err != nil {
+		return err
+	}
+	dtoUser := dto.LoadUserDTOFromModel(&user)
+	if errBindOrValidate := ctr.BindAndValidate(c, dtoUser); errBindOrValidate != nil {
+		return errBindOrValidate
+	}
+	if errUpdateUser := ctr.repo.Update(dto.LoadUserModelFromDTO(dtoUser)); errUpdateUser != nil {
+		return errUpdateUser
+	}
+	return c.JSON(http.StatusOK, dtoUser)
 }
 
-// GetOrder example: /api/manager/order/{orderId}
-func (ctr *ManagerController) GetOrder(c echo.Context) error {
-	return c.JSON(http.StatusOK, []string{"1", "two", "110"})
+// GetOrdersByManager godoc
+// @Summary           get orders
+// @Description       get orders by manager
+// @Tags              order
+// @Accept            json
+// @Produce           json
+// @Success           200  {object} dto.Orders
+// @Security          ApiKeyAuth
+// @Router            /api/manager/order [get]
+func (ctr *OrderController) GetOrdersByManager(c echo.Context) error {
+	var (
+		orders models.Orders // todo: change to orders
+		err    error
+	)
+	if orders, err = ctr.repo.GetAll(); err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, dto.LoadOrderDTOCollectionFromModel(orders))
 }
 
-// HandleOrder example: /api/manager/order/{orderId}
+// HandleOrder   godoc
+// @Summary      handle order
+// @Description  handle order by manager
+// @Tags         manager
+// @Accept       json
+// @Produce      json
+// @Param        message  body  dto.Order  true  "Order"
+// @Success      200  {object} dto.Order
+// @Security     ApiKeyAuth
+// @Router       /api/manager/order/{orderId} [patch]
 func (ctr *ManagerController) HandleOrder(c echo.Context) error {
 	return c.JSON(http.StatusOK, []string{"1", "two", "110"})
 }
 
-// Debit example: /api/manager/wallet/{walletId}/debit
+// CreateAccount godoc
+// @Summary      create an account
+// @Description  creating an account by manager
+// @Tags         manager
+// @Accept       json
+// @Produce      json
+// @Param        message  body  dto.Account  true  "Account"
+// @Success      200  {object} dto.Account
+// @Security     ApiKeyAuth
+// @Router       /api/manager/account/{userid} [post]
+func (ctr *ManagerController) CreateAccount(c echo.Context) error {
+	return c.JSON(http.StatusOK, []string{"1", "two", "110"})
+}
+
+// UpdateAccount godoc
+// @Summary      update an account
+// @Description  updating an account by manager
+// @Tags         manager
+// @Accept       json
+// @Produce      json
+// @Param        message  body  dto.Account  true  "Account"
+// @Success      200  {object} dto.Account
+// @Security     ApiKeyAuth
+// @Router       /api/manager/account/{accountId} [patch]
+func (ctr *ManagerController) UpdateAccount(c echo.Context) error {
+	return c.JSON(http.StatusOK, []string{"1", "two", "110"})
+}
+
+// CreateWallet  godoc
+// @Summary      create a wallet
+// @Description  creating a wallet by manager
+// @Tags         manager
+// @Accept       json
+// @Produce      json
+// @Param        message  body  dto.Wallet  true  "Wallet"
+// @Success      200  {object} dto.Wallet
+// @Security     ApiKeyAuth
+// @Router       /api/manager/wallet [post]
+func (ctr *ManagerController) CreateWallet(c echo.Context) error {
+	return c.JSON(http.StatusOK, []string{"1", "two", "110"})
+}
+
+// UpdateWallet  godoc
+// @Summary      update a wallet
+// @Description  updating a wallet by manager
+// @Tags         manager
+// @Accept       json
+// @Produce      json
+// @Param        message  body  dto.Wallet  true  "Wallet"
+// @Success      200  {object} dto.Wallet
+// @Security     ApiKeyAuth
+// @Router       /api/manager/wallet/{walletId} [patch]
+func (ctr *ManagerController) UpdateWallet(c echo.Context) error {
+	return c.JSON(http.StatusOK, []string{"1", "two", "110"})
+}
+
+// Debit         godoc
+// @Summary      debit
+// @Description  debit amount from user wallet
+// @Tags         manager
+// @Accept       json
+// @Produce      json
+// @Param        message  body  dto.Wallet  true  "Wallet"
+// @Success      200  {object} dto.Wallet
+// @Security     ApiKeyAuth
+// @Router       /api/manager/wallet/{walletId}/debit [post]
+// todo: create dto
 func (ctr *ManagerController) Debit(c echo.Context) error {
 	return c.JSON(http.StatusOK, []string{"1", "two", "110"})
 }
 
-// Credit example: /api/manager/wallet/{walletId}/credit
+// Credit        godoc
+// @Summary      credit
+// @Description  credit amount from user wallet
+// @Tags         manager
+// @Accept       json
+// @Produce      json
+// @Param        message  body  dto.Wallet  true  "Wallet"
+// @Success      200  {object} dto.Wallet
+// @Security     ApiKeyAuth
+// @Router       /api/manager/wallet/{walletId}/credit [post]
+// todo: create dto
 func (ctr *ManagerController) Credit(c echo.Context) error {
 	return c.JSON(http.StatusOK, []string{"1", "two", "110"})
 }

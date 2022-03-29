@@ -17,36 +17,41 @@ func RegisterAPI(
 	transactionController *controllers.TransactionController,
 ) {
 	jwt := middleware.JWT([]byte("get_key_from_env"))
-
 	router.POST("/auth", userController.Authenticate)
 	user := router.Group("/user")
-	user.GET("/all", userController.GetUsers, jwt)
 	user.GET("/:id", userController.GetByID, jwt)
+	user.GET("", userController.GetUsers, jwt)
+	user.PATCH("/:id", userController.Update, jwt)
 
 	account := router.Group("/account")
-	account.GET("/all", accountController.GetAccounts, jwt)
 	account.GET("/:id", accountController.GetByID, jwt)
+	account.GET("", accountController.GetAccounts, jwt)
+	account.PATCH("/:id", accountController.UpdateAccount, jwt)
 	account.GET("/:id/cash-out", accountController.CashOut, jwt)
 
 	order := router.Group("/order")
-	order.GET("/all", orderController.GetOrders, jwt)
 	order.GET("/:id", orderController.GetByID, jwt)
+	order.GET("", orderController.GetOrders, jwt)
 
 	wallet := router.Group("/wallet")
 	wallet.GET("/:id", walletController.GetByID, jwt)
-	wallet.GET("/all", walletController.GetWallets, jwt)
+	wallet.GET("", walletController.GetWallets, jwt)
 
 	transaction := router.Group("/transaction")
-	transaction.POST("/", transactionController.SendTransaction, jwt)
-	transaction.GET("/all", transactionController.GetTransactions, jwt)
-	transaction.GET("/:userId/all", transactionController.GetUserTransactions, jwt)
+
+	transaction.GET("", transactionController.GetTransactions, jwt)
+	transaction.GET("/:userId", transactionController.GetUserTransactions, jwt)
+	transaction.POST("", transactionController.SendTransaction, jwt)
 
 	manager := router.Group("/manager")
-	manager.POST("/", managerController.Create, jwt)                        // isManagerMiddleware
-	manager.PATCH("/:id", userController.Update, jwt)                       // isManagerMiddleware
-	manager.GET("/order", managerController.GetOrders)                      // isManagerMiddleware
-	manager.GET("/order/:orderId", managerController.GetOrders, jwt)        // isManagerMiddleware
-	manager.POST("/order/:orderId", managerController.HandleOrder, jwt)     // isManagerMiddleware
-	manager.POST("/wallet/debit/:walletId", managerController.Debit, jwt)   // isManagerMiddleware
-	manager.POST("/wallet/credit/:walletId", managerController.Credit, jwt) // isManagerMiddleware
+	manager.POST("/user", managerController.Create)                            // isManagerMiddleware
+	manager.PATCH("/user/:id", userController.Update, jwt)                     // isManagerMiddleware
+	manager.GET("/order", orderController.GetOrdersByManager, jwt)             // isManagerMiddleware
+	manager.PATCH("/order/:orderId", managerController.HandleOrder, jwt)       // isManagerMiddleware
+	manager.POST("/account/:userId", managerController.CreateAccount, jwt)     // isManagerMiddleware
+	manager.PATCH("/account/:accountId", managerController.UpdateAccount, jwt) // isManagerMiddleware
+	manager.POST("/wallet", managerController.CreateWallet, jwt)               // isManagerMiddleware
+	manager.PATCH("/wallet/:walletId", managerController.UpdateWallet, jwt)    // isManagerMiddleware
+	manager.POST("/wallet/:walletId/debit", managerController.Debit, jwt)      // isManagerMiddleware
+	manager.POST("/wallet/:walletId/credit", managerController.Credit, jwt)    // isManagerMiddleware
 }

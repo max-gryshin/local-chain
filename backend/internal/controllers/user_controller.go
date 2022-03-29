@@ -4,11 +4,11 @@ import (
 	"errors"
 
 	"github.com/ZmaximillianZ/local-chain/internal/dto"
+	"github.com/ZmaximillianZ/local-chain/internal/utils"
 	"github.com/go-playground/validator"
 
 	"github.com/ZmaximillianZ/local-chain/internal/e"
 	"github.com/ZmaximillianZ/local-chain/internal/models"
-	"github.com/ZmaximillianZ/local-chain/internal/utils"
 	"github.com/labstack/echo/v4"
 
 	"net/http"
@@ -32,22 +32,16 @@ func NewUserController(repo contractions.UserRepository, errorHandler e.ErrorHan
 	}
 }
 
-// GetByID return user by id
-// example: /api/user/{id}/
-func (ctr *UserController) GetByID(c echo.Context) error {
-	var (
-		err  error
-		user models.User
-	)
-	if user, err = ctr.getUserByID(c); err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, dto.LoadUserDTOFromModel(&user)) // todo: is it have sense?
-}
-
-// Authenticate @Summary Authenticate
-// description: user authorization
-// example: /api/auth
+// Authenticate  godoc
+// @Summary      authenticate
+// @Description  authenticate user
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        email     path  string  true  "email"
+// @Param        password  path  string  true  "password"
+// @Success      200  {object}  dto.User
+// @Router       /api/auth [post]
 func (ctr *UserController) Authenticate(c echo.Context) error {
 	email := c.QueryParam("email")
 	password := c.QueryParam("password")
@@ -72,8 +66,36 @@ func (ctr *UserController) Authenticate(c echo.Context) error {
 	return c.JSON(http.StatusOK, map[string]string{"token": token})
 }
 
-// GetUsers return list of users
-// example: /api/user/all
+// GetByID godoc
+// @Summary      get user
+// @Description  get user by id
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "User ID"
+// @Success      200  {object}  dto.User
+// @Security     ApiKeyAuth
+// @Router       /api/user/{id} [get]
+func (ctr *UserController) GetByID(c echo.Context) error {
+	var (
+		err  error
+		user models.User
+	)
+	if user, err = ctr.getUserByID(c); err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, dto.LoadUserDTOFromModel(&user)) // todo: is it have sense?
+}
+
+// GetUsers      godoc
+// @Summary      get users
+// @Description  get users
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Success      200  {object} dto.Users
+// @Security     ApiKeyAuth
+// @Router       /api/user [get]
 func (ctr *UserController) GetUsers(c echo.Context) error {
 	var (
 		users models.Users
@@ -86,24 +108,16 @@ func (ctr *UserController) GetUsers(c echo.Context) error {
 	return c.JSON(http.StatusOK, dto.LoadUserDTOCollectionFromModel(users))
 }
 
-func (ctr *UserController) getUserByID(c echo.Context) (models.User, error) {
-	var (
-		id   int64
-		err  error
-		user models.User
-	)
-	if id, err = ctr.BaseController.GetID(c); err != nil {
-		return user, err
-	}
-	if user, err = ctr.repo.GetByID(int(id)); err != nil {
-		return user, err
-	}
-
-	return user, err
-}
-
-// Update return user by id
-// example: /api/manager/user/{id}/
+// Update godoc
+// @Summary      update user
+// @Description  update user
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param        message  body  dto.User  true  "User"
+// @Success      200  {object}  dto.User
+// @Security     ApiKeyAuth
+// @Router       /api/user/{id} [patch]
 func (ctr *UserController) Update(c echo.Context) error {
 	var (
 		err  error
@@ -120,4 +134,20 @@ func (ctr *UserController) Update(c echo.Context) error {
 		return errUpdateUser
 	}
 	return c.JSON(http.StatusOK, dtoUser)
+}
+
+func (ctr *UserController) getUserByID(c echo.Context) (models.User, error) {
+	var (
+		id   int64
+		err  error
+		user models.User
+	)
+	if id, err = ctr.BaseController.GetID(c); err != nil {
+		return user, err
+	}
+	if user, err = ctr.repo.GetByID(int(id)); err != nil {
+		return user, err
+	}
+
+	return user, err
 }

@@ -27,7 +27,16 @@ func NewOrderController(repo contractions.OrderRepository, errorHandler e.ErrorH
 	}
 }
 
-// GetByID example: /api/order/{id}
+// GetByID       godoc
+// @Summary      get order
+// @Description  get order by id
+// @Tags         order
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "Order ID"
+// @Success      200  {object}  dto.Order
+// @Security     ApiKeyAuth
+// @Router       /api/order/{id} [get]
 func (ctr *OrderController) GetByID(c echo.Context) error {
 	var (
 		err   error
@@ -39,8 +48,15 @@ func (ctr *OrderController) GetByID(c echo.Context) error {
 	return c.JSON(http.StatusOK, dto.LoadOrderDTOFromModel(&order))
 }
 
-// GetOrders return list of users
-// example: /api/order
+// GetOrders     godoc
+// @Summary      get orders
+// @Description  get orders
+// @Tags         order
+// @Accept       json
+// @Produce      json
+// @Success      200  {object} dto.Orders
+// @Security     ApiKeyAuth
+// @Router       /api/order [get]
 func (ctr *OrderController) GetOrders(c echo.Context) error {
 	var (
 		orders models.Orders
