@@ -92,18 +92,17 @@ func (repo *UserRepository) Create(user *models.User) error {
 		baseQuery.
 		Insert().
 		Into(`user`).
-		Cols("email", "password_hash", "created_at", "updated_at").
-		Vals(goqu.Vals{user.Email, user.Password, user.CreatedAt, user.UpdatedAt})
+		Cols("email", "password_hash", "created_at", "updated_at", "created_by", "updated_by", "roles").
+		Vals(goqu.Vals{user.Email, user.Password, user.CreatedAt, user.UpdatedAt, user.CreatedBy, user.UpdatedBy, user.Roles})
 
 	return repo.execInsert(query)
 }
 
 func (repo *UserRepository) Update(user *models.User) error {
-	expr := repo.baseQuery.Update().Set(user).Where(exp.Ex{"id": user.ID})
+	userMap, err := utils.GetMapFromModel(user)
+	if err != nil {
+		return err
+	}
+	expr := repo.baseQuery.Update().Set(userMap).Where(exp.Ex{"id": user.ID})
 	return repo.execUpdate(expr)
-}
-
-func (repo *UserRepository) Delete(user *models.User) error {
-	expr := repo.baseQuery.Delete().Where(exp.Ex{"id": user.ID})
-	return repo.execDelete(expr)
 }

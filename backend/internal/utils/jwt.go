@@ -21,34 +21,40 @@ const (
 )
 
 // GenerateToken generate tokens used for auth
-func GenerateToken(username, password string, id int) (string, error) {
+func GenerateToken(id int) (string, error) {
 	nowTime := time.Now()
-	// Create token
-	token := jwt.New(jwt.SigningMethodHS256)
-	// Set claims
-	claims := token.Claims.(jwt.MapClaims)
-	claims["id"] = strconv.Itoa(id)
-	claims["name"] = username
-	claims["Issuer"] = "local-chain"
-	claims["admin"] = true
-	claims["exp"] = nowTime.Add(time.Hour * hoursInDay * daysInMonth).Unix() // 1 month by develop
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, &jwt.StandardClaims{
+		Audience:  "all",
+		ExpiresAt: nowTime.Add(time.Hour * hoursInDay * daysInMonth).Unix(), // 1 month by develop
+		Id:        strconv.Itoa(id),
+		IssuedAt:  0,
+		Issuer:    "local-chain",
+		NotBefore: 0,
+		Subject:   "",
+	})
+
 	return token.SignedString(jwtSecret)
 }
 
 // ParseToken parsing token
-func ParseToken(token string) (*Claims, error) {
-	// FIXME: error not checked, try setup golangci-lint
-	tokenClaims, err := jwt.ParseWithClaims(token, &Claims{}, func(token *jwt.Token) (interface{}, error) {
+func ParseToken(token string) (jwt.StandardClaims, error) {
+	tokenClaims, err := jwt.ParseWithClaims(token, &jwt.StandardClaims{}, func(token *jwt.Token) (interface{}, error) {
 		return jwtSecret, nil
 	})
 
-	if tokenClaims != nil {
-		// FIXME: tokenClaims.Valid should be checked firstly:
-		// when tokenClaims is not null and is not *Claims, this method returns nil, nil
-		if claims, ok := tokenClaims.Claims.(*Claims); ok && tokenClaims.Valid {
-			return claims, nil
+	if tokenClaims != nil && tokenClaims.Valid {
+		if claims, ok := tokenClaims.Claims.(*jwt.StandardClaims); ok && tokenClaims.Valid {
+			return *claims, nil
 		}
 	}
 
-	return nil, err
+	return jwt.StandardClaims{}, err
+}
+
+func GetAuthenticatedUserID(token string) (string, error) {
+	claims, err := ParseToken(token)
+	if err != nil {
+		return "", err
+	}
+	return claims.Id, nil
 }

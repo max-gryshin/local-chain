@@ -9,5 +9,4 @@ type UserRepository interface {
 	GetAll() (models.Users, error)
 	Create(user *models.User) error
 	Update(user *models.User) error
-	Delete(user *models.User) error
 }
