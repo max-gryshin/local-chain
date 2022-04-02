@@ -2,8 +2,11 @@ package controllers
 
 import (
 	"errors"
+	"strconv"
+	"time"
 
 	"github.com/ZmaximillianZ/local-chain/internal/dto"
+	"github.com/ZmaximillianZ/local-chain/internal/middleware/access"
 	"github.com/ZmaximillianZ/local-chain/internal/utils"
 	"github.com/go-playground/validator"
 
@@ -38,8 +41,8 @@ func NewUserController(repo contractions.UserRepository, errorHandler e.ErrorHan
 // @Tags         auth
 // @Accept       json
 // @Produce      json
-// @Param        email     path  string  true  "email"
-// @Param        password  path  string  true  "password"
+// @Param        email     query  string  true  "email"
+// @Param        password  query  string  true  "password"
 // @Success      200  {object}  dto.User
 // @Router       /api/auth [post]
 func (ctr *UserController) Authenticate(c echo.Context) error {
@@ -60,7 +63,7 @@ func (ctr *UserController) Authenticate(c echo.Context) error {
 	if user.InvalidPassword(password) {
 		return errors.New("invalid password")
 	}
-	if token, err = utils.GenerateToken(a.Email, a.Password, user.ID); err != nil {
+	if token, err = utils.GenerateToken(user.ID); err != nil {
 		return err
 	}
 	return c.JSON(http.StatusOK, map[string]string{"token": token})
@@ -73,7 +76,7 @@ func (ctr *UserController) Authenticate(c echo.Context) error {
 // @Accept       json
 // @Produce      json
 // @Param        id   path      int  true  "User ID"
-// @Success      200  {object}  dto.User
+// @Success      200  {object}  dto.GetUserOwner
 // @Security     ApiKeyAuth
 // @Router       /api/user/{id} [get]
 func (ctr *UserController) GetByID(c echo.Context) error {
@@ -84,7 +87,7 @@ func (ctr *UserController) GetByID(c echo.Context) error {
 	if user, err = ctr.getUserByID(c); err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, dto.LoadUserDTOFromModel(&user)) // todo: is it have sense?
+	return c.JSON(http.StatusOK, dto.LoadGetUserOwnerDTOFromModel(&user))
 }
 
 // GetUsers      godoc
@@ -93,7 +96,7 @@ func (ctr *UserController) GetByID(c echo.Context) error {
 // @Tags         user
 // @Accept       json
 // @Produce      json
-// @Success      200  {object} dto.Users
+// @Success      200  {object} dto.GetUserOwners
 // @Security     ApiKeyAuth
 // @Router       /api/user [get]
 func (ctr *UserController) GetUsers(c echo.Context) error {
@@ -105,7 +108,7 @@ func (ctr *UserController) GetUsers(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, dto.LoadUserDTOCollectionFromModel(users))
+	return c.JSON(http.StatusOK, dto.LoadGetUserOwnerDTOCollectionFromModel(users))
 }
 
 // Update godoc
@@ -114,23 +117,31 @@ func (ctr *UserController) GetUsers(c echo.Context) error {
 // @Tags         user
 // @Accept       json
 // @Produce      json
-// @Param        message  body  dto.User  true  "User"
-// @Success      200  {object}  dto.User
+// @Param        message  body  dto.UpdateUserOwnerRequest  true  "User"
+// @Success      200  {object}  dto.UpdateUserOwnerRequest
 // @Security     ApiKeyAuth
-// @Router       /api/user/{id} [patch]
+// @Router       /api/user [patch]
 func (ctr *UserController) Update(c echo.Context) error {
 	var (
-		err  error
-		user models.User
+		userID int
+		err    error
+		user   models.User
 	)
-	if user, err = ctr.getUserByID(c); err != nil {
+	id := c.Get(access.UserID).(string)
+	if userID, err = strconv.Atoi(id); err != nil {
 		return err
 	}
-	dtoUser := dto.LoadUserDTOFromModel(&user)
+	if user, err = ctr.repo.GetByID(userID); err != nil {
+		return err
+	}
+	dtoUser := dto.LoadUpdateUserOwnerDTOFromModel(&user)
 	if errBindOrValidate := ctr.BindAndValidate(c, dtoUser); errBindOrValidate != nil {
 		return errBindOrValidate
 	}
-	if errUpdateUser := ctr.repo.Update(dto.LoadUserModelFromDTO(dtoUser)); errUpdateUser != nil {
+	newModel := dto.LoadUserModelFromUpdateUserOwnerDTO(dtoUser)
+	newModel.UpdatedBy = userID
+	newModel.UpdatedAt = time.Now()
+	if errUpdateUser := ctr.repo.Update(newModel); errUpdateUser != nil {
 		return errUpdateUser
 	}
 	return c.JSON(http.StatusOK, dtoUser)

@@ -23,6 +23,39 @@ definitions:
     required:
     - id
     type: object
+  dto.GetUserOwner:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      email:
+        maxLength: 50
+        minLength: 10
+        type: string
+      first_name:
+        maxLength: 50
+        minLength: 3
+        type: string
+      id:
+        type: integer
+      last_name:
+        maxLength: 50
+        minLength: 3
+        type: string
+      middle_name:
+        maxLength: 50
+        minLength: 3
+        type: string
+      status:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+    required:
+    - id
+    type: object
   dto.Order:
     properties:
       amount:
@@ -50,6 +83,25 @@ definitions:
     required:
     - id
     type: object
+  dto.UpdateUserOwnerRequest:
+    properties:
+      email:
+        maxLength: 50
+        minLength: 10
+        type: string
+      first_name:
+        maxLength: 50
+        minLength: 3
+        type: string
+      last_name:
+        maxLength: 50
+        minLength: 3
+        type: string
+      middle_name:
+        maxLength: 50
+        minLength: 3
+        type: string
+    type: object
   dto.User:
     properties:
       created_at:
@@ -61,6 +113,45 @@ definitions:
       password:
         description: validate:"gte=6,lte=50"`
         type: string
+    required:
+    - id
+    type: object
+  dto.UserByManager:
+    properties:
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      email:
+        maxLength: 50
+        minLength: 10
+        type: string
+      first_name:
+        maxLength: 50
+        minLength: 3
+        type: string
+      id:
+        type: integer
+      last_name:
+        maxLength: 50
+        minLength: 3
+        type: string
+      middle_name:
+        maxLength: 50
+        minLength: 3
+        type: string
+      password:
+        maxLength: 50
+        minLength: 6
+        type: string
+      roles:
+        type: string
+      status:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
     required:
     - id
     type: object
@@ -87,7 +178,7 @@ definitions:
     required:
     - id
     type: object
-host: local-chain.lh
+host: 0.0.0.0:1323
 info:
   contact:
     email: goooglemax1993@gmail.com
@@ -187,12 +278,12 @@ paths:
       description: authenticate user
       parameters:
       - description: email
-        in: path
+        in: query
         name: email
         required: true
         type: string
       - description: password
-        in: path
+        in: query
         name: password
         required: true
         type: string
@@ -308,14 +399,14 @@ paths:
         name: message
         required: true
         schema:
-          $ref: '#/definitions/dto.User'
+          $ref: '#/definitions/dto.UserByManager'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.User'
+            $ref: '#/definitions/dto.UserByManager'
       security:
       - ApiKeyAuth: []
       summary: create user
@@ -332,14 +423,14 @@ paths:
         name: message
         required: true
         schema:
-          $ref: '#/definitions/dto.User'
+          $ref: '#/definitions/dto.UserByManager'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.User'
+            $ref: '#/definitions/dto.UserByManager'
       security:
       - ApiKeyAuth: []
       summary: update user
@@ -556,11 +647,34 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.User'
+              $ref: '#/definitions/dto.GetUserOwner'
             type: array
       security:
       - ApiKeyAuth: []
       summary: get users
+      tags:
+      - user
+    patch:
+      consumes:
+      - application/json
+      description: update user
+      parameters:
+      - description: User
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/dto.UpdateUserOwnerRequest'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UpdateUserOwnerRequest'
+      security:
+      - ApiKeyAuth: []
+      summary: update user
       tags:
       - user
   /api/user/{id}:
@@ -580,33 +694,10 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.User'
+            $ref: '#/definitions/dto.GetUserOwner'
       security:
       - ApiKeyAuth: []
       summary: get user
-      tags:
-      - user
-    patch:
-      consumes:
-      - application/json
-      description: update user
-      parameters:
-      - description: User
-        in: body
-        name: message
-        required: true
-        schema:
-          $ref: '#/definitions/dto.User'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.User'
-      security:
-      - ApiKeyAuth: []
-      summary: update user
       tags:
       - user
   /api/wallet:
@@ -654,6 +745,8 @@ paths:
 schemes:
 - http
 securityDefinitions:
-  BasicAuth:
-    type: basic
+  ApiKeyAuth:
+    in: header
+    name: Authorization
+    type: apiKey
 swagger: "2.0"

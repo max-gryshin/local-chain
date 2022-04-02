@@ -25,10 +25,12 @@ import (
 // @contact.name   Maxim Hryshyn
 // @contact.email  goooglemax1993@gmail.com
 // @schemes http
-// @host      local-chain.lh
-// @BasePath  /
+// @host      	   0.0.0.0:1323
+// @BasePath       /
 
-// @securityDefinitions.basic BasicAuth
+// @securityDefinitions.apikey ApiKeyAuth
+// @in header
+// @name Authorization
 func main() {
 	if err := godotenv.Load(); err != nil {
 		log.Print(err.Error())
@@ -60,8 +62,9 @@ func main() {
 	walletController := controllers.NewWalletController(walletRepo, eHandler, validator.New())
 	transactionController := controllers.NewTransactionController(eHandler, validator.New())
 	eco := echo.New()
+	eco.Debug = true
 	eco.GET("/swagger/*", echoSwagger.WrapHandler)
-	router := eco.Group("/")
+	router := eco.Group("/api")
 	router.Use(eHandler.Handle)
 	routes.RegisterAPI(
 		router,
