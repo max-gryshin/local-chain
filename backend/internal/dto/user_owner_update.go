@@ -7,10 +7,10 @@ import (
 type UpdateUserOwners []*UpdateUserOwner
 
 type UpdateUserOwnerRequest struct {
-	Email      *string `json:"email"       validate:"email,gte=10,lte=50"`
-	FirstName  *string `json:"first_name"  validate:"gte=3,lte=50"`
-	LastName   *string `json:"last_name"   validate:"gte=3,lte=50"`
-	MiddleName *string `json:"middle_name" validate:"gte=3,lte=50"`
+	Email      *string `json:"email"       validate:"required,email"`
+	FirstName  *string `json:"first_name"  validate:"alpha"`
+	LastName   *string `json:"last_name"   validate:"alpha"`
+	MiddleName *string `json:"middle_name" validate:"alpha"`
 }
 
 type UpdateUserOwner struct {
