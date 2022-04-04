@@ -3,11 +3,12 @@ package controllers
 import (
 	"errors"
 	"net/http"
-	"time"
+	"strconv"
 
 	"github.com/ZmaximillianZ/local-chain/internal/contractions"
 	"github.com/ZmaximillianZ/local-chain/internal/dto"
 	"github.com/ZmaximillianZ/local-chain/internal/e"
+	"github.com/ZmaximillianZ/local-chain/internal/middleware/access"
 	"github.com/ZmaximillianZ/local-chain/internal/models"
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
@@ -35,36 +36,44 @@ func NewManagerController(repo contractions.UserRepository, errorHandler e.Error
 // @Tags         manager
 // @Accept       json
 // @Produce      json
-// @Param        message  body  dto.User  true  "User"
-// @Success      200  {object}  dto.User
+// @Param        message  body  dto.UserRegistration  true  "User"
+// @Success      200  {object}  dto.UserRegistration
 // @Security     ApiKeyAuth
 // @Router       /api/manager/user [post]
 func (ctr *ManagerController) Create(c echo.Context) error {
-	email := c.QueryParam("email")
-	password := c.QueryParam("password")
-	a := models.Auth{Email: email, Password: password}
-	if errValidation := ctr.BaseController.validator.Struct(&a); errValidation != nil {
-		return errValidation
-	}
 	var (
-		userExist models.User
+		userID    int
 		err       error
-		user      models.User
+		userExist models.User
 	)
-	if userExist, err = ctr.repo.GetByEmail(a.Email); err != nil {
+	id := c.Get(access.UserID).(string)
+	if userID, err = strconv.Atoi(id); err != nil {
+		return err
+	}
+	newUserDTO := dto.UserRegistration{}
+	if errBinding := c.Bind(&newUserDTO); errBinding != nil {
+		return errBinding
+	}
+	if errValidate := ctr.validator.Struct(newUserDTO); errValidate != nil {
+		return errValidate
+	}
+	if userExist, err = ctr.repo.GetByEmail(*newUserDTO.Email); err != nil {
 		return err
 	}
 	if userExist.ID != 0 {
-		return errors.New("user with email " + a.Email + " exists")
+		return errors.New("user with email " + *newUserDTO.Email + " exists")
 	}
-	user = models.User{Email: a.Email, CreatedAt: time.Now(), UpdatedAt: time.Now()}
-	if errSetPassword := user.SetPassword(a.Password); errSetPassword != nil {
+	user := dto.LoadUserModelFromUserRegistrationDTO(&newUserDTO)
+	user.CreatedBy = userID
+	user.UpdatedBy = userID
+	user.Roles = newUserDTO.Roles
+	if errSetPassword := user.SetPassword(newUserDTO.Password); errSetPassword != nil {
 		return errSetPassword
 	}
-	if errCreateUser := ctr.repo.Create(&user); errCreateUser != nil {
+	if errCreateUser := ctr.repo.Create(user); errCreateUser != nil {
 		return errCreateUser
 	}
-	return c.JSON(http.StatusOK, dto.LoadUserDTOFromModel(&user))
+	return c.JSON(http.StatusOK, dto.LoadUserByManagerDTOFromModel(user))
 }
 
 // UpdateUser    godoc
@@ -73,8 +82,8 @@ func (ctr *ManagerController) Create(c echo.Context) error {
 // @Tags         manager
 // @Accept       json
 // @Produce      json
-// @Param        message  body  dto.User  true  "User"
-// @Success      200  {object}  dto.User
+// @Param        message  body  dto.UserByManager  true  "User"
+// @Success      200  {object}  dto.UserByManager
 // @Security     ApiKeyAuth
 // @Router       /api/manager/user/{id} [patch]
 func (ctr *UserController) UpdateUser(c echo.Context) error {

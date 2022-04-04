@@ -92,8 +92,32 @@ func (repo *UserRepository) Create(user *models.User) error {
 		baseQuery.
 		Insert().
 		Into(`user`).
-		Cols("email", "password_hash", "created_at", "updated_at", "created_by", "updated_by", "roles").
-		Vals(goqu.Vals{user.Email, user.Password, user.CreatedAt, user.UpdatedAt, user.CreatedBy, user.UpdatedBy, user.Roles})
+		Cols(
+			"email",
+			"password_hash",
+			"status",
+			"first_name",
+			"last_name",
+			"middle_name",
+			"created_at",
+			"updated_at",
+			"created_by",
+			"updated_by",
+			"roles",
+		).
+		Vals(goqu.Vals{
+			user.Email,
+			user.Password,
+			user.Status,
+			user.FirstName,
+			user.LastName,
+			user.MiddleName,
+			user.CreatedAt,
+			user.UpdatedAt,
+			user.CreatedBy,
+			user.UpdatedBy,
+			user.Roles,
+		})
 
 	return repo.execInsert(query)
 }

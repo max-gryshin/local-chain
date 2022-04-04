@@ -7,8 +7,8 @@ import (
 type UsersByManager []*UserByManager
 
 type UserByManager struct {
-	Password string `json:"password" validate:"gte=6,lte=50"`
-	Roles    string `json:"roles"    validate:"json"`
+	Password string   `json:"password" validate:"gte=6,lte=50"`
+	Roles    []string `json:"roles"`
 	GetUserOwner
 }
 

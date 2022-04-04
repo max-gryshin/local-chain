@@ -368,7 +368,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.UserByManager"
+                            "$ref": "#/definitions/dto.UserRegistration"
                         }
                     }
                 ],
@@ -376,7 +376,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.UserByManager"
+                            "$ref": "#/definitions/dto.UserRegistration"
                         }
                     }
                 }
@@ -969,7 +969,7 @@ const docTemplate = `{
                 "email": {
                     "type": "string",
                     "maxLength": 50,
-                    "minLength": 10
+                    "minLength": 9
                 },
                 "first_name": {
                     "type": "string",
@@ -1047,7 +1047,7 @@ const docTemplate = `{
                 "email": {
                     "type": "string",
                     "maxLength": 50,
-                    "minLength": 10
+                    "minLength": 9
                 },
                 "first_name": {
                     "type": "string",
@@ -1102,7 +1102,7 @@ const docTemplate = `{
                 "email": {
                     "type": "string",
                     "maxLength": 50,
-                    "minLength": 10
+                    "minLength": 9
                 },
                 "first_name": {
                     "type": "string",
@@ -1128,7 +1128,10 @@ const docTemplate = `{
                     "minLength": 6
                 },
                 "roles": {
-                    "type": "string"
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
                 },
                 "status": {
                     "type": "integer"
@@ -1137,6 +1140,45 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_by": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.UserRegistration": {
+            "type": "object",
+            "properties": {
+                "email": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 9
+                },
+                "first_name": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 3
+                },
+                "last_name": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 3
+                },
+                "middle_name": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 3
+                },
+                "password": {
+                    "type": "string",
+                    "maxLength": 50,
+                    "minLength": 6
+                },
+                "roles": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "status": {
                     "type": "integer"
                 }
             }

@@ -2,6 +2,7 @@ package routes
 
 import (
 	"github.com/ZmaximillianZ/local-chain/internal/controllers"
+	"github.com/ZmaximillianZ/local-chain/internal/middleware/access"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
 )
@@ -45,7 +46,7 @@ func RegisterAPI(
 	transaction.POST("", transactionController.SendTransaction)
 
 	manager := router.Group("/manager", jwt)
-	manager.POST("manager/user", managerController.Create)
+	manager.POST("/user", managerController.Create, jwt, access.IsResourceAvailable)
 	manager.PATCH("/user/:userId", userController.Update)
 	manager.GET("/order", orderController.GetOrdersByManager)
 	manager.PATCH("/order/:orderId", managerController.HandleOrder)
