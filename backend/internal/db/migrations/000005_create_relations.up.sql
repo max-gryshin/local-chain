@@ -2,13 +2,13 @@ alter table "user"
     add constraint user_created_by
         foreign key (created_by) references "user",
     add constraint user_updated_by
-        foreign key (updated_by) references "user";
+        foreign key (updated_by) references "user",
+    add constraint user_parent
+        foreign key (manager_id) references "user";
 
 alter table account
     add constraint account_user_id_fk
         foreign key (user_id) references "user",
-    add constraint account_parent
-        foreign key (manager_id) references account,
     add constraint account_user_created_by
         foreign key (created_by) references "user",
     add constraint account_user_updated_by

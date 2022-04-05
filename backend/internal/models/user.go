@@ -31,6 +31,7 @@ type User struct {
 	UpdatedAt  time.Time      `json:"updated_at"  db:"updated_at"`
 	CreatedBy  int            `json:"created_by"  db:"created_by"`
 	UpdatedBy  int            `json:"updated_by"  db:"updated_by"`
+	ManagerID  int            `json:"manager_id"  db:"manager_id"`
 	Roles      pq.StringArray `json:"roles"       db:"roles"`
 }
 

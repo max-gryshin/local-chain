@@ -8,6 +8,5 @@ create table account (
     created_at    timestamp    NOT NULL,
     updated_at    timestamp    NOT NULL,
     updated_by    int          NOT NULL,
-    created_by    int          NOT NULL,
-    manager_id    int          NOT NULL
+    created_by    int          NOT NULL
 );

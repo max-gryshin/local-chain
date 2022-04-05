@@ -1,20 +1,20 @@
 package dto
 
 import (
+	"time"
+
 	"github.com/ZmaximillianZ/local-chain/internal/models"
 )
 
 type UsersByManager []*UserByManager
 
 type UserByManager struct {
-	Password string   `json:"password" validate:"gte=6,lte=50"`
-	Roles    []string `json:"roles"`
+	Roles []string `json:"roles"`
 	GetUserOwner
 }
 
 func LoadUserByManagerDTOFromModel(model *models.User) *UserByManager {
 	return &UserByManager{
-		Password:     model.Password,
 		Roles:        model.Roles,
 		GetUserOwner: *LoadGetUserOwnerDTOFromModel(model),
 	}
@@ -28,12 +28,12 @@ func LoadUserModelFromUserByManagerDTO(dto *UserByManager) *models.User {
 		LastName:   dto.LastName,
 		MiddleName: dto.MiddleName,
 		Status:     dto.Status,
-		Password:   dto.Password,
 		Roles:      dto.Roles,
 		CreatedAt:  dto.CreatedAt,
-		UpdatedAt:  dto.UpdatedAt,
+		UpdatedAt:  time.Now(),
 		CreatedBy:  dto.CreatedBy,
 		UpdatedBy:  dto.UpdatedBy,
+		ManagerID:  dto.ManagerID,
 	}
 }
 

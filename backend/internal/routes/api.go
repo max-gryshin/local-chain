@@ -20,10 +20,11 @@ func RegisterAPI(
 	jwt := middleware.JWT([]byte("get_key_from_env"))
 	router.POST("/auth", userController.Authenticate)
 
+	resourceAccess := access.NewResourceAccess(userController.Repo)
 	user := router.Group("/user", jwt)
 	user.GET("/:id", userController.GetByID)
 	user.GET("", userController.GetUsers)
-	user.PATCH("", userController.Update)
+	user.PATCH("", userController.Update, resourceAccess.IsResourceAvailable)
 
 	account := router.Group("/account", jwt)
 	account.GET("/:accountId", accountController.GetByID)
@@ -46,8 +47,8 @@ func RegisterAPI(
 	transaction.POST("", transactionController.SendTransaction)
 
 	manager := router.Group("/manager", jwt)
-	manager.POST("/user", managerController.Create, jwt, access.IsResourceAvailable)
-	manager.PATCH("/user/:userId", userController.Update)
+	manager.POST("/user", managerController.Create, resourceAccess.IsResourceAvailable)
+	manager.PATCH("/user/:id", userController.UpdateUser, resourceAccess.IsResourceAvailable)
 	manager.GET("/order", orderController.GetOrdersByManager)
 	manager.PATCH("/order/:orderId", managerController.HandleOrder)
 	manager.POST("/account/:userId", managerController.CreateAccount)

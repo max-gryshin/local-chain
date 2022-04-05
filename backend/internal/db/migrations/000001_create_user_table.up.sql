@@ -12,6 +12,7 @@ CREATE TABLE "user"
     updated_at    timestamp    NOT NULL,
     created_by    int          NOT NULL,
     updated_by    int          NOT NULL,
+    manager_id    int          NULL,
     status        smallserial  NOT NULL
         CONSTRAINT state_check CHECK (status > 0 and status <= 15),
     roles         role_type[]  NOT NULL

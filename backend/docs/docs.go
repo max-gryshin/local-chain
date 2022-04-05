@@ -402,6 +402,13 @@ const docTemplate = `{
                 "summary": "update user",
                 "parameters": [
                     {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    },
+                    {
                         "description": "User",
                         "name": "message",
                         "in": "body",
@@ -957,6 +964,7 @@ const docTemplate = `{
         "dto.GetUserOwner": {
             "type": "object",
             "required": [
+                "email",
                 "id"
             ],
             "properties": {
@@ -967,27 +975,22 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "email": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 9
+                    "type": "string"
                 },
                 "first_name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 3
+                    "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "last_name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 3
+                    "type": "string"
+                },
+                "manager_id": {
+                    "type": "integer"
                 },
                 "middle_name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 3
+                    "type": "string"
                 },
                 "status": {
                     "type": "integer"
@@ -1043,26 +1046,21 @@ const docTemplate = `{
         },
         "dto.UpdateUserOwnerRequest": {
             "type": "object",
+            "required": [
+                "email"
+            ],
             "properties": {
                 "email": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 9
+                    "type": "string"
                 },
                 "first_name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 3
+                    "type": "string"
                 },
                 "last_name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 3
+                    "type": "string"
                 },
                 "middle_name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 3
+                    "type": "string"
                 }
             }
         },
@@ -1090,6 +1088,7 @@ const docTemplate = `{
         "dto.UserByManager": {
             "type": "object",
             "required": [
+                "email",
                 "id"
             ],
             "properties": {
@@ -1100,34 +1099,25 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "email": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 9
+                    "type": "string"
                 },
                 "first_name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 3
+                    "type": "string"
                 },
                 "id": {
                     "type": "integer"
                 },
                 "last_name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 3
+                    "type": "string"
+                },
+                "manager_id": {
+                    "type": "integer"
                 },
                 "middle_name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 3
-                },
-                "password": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 6
+                    "type": "string"
                 },
                 "roles": {
+                    "description": "Password string   ` + "`" + `json:\"password\" validate:\"gte=6,lte=50\"` + "`" + `",
                     "type": "array",
                     "items": {
                         "type": "string"
@@ -1146,26 +1136,23 @@ const docTemplate = `{
         },
         "dto.UserRegistration": {
             "type": "object",
+            "required": [
+                "email",
+                "password",
+                "status"
+            ],
             "properties": {
                 "email": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 9
+                    "type": "string"
                 },
                 "first_name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 3
+                    "type": "string"
                 },
                 "last_name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 3
+                    "type": "string"
                 },
                 "middle_name": {
-                    "type": "string",
-                    "maxLength": 50,
-                    "minLength": 3
+                    "type": "string"
                 },
                 "password": {
                     "type": "string",
@@ -1179,7 +1166,9 @@ const docTemplate = `{
                     }
                 },
                 "status": {
-                    "type": "integer"
+                    "type": "integer",
+                    "maximum": 4,
+                    "minimum": 1
                 }
             }
         },
