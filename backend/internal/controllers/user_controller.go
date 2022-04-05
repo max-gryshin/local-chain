@@ -21,7 +21,7 @@ import (
 
 // UserController is HTTP controller for manage users
 type UserController struct {
-	repo         contractions.UserRepository
+	Repo         contractions.UserRepository
 	errorHandler e.ErrorHandler
 	BaseController
 }
@@ -29,7 +29,7 @@ type UserController struct {
 // NewUserController return new instance of UserController
 func NewUserController(repo contractions.UserRepository, errorHandler e.ErrorHandler, v *validator.Validate) *UserController {
 	return &UserController{
-		repo:           repo,
+		Repo:           repo,
 		errorHandler:   errorHandler,
 		BaseController: BaseController{*v},
 	}
@@ -57,7 +57,7 @@ func (ctr *UserController) Authenticate(c echo.Context) error {
 		err   error
 		token string
 	)
-	if user, err = ctr.repo.GetByEmail(email); err != nil {
+	if user, err = ctr.Repo.GetByEmail(email); err != nil {
 		return err
 	}
 	if user.InvalidPassword(password) {
@@ -104,7 +104,7 @@ func (ctr *UserController) GetUsers(c echo.Context) error {
 		users models.Users
 		err   error
 	)
-	if users, err = ctr.repo.GetAll(); err != nil {
+	if users, err = ctr.Repo.GetAll(); err != nil {
 		return err
 	}
 
@@ -131,7 +131,7 @@ func (ctr *UserController) Update(c echo.Context) error {
 	if userID, err = strconv.Atoi(id); err != nil {
 		return err
 	}
-	if user, err = ctr.repo.GetByID(userID); err != nil {
+	if user, err = ctr.Repo.GetByID(userID); err != nil {
 		return err
 	}
 	dtoUser := dto.LoadUpdateUserOwnerDTOFromModel(&user)
@@ -141,7 +141,7 @@ func (ctr *UserController) Update(c echo.Context) error {
 	newModel := dto.LoadUserModelFromUpdateUserOwnerDTO(dtoUser)
 	newModel.UpdatedBy = userID
 	newModel.UpdatedAt = time.Now()
-	if errUpdateUser := ctr.repo.Update(newModel); errUpdateUser != nil {
+	if errUpdateUser := ctr.Repo.Update(newModel); errUpdateUser != nil {
 		return errUpdateUser
 	}
 	return c.JSON(http.StatusOK, dtoUser)
@@ -156,7 +156,7 @@ func (ctr *UserController) getUserByID(c echo.Context) (models.User, error) {
 	if id, err = ctr.BaseController.GetID(c); err != nil {
 		return user, err
 	}
-	if user, err = ctr.repo.GetByID(int(id)); err != nil {
+	if user, err = ctr.Repo.GetByID(int(id)); err != nil {
 		return user, err
 	}
 

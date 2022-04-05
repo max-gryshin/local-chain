@@ -22,5 +22,6 @@ func LoadUserModelFromUserRegistrationDTO(dto *UserRegistration) *models.User {
 		Status:     dto.Status,
 		CreatedAt:  time.Now(),
 		UpdatedAt:  time.Now(),
+		Roles:      dto.Roles,
 	}
 }

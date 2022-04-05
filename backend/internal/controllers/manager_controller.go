@@ -42,12 +42,12 @@ func NewManagerController(repo contractions.UserRepository, errorHandler e.Error
 // @Router       /api/manager/user [post]
 func (ctr *ManagerController) Create(c echo.Context) error {
 	var (
-		userID    int
+		managerID int
 		err       error
 		userExist models.User
 	)
-	id := c.Get(access.UserID).(string)
-	if userID, err = strconv.Atoi(id); err != nil {
+	managerIDString := c.Get(access.UserID).(string)
+	if managerID, err = strconv.Atoi(managerIDString); err != nil {
 		return err
 	}
 	newUserDTO := dto.UserRegistration{}
@@ -64,9 +64,9 @@ func (ctr *ManagerController) Create(c echo.Context) error {
 		return errors.New("user with email " + *newUserDTO.Email + " exists")
 	}
 	user := dto.LoadUserModelFromUserRegistrationDTO(&newUserDTO)
-	user.CreatedBy = userID
-	user.UpdatedBy = userID
-	user.Roles = newUserDTO.Roles
+	user.CreatedBy = managerID
+	user.UpdatedBy = managerID
+	user.ManagerID = managerID
 	if errSetPassword := user.SetPassword(newUserDTO.Password); errSetPassword != nil {
 		return errSetPassword
 	}
@@ -82,23 +82,30 @@ func (ctr *ManagerController) Create(c echo.Context) error {
 // @Tags         manager
 // @Accept       json
 // @Produce      json
+// @Param        id   path  int  true  "User ID"
 // @Param        message  body  dto.UserByManager  true  "User"
 // @Success      200  {object}  dto.UserByManager
 // @Security     ApiKeyAuth
 // @Router       /api/manager/user/{id} [patch]
 func (ctr *UserController) UpdateUser(c echo.Context) error {
 	var (
-		err  error
-		user models.User
+		managerID int
+		err       error
+		user      models.User
 	)
 	if user, err = ctr.getUserByID(c); err != nil {
 		return err
 	}
-	dtoUser := dto.LoadUserDTOFromModel(&user)
+	managerIDString := c.Get(access.UserID).(string)
+	if managerID, err = strconv.Atoi(managerIDString); err != nil {
+		return err
+	}
+	dtoUser := dto.LoadUserByManagerDTOFromModel(&user)
 	if errBindOrValidate := ctr.BindAndValidate(c, dtoUser); errBindOrValidate != nil {
 		return errBindOrValidate
 	}
-	if errUpdateUser := ctr.repo.Update(dto.LoadUserModelFromDTO(dtoUser)); errUpdateUser != nil {
+	dtoUser.UpdatedBy = managerID
+	if errUpdateUser := ctr.Repo.Update(dto.LoadUserModelFromUserByManagerDTO(dtoUser)); errUpdateUser != nil {
 		return errUpdateUser
 	}
 	return c.JSON(http.StatusOK, dtoUser)

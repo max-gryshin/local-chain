@@ -14,6 +14,7 @@ type GetUserOwner struct {
 	UpdatedAt time.Time `json:"updated_at"`
 	CreatedBy int       `json:"created_by"`
 	UpdatedBy int       `json:"updated_by"`
+	ManagerID int       `json:"manager_id"`
 	UpdateUserOwner
 }
 
@@ -24,6 +25,7 @@ func LoadGetUserOwnerDTOFromModel(model *models.User) *GetUserOwner {
 		UpdatedAt:       model.UpdatedAt,
 		CreatedBy:       model.CreatedBy,
 		UpdatedBy:       model.UpdatedBy,
+		ManagerID:       model.ManagerID,
 		UpdateUserOwner: *LoadUpdateUserOwnerDTOFromModel(model),
 	}
 }

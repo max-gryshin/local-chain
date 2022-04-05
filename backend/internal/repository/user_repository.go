@@ -103,6 +103,7 @@ func (repo *UserRepository) Create(user *models.User) error {
 			"updated_at",
 			"created_by",
 			"updated_by",
+			"manager_id",
 			"roles",
 		).
 		Vals(goqu.Vals{
@@ -116,6 +117,7 @@ func (repo *UserRepository) Create(user *models.User) error {
 			user.UpdatedAt,
 			user.CreatedBy,
 			user.UpdatedBy,
+			user.ManagerID,
 			user.Roles,
 		})
 
@@ -129,4 +131,15 @@ func (repo *UserRepository) Update(user *models.User) error {
 	}
 	expr := repo.baseQuery.Update().Set(userMap).Where(exp.Ex{"id": user.ID})
 	return repo.execUpdate(expr)
+}
+
+func (repo *UserRepository) GetManagerIDs() ([]int, error) {
+	query := repo.baseQuery.Select("manager_id").Distinct()
+	sql, p, err := query.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+	res := make([]int, 1)
+	err = repo.db.Select(&res, sql, p...)
+	return res, err
 }

@@ -30,22 +30,16 @@ definitions:
       created_by:
         type: integer
       email:
-        maxLength: 50
-        minLength: 9
         type: string
       first_name:
-        maxLength: 50
-        minLength: 3
         type: string
       id:
         type: integer
       last_name:
-        maxLength: 50
-        minLength: 3
         type: string
+      manager_id:
+        type: integer
       middle_name:
-        maxLength: 50
-        minLength: 3
         type: string
       status:
         type: integer
@@ -54,6 +48,7 @@ definitions:
       updated_by:
         type: integer
     required:
+    - email
     - id
     type: object
   dto.Order:
@@ -86,21 +81,15 @@ definitions:
   dto.UpdateUserOwnerRequest:
     properties:
       email:
-        maxLength: 50
-        minLength: 9
         type: string
       first_name:
-        maxLength: 50
-        minLength: 3
         type: string
       last_name:
-        maxLength: 50
-        minLength: 3
         type: string
       middle_name:
-        maxLength: 50
-        minLength: 3
         type: string
+    required:
+    - email
     type: object
   dto.User:
     properties:
@@ -123,28 +112,19 @@ definitions:
       created_by:
         type: integer
       email:
-        maxLength: 50
-        minLength: 9
         type: string
       first_name:
-        maxLength: 50
-        minLength: 3
         type: string
       id:
         type: integer
       last_name:
-        maxLength: 50
-        minLength: 3
         type: string
+      manager_id:
+        type: integer
       middle_name:
-        maxLength: 50
-        minLength: 3
-        type: string
-      password:
-        maxLength: 50
-        minLength: 6
         type: string
       roles:
+        description: Password string   `json:"password" validate:"gte=6,lte=50"`
         items:
           type: string
         type: array
@@ -155,25 +135,18 @@ definitions:
       updated_by:
         type: integer
     required:
+    - email
     - id
     type: object
   dto.UserRegistration:
     properties:
       email:
-        maxLength: 50
-        minLength: 9
         type: string
       first_name:
-        maxLength: 50
-        minLength: 3
         type: string
       last_name:
-        maxLength: 50
-        minLength: 3
         type: string
       middle_name:
-        maxLength: 50
-        minLength: 3
         type: string
       password:
         maxLength: 50
@@ -184,7 +157,13 @@ definitions:
           type: string
         type: array
       status:
+        maximum: 4
+        minimum: 1
         type: integer
+    required:
+    - email
+    - password
+    - status
     type: object
   dto.Wallet:
     properties:
@@ -449,6 +428,11 @@ paths:
       - application/json
       description: update user by manager
       parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
       - description: User
         in: body
         name: message
