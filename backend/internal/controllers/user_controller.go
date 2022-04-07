@@ -43,7 +43,7 @@ func NewUserController(repo contractions.UserRepository, errorHandler e.ErrorHan
 // @Produce      json
 // @Param        email     query  string  true  "email"
 // @Param        password  query  string  true  "password"
-// @Success      200  {object}  dto.User
+// @Success      200  {string}  dto.Authenticate
 // @Router       /api/auth [post]
 func (ctr *UserController) Authenticate(c echo.Context) error {
 	email := c.QueryParam("email")

@@ -33,7 +33,7 @@ func NewAccountController(repo contractions.AccountRepository, errorHandler e.Er
 // @Tags         account
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}            dto.Account
+// @Success      200  {object}   dto.GetAccount
 // @Security     ApiKeyAuth
 // @Router       /api/account/{accountId} [get]
 func (ctr *AccountController) GetByID(c echo.Context) error {
@@ -44,7 +44,7 @@ func (ctr *AccountController) GetByID(c echo.Context) error {
 	if account, err = ctr.getAccountByID(c); err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, dto.LoadAccountDTOFromModel(&account))
+	return c.JSON(http.StatusOK, dto.LoadGetAccountDTOFromModel(&account))
 }
 
 // GetAccounts   godoc
@@ -53,7 +53,7 @@ func (ctr *AccountController) GetByID(c echo.Context) error {
 // @Tags         account
 // @Accept       json
 // @Produce      json
-// @Success      200  {object}    dto.Accounts
+// @Success      200  {object}    dto.GetAccounts
 // @Security     ApiKeyAuth
 // @Router       /api/account [get]
 func (ctr *AccountController) GetAccounts(c echo.Context) error {
@@ -65,7 +65,7 @@ func (ctr *AccountController) GetAccounts(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, dto.LoadAccountDTOCollectionFromModel(accounts))
+	return c.JSON(http.StatusOK, dto.LoadGetAccountsDTOCollectionFromModel(accounts))
 }
 
 // UpdateAccount godoc
@@ -74,8 +74,8 @@ func (ctr *AccountController) GetAccounts(c echo.Context) error {
 // @Tags         account
 // @Accept       json
 // @Produce      json
-// @Param        message  body  dto.Account  true  "Account"
-// @Success      200  {object}  dto.Account
+// @Param        message  body  dto.AccountOwnerUpdateRequest true  "AccountOwnerUpdateRequest"
+// @Success      200  {object}  dto.AccountOwnerUpdate
 // @Security     ApiKeyAuth
 // @Router       /api/account/{accountId}/ [patch]
 func (ctr *AccountController) UpdateAccount(c echo.Context) error {

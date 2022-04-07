@@ -194,8 +194,8 @@ func (ctr *ManagerController) HandleOrder(c echo.Context) error {
 // @Tags         manager
 // @Accept       json
 // @Produce      json
-// @Param        message  body  dto.Account  true  "Account"
-// @Success      200  {object} dto.Account
+// @Param        message  body  dto.AccountByManager  true  "AccountByManager"
+// @Success      200  {object} dto.GetAccount
 // @Security     ApiKeyAuth
 // @Router       /api/manager/account/{userid} [post]
 func (ctr *ManagerController) CreateAccount(c echo.Context) error {
@@ -208,8 +208,8 @@ func (ctr *ManagerController) CreateAccount(c echo.Context) error {
 // @Tags         manager
 // @Accept       json
 // @Produce      json
-// @Param        message  body  dto.Account  true  "Account"
-// @Success      200  {object} dto.Account
+// @Param        message  body  dto.AccountByManager  true  "AccountByManager"
+// @Success      200  {object} dto.GetAccount
 // @Security     ApiKeyAuth
 // @Router       /api/manager/account/{accountId} [patch]
 func (ctr *ManagerController) UpdateAccount(c echo.Context) error {

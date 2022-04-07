@@ -43,7 +43,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.Account"
+                                "$ref": "#/definitions/dto.GetAccount"
                             }
                         }
                     }
@@ -72,7 +72,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Account"
+                            "$ref": "#/definitions/dto.GetAccount"
                         }
                     }
                 }
@@ -98,12 +98,12 @@ const docTemplate = `{
                 "summary": "update account",
                 "parameters": [
                     {
-                        "description": "Account",
+                        "description": "AccountOwnerUpdateRequest",
                         "name": "message",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.Account"
+                            "$ref": "#/definitions/dto.AccountOwnerUpdateRequest"
                         }
                     }
                 ],
@@ -111,7 +111,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Account"
+                            "$ref": "#/definitions/dto.AccountOwnerUpdate"
                         }
                     }
                 }
@@ -189,7 +189,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.User"
+                            "type": "string"
                         }
                     }
                 }
@@ -215,12 +215,12 @@ const docTemplate = `{
                 "summary": "update an account",
                 "parameters": [
                     {
-                        "description": "Account",
+                        "description": "AccountByManager",
                         "name": "message",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.Account"
+                            "$ref": "#/definitions/dto.AccountByManager"
                         }
                     }
                 ],
@@ -228,7 +228,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Account"
+                            "$ref": "#/definitions/dto.GetAccount"
                         }
                     }
                 }
@@ -254,12 +254,12 @@ const docTemplate = `{
                 "summary": "create an account",
                 "parameters": [
                     {
-                        "description": "Account",
+                        "description": "AccountByManager",
                         "name": "message",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.Account"
+                            "$ref": "#/definitions/dto.AccountByManager"
                         }
                     }
                 ],
@@ -267,7 +267,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Account"
+                            "$ref": "#/definitions/dto.GetAccount"
                         }
                     }
                 }
@@ -990,7 +990,52 @@ const docTemplate = `{
         }
     },
     "definitions": {
-        "dto.Account": {
+        "dto.AccountByManager": {
+            "type": "object",
+            "properties": {
+                "dob": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.AccountOwnerUpdate": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "dob": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.AccountOwnerUpdateRequest": {
+            "type": "object",
+            "properties": {
+                "dob": {
+                    "type": "string"
+                },
+                "phone": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.GetAccount": {
             "type": "object",
             "required": [
                 "id"
@@ -1124,27 +1169,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "middle_name": {
-                    "type": "string"
-                }
-            }
-        },
-        "dto.User": {
-            "type": "object",
-            "required": [
-                "id"
-            ],
-            "properties": {
-                "created_at": {
-                    "type": "string"
-                },
-                "email": {
-                    "type": "string"
-                },
-                "id": {
-                    "type": "integer"
-                },
-                "password": {
-                    "description": "validate:\"gte=6,lte=50\"` + "`" + `",
                     "type": "string"
                 }
             }
