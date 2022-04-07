@@ -8,23 +8,31 @@ import (
 
 type Wallets []*Wallet
 
+type WalletCreate struct {
+	Status     int    `json:"status"`
+	WalletID   string `json:"wallet_id"`
+	PrivateKey string `json:"private_key"`
+	AccountID  int    `json:"account_id"`
+}
+
 type Wallet struct {
-	ID         int       `json:"id" validate:"required"`
-	Status     int       `json:"status"`
-	WalletID   string    `json:"wallet_id"`
-	PrivateKey string    `json:"private_key"`
-	AccountID  int       `json:"account_id"`
-	CreatedAt  time.Time `json:"created_at"`
-	UpdatedAt  time.Time `json:"updated_at"`
-	CreatedBy  int       `json:"created_by"`
-	UpdatedBy  int       `json:"updated_by"`
+	ID        int       `json:"id" validate:"required"`
+	CreatedAt time.Time `json:"created_at"`
+	UpdatedAt time.Time `json:"updated_at"`
+	CreatedBy int       `json:"created_by"`
+	UpdatedBy int       `json:"updated_by"`
+	WalletCreate
 }
 
 func LoadWalletDTOFromModel(model *models.Wallet) *Wallet {
 	return &Wallet{
-		ID:        model.ID,
-		Status:    model.Status,
-		WalletID:  model.WalletID,
+		ID: model.ID,
+		WalletCreate: WalletCreate{
+			Status:     model.Status,
+			WalletID:   model.WalletID,
+			PrivateKey: model.PrivateKey,
+			AccountID:  model.AccountID,
+		},
 		CreatedAt: model.CreatedAt,
 		UpdatedAt: model.UpdatedAt,
 		CreatedBy: model.CreatedBy,
@@ -39,10 +47,8 @@ func LoadWalletModelFromDTO(dto *Wallet) *models.Wallet {
 		WalletID:   dto.WalletID,
 		PrivateKey: dto.PrivateKey,
 		AccountID:  dto.AccountID,
-		CreatedAt:  dto.CreatedAt,
-		UpdatedAt:  dto.UpdatedAt,
-		CreatedBy:  dto.CreatedBy,
-		UpdatedBy:  dto.UpdatedBy,
+		CreatedAt:  time.Now(),
+		UpdatedAt:  time.Now(),
 	}
 }
 

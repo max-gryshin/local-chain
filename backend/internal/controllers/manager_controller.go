@@ -159,7 +159,7 @@ func (ctr *UserController) GetUserByID(c echo.Context) error {
 // @Tags              order
 // @Accept            json
 // @Produce           json
-// @Success           200  {object} dto.Orders
+// @Success           200  {object} dto.GetOrders
 // @Security          ApiKeyAuth
 // @Router            /api/manager/order [get]
 func (ctr *OrderController) GetOrdersByManager(c echo.Context) error {
@@ -171,7 +171,7 @@ func (ctr *OrderController) GetOrdersByManager(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, dto.LoadOrderDTOCollectionFromModel(orders))
+	return c.JSON(http.StatusOK, dto.LoadGetOrdersDTOCollectionFromModel(orders))
 }
 
 // HandleOrder   godoc
@@ -180,10 +180,10 @@ func (ctr *OrderController) GetOrdersByManager(c echo.Context) error {
 // @Tags         manager
 // @Accept       json
 // @Produce      json
-// @Param        message  body  dto.Order  true  "Order"
-// @Success      200  {object} dto.Order
+// @Param        message  body  dto.OrderByManager  true  "GetOrder"
+// @Success      200  {object} dto.GetOrder
 // @Security     ApiKeyAuth
-// @Router       /api/manager/order/{orderId} [patch]
+// @Router       /api/manager/order/{id} [patch]
 func (ctr *ManagerController) HandleOrder(c echo.Context) error {
 	return c.JSON(http.StatusOK, []string{"1", "two", "110"})
 }
@@ -197,7 +197,7 @@ func (ctr *ManagerController) HandleOrder(c echo.Context) error {
 // @Param        message  body  dto.AccountByManager  true  "AccountByManager"
 // @Success      200  {object} dto.GetAccount
 // @Security     ApiKeyAuth
-// @Router       /api/manager/account/{userid} [post]
+// @Router       /api/manager/account [post]
 func (ctr *ManagerController) CreateAccount(c echo.Context) error {
 	return c.JSON(http.StatusOK, []string{"1", "two", "110"})
 }
@@ -211,7 +211,7 @@ func (ctr *ManagerController) CreateAccount(c echo.Context) error {
 // @Param        message  body  dto.AccountByManager  true  "AccountByManager"
 // @Success      200  {object} dto.GetAccount
 // @Security     ApiKeyAuth
-// @Router       /api/manager/account/{accountId} [patch]
+// @Router       /api/manager/account/{id} [patch]
 func (ctr *ManagerController) UpdateAccount(c echo.Context) error {
 	return c.JSON(http.StatusOK, []string{"1", "two", "110"})
 }
@@ -222,7 +222,7 @@ func (ctr *ManagerController) UpdateAccount(c echo.Context) error {
 // @Tags         manager
 // @Accept       json
 // @Produce      json
-// @Param        message  body  dto.Wallet  true  "Wallet"
+// @Param        message  body  dto.WalletCreate  true  "Wallet"
 // @Success      200  {object} dto.Wallet
 // @Security     ApiKeyAuth
 // @Router       /api/manager/wallet [post]
@@ -236,10 +236,10 @@ func (ctr *ManagerController) CreateWallet(c echo.Context) error {
 // @Tags         manager
 // @Accept       json
 // @Produce      json
-// @Param        message  body  dto.Wallet  true  "Wallet"
+// @Param        message  body  dto.WalletCreate  true  "Wallet"
 // @Success      200  {object} dto.Wallet
 // @Security     ApiKeyAuth
-// @Router       /api/manager/wallet/{walletId} [patch]
+// @Router       /api/manager/wallet/{id} [patch]
 func (ctr *ManagerController) UpdateWallet(c echo.Context) error {
 	return c.JSON(http.StatusOK, []string{"1", "two", "110"})
 }
@@ -250,11 +250,10 @@ func (ctr *ManagerController) UpdateWallet(c echo.Context) error {
 // @Tags         manager
 // @Accept       json
 // @Produce      json
-// @Param        message  body  dto.Wallet  true  "Wallet"
+// @Param        message  body  dto.Debit  true  "Debit"
 // @Success      200  {object} dto.Wallet
 // @Security     ApiKeyAuth
-// @Router       /api/manager/wallet/{walletId}/debit [post]
-// todo: create dto
+// @Router       /api/manager/wallet/{id}/debit [post]
 func (ctr *ManagerController) Debit(c echo.Context) error {
 	return c.JSON(http.StatusOK, []string{"1", "two", "110"})
 }
@@ -265,11 +264,10 @@ func (ctr *ManagerController) Debit(c echo.Context) error {
 // @Tags         manager
 // @Accept       json
 // @Produce      json
-// @Param        message  body  dto.Wallet  true  "Wallet"
+// @Param        message  body  dto.Credit  true  "Credit"
 // @Success      200  {object} dto.Wallet
 // @Security     ApiKeyAuth
-// @Router       /api/manager/wallet/{walletId}/credit [post]
-// todo: create dto
+// @Router       /api/manager/wallet/{id}/credit [post]
 func (ctr *ManagerController) Credit(c echo.Context) error {
 	return c.JSON(http.StatusOK, []string{"1", "two", "110"})
 }

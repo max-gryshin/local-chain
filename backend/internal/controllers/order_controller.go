@@ -33,8 +33,8 @@ func NewOrderController(repo contractions.OrderRepository, errorHandler e.ErrorH
 // @Tags         order
 // @Accept       json
 // @Produce      json
-// @Param        id   path      int  true  "Order ID"
-// @Success      200  {object}  dto.Order
+// @Param        id   path      int  true  "GetOrder ID"
+// @Success      200  {object}  dto.GetOrder
 // @Security     ApiKeyAuth
 // @Router       /api/order/{id} [get]
 func (ctr *OrderController) GetByID(c echo.Context) error {
@@ -45,7 +45,7 @@ func (ctr *OrderController) GetByID(c echo.Context) error {
 	if order, err = ctr.getOrderByID(c); err != nil {
 		return err
 	}
-	return c.JSON(http.StatusOK, dto.LoadOrderDTOFromModel(&order))
+	return c.JSON(http.StatusOK, dto.LoadGetOrderDTOFromModel(&order))
 }
 
 // GetOrders     godoc
@@ -54,7 +54,7 @@ func (ctr *OrderController) GetByID(c echo.Context) error {
 // @Tags         order
 // @Accept       json
 // @Produce      json
-// @Success      200  {object} dto.Orders
+// @Success      200  {object} dto.GetOrders
 // @Security     ApiKeyAuth
 // @Router       /api/order [get]
 func (ctr *OrderController) GetOrders(c echo.Context) error {
@@ -66,7 +66,22 @@ func (ctr *OrderController) GetOrders(c echo.Context) error {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, dto.LoadOrderDTOCollectionFromModel(orders))
+	return c.JSON(http.StatusOK, dto.LoadGetOrdersDTOCollectionFromModel(orders))
+}
+
+// CashOut       godoc
+// @Summary      cash out
+// @Description  create an order to cash out money
+// @Tags         account
+// @Accept       json
+// @Produce      json
+// @Param        message  body  dto.OrderRequest  true  "OrderRequest"
+// @Success      200  {object}  dto.GetOrder
+// @Security     ApiKeyAuth
+// @Router       /api/account/{id}/cash-out [post]
+// todo: create dto
+func (ctr *OrderController) CashOut(c echo.Context) error {
+	return c.JSON(http.StatusOK, "ok")
 }
 
 func (ctr *OrderController) getOrderByID(c echo.Context) (models.Order, error) {

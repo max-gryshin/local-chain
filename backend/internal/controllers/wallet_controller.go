@@ -36,7 +36,7 @@ func NewWalletController(repo contractions.WalletRepository, errorHandler e.Erro
 // @Param        id   path      int  true  "Wallet ID"
 // @Success      200  {object}  dto.Wallet
 // @Security     ApiKeyAuth
-// @Router      /api/wallet/{walletId} [get]
+// @Router      /api/wallet/{id} [get]
 func (ctr *WalletController) GetByID(c echo.Context) error {
 	var (
 		err    error

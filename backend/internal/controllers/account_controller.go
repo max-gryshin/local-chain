@@ -35,7 +35,7 @@ func NewAccountController(repo contractions.AccountRepository, errorHandler e.Er
 // @Produce      json
 // @Success      200  {object}   dto.GetAccount
 // @Security     ApiKeyAuth
-// @Router       /api/account/{accountId} [get]
+// @Router       /api/account/{id} [get]
 func (ctr *AccountController) GetByID(c echo.Context) error {
 	var (
 		err     error
@@ -77,24 +77,9 @@ func (ctr *AccountController) GetAccounts(c echo.Context) error {
 // @Param        message  body  dto.AccountOwnerUpdateRequest true  "AccountOwnerUpdateRequest"
 // @Success      200  {object}  dto.AccountOwnerUpdate
 // @Security     ApiKeyAuth
-// @Router       /api/account/{accountId}/ [patch]
+// @Router       /api/account/{id}/ [patch]
 func (ctr *AccountController) UpdateAccount(c echo.Context) error {
 	return c.JSON(http.StatusOK, []string{"1", "two", "110"})
-}
-
-// CashOut       godoc
-// @Summary      cash out
-// @Description  create an order to cash out money
-// @Tags         account
-// @Accept       json
-// @Produce      json
-// @Param        message  body  dto.Order  true  "Order"
-// @Success      200  {object}  dto.Order
-// @Security     ApiKeyAuth
-// @Router       /api/account/{id}/cash-out [post]
-// todo: create dto
-func (ctr *AccountController) CashOut(c echo.Context) error {
-	return c.JSON(http.StatusOK, "ok")
 }
 
 func (ctr *AccountController) getAccountByID(c echo.Context) (models.Account, error) {

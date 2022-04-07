@@ -44,7 +44,7 @@ func (ctr *TransactionController) GetTransactions(c echo.Context) error {
 // @Produce            json
 // @Success            200  {object} dto.Orders
 // @Security           ApiKeyAuth
-// @Router             /api/transaction/{userId} [get]
+// @Router             /api/transaction/user/{id} [get]
 // todo: create dto
 func (ctr *TransactionController) GetUserTransactions(c echo.Context) error {
 	return c.JSON(http.StatusOK, []string{"1", "2", "3"})

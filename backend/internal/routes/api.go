@@ -27,23 +27,23 @@ func RegisterAPI(
 	user.PATCH("", userController.Update, resourceAccess.IsResourceAvailable)
 
 	account := router.Group("/account", jwt)
-	account.GET("/:accountId", accountController.GetByID)
+	account.GET("/:id", accountController.GetByID)
 	account.GET("", accountController.GetAccounts)
-	account.PATCH("/:accountId", accountController.UpdateAccount)
-	account.GET("/:accountId/cash-out", accountController.CashOut)
+	account.PATCH("/:id", accountController.UpdateAccount)
 
 	order := router.Group("/order", jwt)
-	order.GET("/:orderId", orderController.GetByID)
+	order.GET("/:id", orderController.GetByID)
 	order.GET("", orderController.GetOrders)
+	order.POST("/:id/cash-out", orderController.CashOut)
 
 	wallet := router.Group("/wallet", jwt)
-	wallet.GET("/:walletId", walletController.GetByID)
+	wallet.GET("/:id", walletController.GetByID)
 	wallet.GET("", walletController.GetWallets)
 
 	transaction := router.Group("/transaction", jwt)
 
 	transaction.GET("", transactionController.GetTransactions)
-	transaction.GET("/:userId", transactionController.GetUserTransactions)
+	transaction.GET("/user/:id", transactionController.GetUserTransactions)
 	transaction.POST("", transactionController.SendTransaction)
 
 	manager := router.Group("/manager", jwt)
@@ -52,11 +52,11 @@ func RegisterAPI(
 	manager.GET("/user", userController.GetUsersByManager)
 	manager.GET("/user/:id", userController.GetUserByID)
 	manager.GET("/order", orderController.GetOrdersByManager)
-	manager.PATCH("/order/:orderId", managerController.HandleOrder)
-	manager.POST("/account/:userId", managerController.CreateAccount)
-	manager.PATCH("/account/:accountId", managerController.UpdateAccount)
+	manager.PATCH("/order/:id", managerController.HandleOrder)
+	manager.POST("/account", managerController.CreateAccount)
+	manager.PATCH("/account/:id", managerController.UpdateAccount)
 	manager.POST("/wallet", managerController.CreateWallet)
-	manager.PATCH("/wallet/:walletId", managerController.UpdateWallet)
-	manager.POST("/wallet/:walletId/debit", managerController.Debit)
-	manager.POST("/wallet/:walletId/credit", managerController.Credit)
+	manager.PATCH("/wallet/:id", managerController.UpdateWallet)
+	manager.POST("/wallet/:id/debit", managerController.Debit)
+	manager.POST("/wallet/:id/credit", managerController.Credit)
 }
