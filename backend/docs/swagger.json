@@ -46,7 +46,7 @@
                 }
             }
         },
-        "/api/account/{accountId}": {
+        "/api/account/{id}": {
             "get": {
                 "security": [
                     {
@@ -74,7 +74,7 @@
                 }
             }
         },
-        "/api/account/{accountId}/": {
+        "/api/account/{id}/": {
             "patch": {
                 "security": [
                     {
@@ -133,12 +133,12 @@
                 "summary": "cash out",
                 "parameters": [
                     {
-                        "description": "Order",
+                        "description": "OrderRequest",
                         "name": "message",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.Order"
+                            "$ref": "#/definitions/dto.OrderRequest"
                         }
                     }
                 ],
@@ -146,7 +146,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Order"
+                            "$ref": "#/definitions/dto.GetOrder"
                         }
                     }
                 }
@@ -191,14 +191,14 @@
                 }
             }
         },
-        "/api/manager/account/{accountId}": {
-            "patch": {
+        "/api/manager/account": {
+            "post": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "updating an account by manager",
+                "description": "creating an account by manager",
                 "consumes": [
                     "application/json"
                 ],
@@ -208,7 +208,7 @@
                 "tags": [
                     "manager"
                 ],
-                "summary": "update an account",
+                "summary": "create an account",
                 "parameters": [
                     {
                         "description": "AccountByManager",
@@ -230,14 +230,14 @@
                 }
             }
         },
-        "/api/manager/account/{userid}": {
-            "post": {
+        "/api/manager/account/{id}": {
+            "patch": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "creating an account by manager",
+                "description": "updating an account by manager",
                 "consumes": [
                     "application/json"
                 ],
@@ -247,7 +247,7 @@
                 "tags": [
                     "manager"
                 ],
-                "summary": "create an account",
+                "summary": "update an account",
                 "parameters": [
                     {
                         "description": "AccountByManager",
@@ -293,14 +293,14 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.Order"
+                                "$ref": "#/definitions/dto.GetOrder"
                             }
                         }
                     }
                 }
             }
         },
-        "/api/manager/order/{orderId}": {
+        "/api/manager/order/{id}": {
             "patch": {
                 "security": [
                     {
@@ -320,12 +320,12 @@
                 "summary": "handle order",
                 "parameters": [
                     {
-                        "description": "Order",
+                        "description": "GetOrder",
                         "name": "message",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.Order"
+                            "$ref": "#/definitions/dto.OrderByManager"
                         }
                     }
                 ],
@@ -333,7 +333,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Order"
+                            "$ref": "#/definitions/dto.GetOrder"
                         }
                     }
                 }
@@ -513,7 +513,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.Wallet"
+                            "$ref": "#/definitions/dto.WalletCreate"
                         }
                     }
                 ],
@@ -527,7 +527,7 @@
                 }
             }
         },
-        "/api/manager/wallet/{walletId}": {
+        "/api/manager/wallet/{id}": {
             "patch": {
                 "security": [
                     {
@@ -552,7 +552,7 @@
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.Wallet"
+                            "$ref": "#/definitions/dto.WalletCreate"
                         }
                     }
                 ],
@@ -566,7 +566,7 @@
                 }
             }
         },
-        "/api/manager/wallet/{walletId}/credit": {
+        "/api/manager/wallet/{id}/credit": {
             "post": {
                 "security": [
                     {
@@ -586,12 +586,12 @@
                 "summary": "credit",
                 "parameters": [
                     {
-                        "description": "Wallet",
+                        "description": "Credit",
                         "name": "message",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.Wallet"
+                            "$ref": "#/definitions/dto.Credit"
                         }
                     }
                 ],
@@ -605,7 +605,7 @@
                 }
             }
         },
-        "/api/manager/wallet/{walletId}/debit": {
+        "/api/manager/wallet/{id}/debit": {
             "post": {
                 "security": [
                     {
@@ -625,12 +625,12 @@
                 "summary": "debit",
                 "parameters": [
                     {
-                        "description": "Wallet",
+                        "description": "Debit",
                         "name": "message",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.Wallet"
+                            "$ref": "#/definitions/dto.Debit"
                         }
                     }
                 ],
@@ -668,7 +668,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.Order"
+                                "$ref": "#/definitions/dto.GetOrder"
                             }
                         }
                     }
@@ -696,7 +696,7 @@
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Order ID",
+                        "description": "GetOrder ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -706,7 +706,7 @@
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Order"
+                            "$ref": "#/definitions/dto.GetOrder"
                         }
                     }
                 }
@@ -736,7 +736,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.Order"
+                                "$ref": "#/definitions/dto.GetOrder"
                             }
                         }
                     }
@@ -780,7 +780,7 @@
                 }
             }
         },
-        "/api/transaction/{userId}": {
+        "/api/transaction/user/{id}": {
             "get": {
                 "security": [
                     {
@@ -804,7 +804,7 @@
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.Order"
+                                "$ref": "#/definitions/dto.GetOrder"
                             }
                         }
                     }
@@ -947,7 +947,7 @@
                 }
             }
         },
-        "/api/wallet/{walletId}": {
+        "/api/wallet/{id}": {
             "get": {
                 "security": [
                     {
@@ -1031,6 +1031,22 @@
                 }
             }
         },
+        "dto.Credit": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.Debit": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                }
+            }
+        },
         "dto.GetAccount": {
             "type": "object",
             "required": [
@@ -1062,6 +1078,47 @@
                     "type": "integer"
                 },
                 "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.GetOrder": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "request_reason": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                },
+                "wallet_id": {
                     "type": "integer"
                 }
             }
@@ -1108,41 +1165,28 @@
                 }
             }
         },
-        "dto.Order": {
+        "dto.OrderByManager": {
             "type": "object",
-            "required": [
-                "id"
-            ],
+            "properties": {
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.OrderRequest": {
+            "type": "object",
             "properties": {
                 "amount": {
                     "type": "number"
                 },
-                "created_at": {
-                    "type": "string"
-                },
-                "created_by": {
-                    "type": "integer"
-                },
                 "description": {
                     "type": "string"
-                },
-                "id": {
-                    "type": "integer"
                 },
                 "request_reason": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
-                },
-                "status": {
-                    "type": "integer"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "updated_by": {
-                    "type": "integer"
                 },
                 "wallet_id": {
                     "type": "integer"
@@ -1283,6 +1327,23 @@
                     "type": "string"
                 },
                 "updated_by": {
+                    "type": "integer"
+                },
+                "wallet_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.WalletCreate": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "type": "integer"
+                },
+                "private_key": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "integer"
                 },
                 "wallet_id": {

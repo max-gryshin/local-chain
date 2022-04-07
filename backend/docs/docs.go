@@ -50,7 +50,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/account/{accountId}": {
+        "/api/account/{id}": {
             "get": {
                 "security": [
                     {
@@ -78,7 +78,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/account/{accountId}/": {
+        "/api/account/{id}/": {
             "patch": {
                 "security": [
                     {
@@ -137,12 +137,12 @@ const docTemplate = `{
                 "summary": "cash out",
                 "parameters": [
                     {
-                        "description": "Order",
+                        "description": "OrderRequest",
                         "name": "message",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.Order"
+                            "$ref": "#/definitions/dto.OrderRequest"
                         }
                     }
                 ],
@@ -150,7 +150,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Order"
+                            "$ref": "#/definitions/dto.GetOrder"
                         }
                     }
                 }
@@ -195,14 +195,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/manager/account/{accountId}": {
-            "patch": {
+        "/api/manager/account": {
+            "post": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "updating an account by manager",
+                "description": "creating an account by manager",
                 "consumes": [
                     "application/json"
                 ],
@@ -212,7 +212,7 @@ const docTemplate = `{
                 "tags": [
                     "manager"
                 ],
-                "summary": "update an account",
+                "summary": "create an account",
                 "parameters": [
                     {
                         "description": "AccountByManager",
@@ -234,14 +234,14 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/manager/account/{userid}": {
-            "post": {
+        "/api/manager/account/{id}": {
+            "patch": {
                 "security": [
                     {
                         "ApiKeyAuth": []
                     }
                 ],
-                "description": "creating an account by manager",
+                "description": "updating an account by manager",
                 "consumes": [
                     "application/json"
                 ],
@@ -251,7 +251,7 @@ const docTemplate = `{
                 "tags": [
                     "manager"
                 ],
-                "summary": "create an account",
+                "summary": "update an account",
                 "parameters": [
                     {
                         "description": "AccountByManager",
@@ -297,14 +297,14 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.Order"
+                                "$ref": "#/definitions/dto.GetOrder"
                             }
                         }
                     }
                 }
             }
         },
-        "/api/manager/order/{orderId}": {
+        "/api/manager/order/{id}": {
             "patch": {
                 "security": [
                     {
@@ -324,12 +324,12 @@ const docTemplate = `{
                 "summary": "handle order",
                 "parameters": [
                     {
-                        "description": "Order",
+                        "description": "GetOrder",
                         "name": "message",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.Order"
+                            "$ref": "#/definitions/dto.OrderByManager"
                         }
                     }
                 ],
@@ -337,7 +337,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Order"
+                            "$ref": "#/definitions/dto.GetOrder"
                         }
                     }
                 }
@@ -517,7 +517,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.Wallet"
+                            "$ref": "#/definitions/dto.WalletCreate"
                         }
                     }
                 ],
@@ -531,7 +531,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/manager/wallet/{walletId}": {
+        "/api/manager/wallet/{id}": {
             "patch": {
                 "security": [
                     {
@@ -556,7 +556,7 @@ const docTemplate = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.Wallet"
+                            "$ref": "#/definitions/dto.WalletCreate"
                         }
                     }
                 ],
@@ -570,7 +570,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/manager/wallet/{walletId}/credit": {
+        "/api/manager/wallet/{id}/credit": {
             "post": {
                 "security": [
                     {
@@ -590,12 +590,12 @@ const docTemplate = `{
                 "summary": "credit",
                 "parameters": [
                     {
-                        "description": "Wallet",
+                        "description": "Credit",
                         "name": "message",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.Wallet"
+                            "$ref": "#/definitions/dto.Credit"
                         }
                     }
                 ],
@@ -609,7 +609,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/manager/wallet/{walletId}/debit": {
+        "/api/manager/wallet/{id}/debit": {
             "post": {
                 "security": [
                     {
@@ -629,12 +629,12 @@ const docTemplate = `{
                 "summary": "debit",
                 "parameters": [
                     {
-                        "description": "Wallet",
+                        "description": "Debit",
                         "name": "message",
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/dto.Wallet"
+                            "$ref": "#/definitions/dto.Debit"
                         }
                     }
                 ],
@@ -672,7 +672,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.Order"
+                                "$ref": "#/definitions/dto.GetOrder"
                             }
                         }
                     }
@@ -700,7 +700,7 @@ const docTemplate = `{
                 "parameters": [
                     {
                         "type": "integer",
-                        "description": "Order ID",
+                        "description": "GetOrder ID",
                         "name": "id",
                         "in": "path",
                         "required": true
@@ -710,7 +710,7 @@ const docTemplate = `{
                     "200": {
                         "description": "OK",
                         "schema": {
-                            "$ref": "#/definitions/dto.Order"
+                            "$ref": "#/definitions/dto.GetOrder"
                         }
                     }
                 }
@@ -740,7 +740,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.Order"
+                                "$ref": "#/definitions/dto.GetOrder"
                             }
                         }
                     }
@@ -784,7 +784,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/transaction/{userId}": {
+        "/api/transaction/user/{id}": {
             "get": {
                 "security": [
                     {
@@ -808,7 +808,7 @@ const docTemplate = `{
                         "schema": {
                             "type": "array",
                             "items": {
-                                "$ref": "#/definitions/dto.Order"
+                                "$ref": "#/definitions/dto.GetOrder"
                             }
                         }
                     }
@@ -951,7 +951,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/api/wallet/{walletId}": {
+        "/api/wallet/{id}": {
             "get": {
                 "security": [
                     {
@@ -1035,6 +1035,22 @@ const docTemplate = `{
                 }
             }
         },
+        "dto.Credit": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                }
+            }
+        },
+        "dto.Debit": {
+            "type": "object",
+            "properties": {
+                "amount": {
+                    "type": "number"
+                }
+            }
+        },
         "dto.GetAccount": {
             "type": "object",
             "required": [
@@ -1066,6 +1082,47 @@ const docTemplate = `{
                     "type": "integer"
                 },
                 "user_id": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.GetOrder": {
+            "type": "object",
+            "required": [
+                "id"
+            ],
+            "properties": {
+                "amount": {
+                    "type": "number"
+                },
+                "created_at": {
+                    "type": "string"
+                },
+                "created_by": {
+                    "type": "integer"
+                },
+                "description": {
+                    "type": "string"
+                },
+                "id": {
+                    "type": "integer"
+                },
+                "request_reason": {
+                    "type": "array",
+                    "items": {
+                        "type": "string"
+                    }
+                },
+                "status": {
+                    "type": "integer"
+                },
+                "updated_at": {
+                    "type": "string"
+                },
+                "updated_by": {
+                    "type": "integer"
+                },
+                "wallet_id": {
                     "type": "integer"
                 }
             }
@@ -1112,41 +1169,28 @@ const docTemplate = `{
                 }
             }
         },
-        "dto.Order": {
+        "dto.OrderByManager": {
             "type": "object",
-            "required": [
-                "id"
-            ],
+            "properties": {
+                "status": {
+                    "type": "integer"
+                }
+            }
+        },
+        "dto.OrderRequest": {
+            "type": "object",
             "properties": {
                 "amount": {
                     "type": "number"
                 },
-                "created_at": {
-                    "type": "string"
-                },
-                "created_by": {
-                    "type": "integer"
-                },
                 "description": {
                     "type": "string"
-                },
-                "id": {
-                    "type": "integer"
                 },
                 "request_reason": {
                     "type": "array",
                     "items": {
                         "type": "string"
                     }
-                },
-                "status": {
-                    "type": "integer"
-                },
-                "updated_at": {
-                    "type": "string"
-                },
-                "updated_by": {
-                    "type": "integer"
                 },
                 "wallet_id": {
                     "type": "integer"
@@ -1287,6 +1331,23 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "updated_by": {
+                    "type": "integer"
+                },
+                "wallet_id": {
+                    "type": "string"
+                }
+            }
+        },
+        "dto.WalletCreate": {
+            "type": "object",
+            "properties": {
+                "account_id": {
+                    "type": "integer"
+                },
+                "private_key": {
+                    "type": "string"
+                },
+                "status": {
                     "type": "integer"
                 },
                 "wallet_id": {

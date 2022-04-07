@@ -28,7 +28,7 @@ func NewTransactionController(errorHandler e.ErrorHandler, v *validator.Validate
 // @Tags           transaction
 // @Accept         json
 // @Produce        json
-// @Success        200  {object} dto.Orders
+// @Success        200  {object} dto.GetOrders
 // @Security       ApiKeyAuth
 // @Router         /api/transaction [get]
 // todo: create dto
@@ -42,7 +42,7 @@ func (ctr *TransactionController) GetTransactions(c echo.Context) error {
 // @Tags               transaction
 // @Accept             json
 // @Produce            json
-// @Success            200  {object} dto.Orders
+// @Success            200  {object} dto.GetOrders
 // @Security           ApiKeyAuth
 // @Router             /api/transaction/user/{id} [get]
 // todo: create dto

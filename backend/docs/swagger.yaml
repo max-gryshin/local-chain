@@ -29,6 +29,16 @@ definitions:
       phone:
         type: string
     type: object
+  dto.Credit:
+    properties:
+      amount:
+        type: number
+    type: object
+  dto.Debit:
+    properties:
+      amount:
+        type: number
+    type: object
   dto.GetAccount:
     properties:
       created_at:
@@ -48,6 +58,33 @@ definitions:
       updated_by:
         type: integer
       user_id:
+        type: integer
+    required:
+    - id
+    type: object
+  dto.GetOrder:
+    properties:
+      amount:
+        type: number
+      created_at:
+        type: string
+      created_by:
+        type: integer
+      description:
+        type: string
+      id:
+        type: integer
+      request_reason:
+        items:
+          type: string
+        type: array
+      status:
+        type: integer
+      updated_at:
+        type: string
+      updated_by:
+        type: integer
+      wallet_id:
         type: integer
     required:
     - id
@@ -80,32 +117,23 @@ definitions:
     - email
     - id
     type: object
-  dto.Order:
+  dto.OrderByManager:
+    properties:
+      status:
+        type: integer
+    type: object
+  dto.OrderRequest:
     properties:
       amount:
         type: number
-      created_at:
-        type: string
-      created_by:
-        type: integer
       description:
         type: string
-      id:
-        type: integer
       request_reason:
         items:
           type: string
         type: array
-      status:
-        type: integer
-      updated_at:
-        type: string
-      updated_by:
-        type: integer
       wallet_id:
         type: integer
-    required:
-    - id
     type: object
   dto.UpdateUserOwnerRequest:
     properties:
@@ -202,6 +230,17 @@ definitions:
     required:
     - id
     type: object
+  dto.WalletCreate:
+    properties:
+      account_id:
+        type: integer
+      private_key:
+        type: string
+      status:
+        type: integer
+      wallet_id:
+        type: string
+    type: object
 host: 0.0.0.0:1323
 info:
   contact:
@@ -230,7 +269,7 @@ paths:
       summary: get accounts
       tags:
       - account
-  /api/account/{accountId}:
+  /api/account/{id}:
     get:
       consumes:
       - application/json
@@ -247,7 +286,7 @@ paths:
       summary: get account
       tags:
       - account
-  /api/account/{accountId}/:
+  /api/account/{id}/:
     patch:
       consumes:
       - application/json
@@ -277,19 +316,19 @@ paths:
       - application/json
       description: create an order to cash out money
       parameters:
-      - description: Order
+      - description: OrderRequest
         in: body
         name: message
         required: true
         schema:
-          $ref: '#/definitions/dto.Order'
+          $ref: '#/definitions/dto.OrderRequest'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.Order'
+            $ref: '#/definitions/dto.GetOrder'
       security:
       - ApiKeyAuth: []
       summary: cash out
@@ -321,31 +360,7 @@ paths:
       summary: authenticate
       tags:
       - auth
-  /api/manager/account/{accountId}:
-    patch:
-      consumes:
-      - application/json
-      description: updating an account by manager
-      parameters:
-      - description: AccountByManager
-        in: body
-        name: message
-        required: true
-        schema:
-          $ref: '#/definitions/dto.AccountByManager'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/dto.GetAccount'
-      security:
-      - ApiKeyAuth: []
-      summary: update an account
-      tags:
-      - manager
-  /api/manager/account/{userid}:
+  /api/manager/account:
     post:
       consumes:
       - application/json
@@ -369,6 +384,30 @@ paths:
       summary: create an account
       tags:
       - manager
+  /api/manager/account/{id}:
+    patch:
+      consumes:
+      - application/json
+      description: updating an account by manager
+      parameters:
+      - description: AccountByManager
+        in: body
+        name: message
+        required: true
+        schema:
+          $ref: '#/definitions/dto.AccountByManager'
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.GetAccount'
+      security:
+      - ApiKeyAuth: []
+      summary: update an account
+      tags:
+      - manager
   /api/manager/order:
     get:
       consumes:
@@ -381,32 +420,32 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.Order'
+              $ref: '#/definitions/dto.GetOrder'
             type: array
       security:
       - ApiKeyAuth: []
       summary: get orders
       tags:
       - order
-  /api/manager/order/{orderId}:
+  /api/manager/order/{id}:
     patch:
       consumes:
       - application/json
       description: handle order by manager
       parameters:
-      - description: Order
+      - description: GetOrder
         in: body
         name: message
         required: true
         schema:
-          $ref: '#/definitions/dto.Order'
+          $ref: '#/definitions/dto.OrderByManager'
       produces:
       - application/json
       responses:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.Order'
+            $ref: '#/definitions/dto.GetOrder'
       security:
       - ApiKeyAuth: []
       summary: handle order
@@ -516,7 +555,7 @@ paths:
         name: message
         required: true
         schema:
-          $ref: '#/definitions/dto.Wallet'
+          $ref: '#/definitions/dto.WalletCreate'
       produces:
       - application/json
       responses:
@@ -529,7 +568,7 @@ paths:
       summary: create a wallet
       tags:
       - manager
-  /api/manager/wallet/{walletId}:
+  /api/manager/wallet/{id}:
     patch:
       consumes:
       - application/json
@@ -540,7 +579,7 @@ paths:
         name: message
         required: true
         schema:
-          $ref: '#/definitions/dto.Wallet'
+          $ref: '#/definitions/dto.WalletCreate'
       produces:
       - application/json
       responses:
@@ -553,18 +592,18 @@ paths:
       summary: update a wallet
       tags:
       - manager
-  /api/manager/wallet/{walletId}/credit:
+  /api/manager/wallet/{id}/credit:
     post:
       consumes:
       - application/json
       description: credit amount from user wallet
       parameters:
-      - description: Wallet
+      - description: Credit
         in: body
         name: message
         required: true
         schema:
-          $ref: '#/definitions/dto.Wallet'
+          $ref: '#/definitions/dto.Credit'
       produces:
       - application/json
       responses:
@@ -577,18 +616,18 @@ paths:
       summary: credit
       tags:
       - manager
-  /api/manager/wallet/{walletId}/debit:
+  /api/manager/wallet/{id}/debit:
     post:
       consumes:
       - application/json
       description: debit amount from user wallet
       parameters:
-      - description: Wallet
+      - description: Debit
         in: body
         name: message
         required: true
         schema:
-          $ref: '#/definitions/dto.Wallet'
+          $ref: '#/definitions/dto.Debit'
       produces:
       - application/json
       responses:
@@ -613,7 +652,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.Order'
+              $ref: '#/definitions/dto.GetOrder'
             type: array
       security:
       - ApiKeyAuth: []
@@ -626,7 +665,7 @@ paths:
       - application/json
       description: get order by id
       parameters:
-      - description: Order ID
+      - description: GetOrder ID
         in: path
         name: id
         required: true
@@ -637,7 +676,7 @@ paths:
         "200":
           description: OK
           schema:
-            $ref: '#/definitions/dto.Order'
+            $ref: '#/definitions/dto.GetOrder'
       security:
       - ApiKeyAuth: []
       summary: get order
@@ -655,7 +694,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.Order'
+              $ref: '#/definitions/dto.GetOrder'
             type: array
       security:
       - ApiKeyAuth: []
@@ -685,7 +724,7 @@ paths:
       summary: send transaction
       tags:
       - transaction
-  /api/transaction/{userId}:
+  /api/transaction/user/{id}:
     get:
       consumes:
       - application/json
@@ -697,7 +736,7 @@ paths:
           description: OK
           schema:
             items:
-              $ref: '#/definitions/dto.Order'
+              $ref: '#/definitions/dto.GetOrder'
             type: array
       security:
       - ApiKeyAuth: []
@@ -788,7 +827,7 @@ paths:
       summary: get wallets
       tags:
       - wallet
-  /api/wallet/{walletId}:
+  /api/wallet/{id}:
     get:
       consumes:
       - application/json
