@@ -49,6 +49,8 @@ func RegisterAPI(
 	manager := router.Group("/manager", jwt)
 	manager.POST("/user", managerController.Create, resourceAccess.IsResourceAvailable)
 	manager.PATCH("/user/:id", userController.UpdateUser, resourceAccess.IsResourceAvailable)
+	manager.GET("/user", userController.GetUsersByManager)
+	manager.GET("/user/:id", userController.GetUserByID)
 	manager.GET("/order", orderController.GetOrdersByManager)
 	manager.PATCH("/order/:orderId", managerController.HandleOrder)
 	manager.POST("/account/:userId", managerController.CreateAccount)

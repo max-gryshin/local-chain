@@ -124,7 +124,6 @@ definitions:
       middle_name:
         type: string
       roles:
-        description: Password string   `json:"password" validate:"gte=6,lte=50"`
         items:
           type: string
         type: array
@@ -399,6 +398,24 @@ paths:
       tags:
       - manager
   /api/manager/user:
+    get:
+      consumes:
+      - application/json
+      description: get users by manager
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            items:
+              $ref: '#/definitions/dto.UserByManager'
+            type: array
+      security:
+      - ApiKeyAuth: []
+      summary: get users by manager
+      tags:
+      - manager
     post:
       consumes:
       - application/json
@@ -423,6 +440,28 @@ paths:
       tags:
       - manager
   /api/manager/user/{id}:
+    get:
+      consumes:
+      - application/json
+      description: get user by id
+      parameters:
+      - description: User ID
+        in: path
+        name: id
+        required: true
+        type: integer
+      produces:
+      - application/json
+      responses:
+        "200":
+          description: OK
+          schema:
+            $ref: '#/definitions/dto.UserByManager'
+      security:
+      - ApiKeyAuth: []
+      summary: get user
+      tags:
+      - manager
     patch:
       consumes:
       - application/json

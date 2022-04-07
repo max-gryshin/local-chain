@@ -111,6 +111,48 @@ func (ctr *UserController) UpdateUser(c echo.Context) error {
 	return c.JSON(http.StatusOK, dtoUser)
 }
 
+// GetUsersByManager godoc
+// @Summary          get users by manager
+// @Description      get users by manager
+// @Tags             manager
+// @Accept           json
+// @Produce          json
+// @Success          200  {object} dto.UsersByManager
+// @Security         ApiKeyAuth
+// @Router           /api/manager/user [get]
+func (ctr *UserController) GetUsersByManager(c echo.Context) error {
+	var (
+		users models.Users
+		err   error
+	)
+	if users, err = ctr.Repo.GetAll(); err != nil {
+		return err
+	}
+
+	return c.JSON(http.StatusOK, dto.LoadUsersByManagerDTOCollectionFromModel(users))
+}
+
+// GetUserByID   godoc
+// @Summary      get user
+// @Description  get user by id
+// @Tags         manager
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "User ID"
+// @Success      200  {object}  dto.UserByManager
+// @Security     ApiKeyAuth
+// @Router       /api/manager/user/{id} [get]
+func (ctr *UserController) GetUserByID(c echo.Context) error {
+	var (
+		err  error
+		user models.User
+	)
+	if user, err = ctr.getUserByID(c); err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, dto.LoadUserByManagerDTOFromModel(&user))
+}
+
 // GetOrdersByManager godoc
 // @Summary           get orders
 // @Description       get orders by manager

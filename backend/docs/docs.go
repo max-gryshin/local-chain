@@ -344,6 +344,35 @@ const docTemplate = `{
             }
         },
         "/api/manager/user": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "get users by manager",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "manager"
+                ],
+                "summary": "get users by manager",
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "type": "array",
+                            "items": {
+                                "$ref": "#/definitions/dto.UserByManager"
+                            }
+                        }
+                    }
+                }
+            },
             "post": {
                 "security": [
                     {
@@ -383,6 +412,41 @@ const docTemplate = `{
             }
         },
         "/api/manager/user/{id}": {
+            "get": {
+                "security": [
+                    {
+                        "ApiKeyAuth": []
+                    }
+                ],
+                "description": "get user by id",
+                "consumes": [
+                    "application/json"
+                ],
+                "produces": [
+                    "application/json"
+                ],
+                "tags": [
+                    "manager"
+                ],
+                "summary": "get user",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "User ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
+                "responses": {
+                    "200": {
+                        "description": "OK",
+                        "schema": {
+                            "$ref": "#/definitions/dto.UserByManager"
+                        }
+                    }
+                }
+            },
             "patch": {
                 "security": [
                     {
@@ -1117,7 +1181,6 @@ const docTemplate = `{
                     "type": "string"
                 },
                 "roles": {
-                    "description": "Password string   ` + "`" + `json:\"password\" validate:\"gte=6,lte=50\"` + "`" + `",
                     "type": "array",
                     "items": {
                         "type": "string"
