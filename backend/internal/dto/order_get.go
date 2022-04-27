@@ -31,7 +31,7 @@ func LoadGetOrderDTOFromModel(model *models.Order) *GetOrder {
 		OrderRequest: OrderRequest{
 			Amount:        model.Amount,
 			Description:   model.Description,
-			RequestReason: model.RequestReason,
+			RequestReason: model.RequestReasons,
 			WalletID:      model.WalletID,
 		},
 		CreatedAt:      model.CreatedAt,
@@ -44,16 +44,16 @@ func LoadGetOrderDTOFromModel(model *models.Order) *GetOrder {
 
 func LoadGetOrderModelFromDTO(dto *GetOrder) *models.Order {
 	return &models.Order{
-		ID:            dto.ID,
-		Status:        dto.Status,
-		Amount:        dto.Amount,
-		Description:   dto.Description,
-		RequestReason: dto.RequestReason,
-		WalletID:      dto.WalletID,
-		CreatedAt:     dto.CreatedAt,
-		UpdatedAt:     dto.UpdatedAt,
-		CreatedBy:     dto.CreatedBy,
-		UpdatedBy:     dto.UpdatedBy,
+		ID:             dto.ID,
+		Status:         dto.Status,
+		Amount:         dto.Amount,
+		Description:    dto.Description,
+		RequestReasons: dto.RequestReason,
+		WalletID:       dto.WalletID,
+		CreatedAt:      dto.CreatedAt,
+		UpdatedAt:      dto.UpdatedAt,
+		CreatedBy:      dto.CreatedBy,
+		UpdatedBy:      dto.UpdatedBy,
 	}
 }
 

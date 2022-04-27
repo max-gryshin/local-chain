@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="AutoImportSettings">
+    <option name="autoReloadType" value="ALL" />
+  </component>
+  <component name="ChangeListManager">
+    <list default="true" id="5f70db70-f113-44ae-8208-06c911eb11bc" name="Changes" comment="">
+      <change beforePath="$USER_HOME$/GolandProjects/messenger/main.go" beforeDir="false" afterPath="$USER_HOME$/GolandProjects/messenger/main.go" afterDir="false" />
+      <change beforePath="$USER_HOME$/GolandProjects/messenger/server/handle_connection.go" beforeDir="false" afterPath="$USER_HOME$/GolandProjects/messenger/server/handle_connection.go" afterDir="false" />
+      <change beforePath="$USER_HOME$/GolandProjects/messenger/server/tcp.go" beforeDir="false" afterPath="$USER_HOME$/GolandProjects/messenger/server/tcp.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/local-chain.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/local-chain.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/docs/docs.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/docs/swagger.json" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/docs/swagger.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/backend/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/backend/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/controllers/account_controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/controllers/account_controller.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/dto/order_get.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/dto/order_get.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/models/order.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/models/order.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/models/wallet.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/models/wallet.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/internal/repository/order_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/repository/order_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/backend/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/main.go" afterDir="false" />
+    </list>
+    <option name="SHOW_DIALOG" value="false" />
+    <option name="HIGHLIGHT_CONFLICTS" value="true" />
+    <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
+    <option name="LAST_RESOLUTION" value="IGNORE" />
+  </component>
+  <component name="FileTemplateManagerImpl">
+    <option name="RECENT_TEMPLATES">
+      <list>
+        <option value="Go File" />
+      </list>
+    </option>
+  </component>
+  <component name="GOROOT" url="file:///usr/local/go" />
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
+  <component name="GoLibraries">
+    <option name="indexEntireGoPath" value="false" />
+  </component>
+  <component name="HighlightingSettingsPerFile">
+    <setting file="file://$PROJECT_DIR$/backend/internal/dto/user_owner_get.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/backend/internal/dto/user_owner_update.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/backend/internal/dto/account_get.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/backend/internal/dto/user_by_manager.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/backend/internal/dto/account_owner_update.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/backend/internal/controllers/manager_controller.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/backend/internal/dto/account_by_manager.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/backend/internal/controllers/order_controller.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/backend/internal/dto/user_registration.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/backend/internal/controllers/wallet_controller.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/backend/internal/dto/debit.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/backend/internal/routes/api.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/backend/internal/dto/wallet.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/backend/internal/dto/credit.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/backend/internal/controllers/account_controller.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/backend/internal/dto/order_get.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/backend/internal/dto/order_by_manager.go" root0="FORCE_HIGHLIGHTING" />
+    <setting file="file://$PROJECT_DIR$/backend/internal/controllers/user_controller.go" root0="FORCE_HIGHLIGHTING" />
+  </component>
+  <component name="MarkdownSettingsMigration">
+    <option name="stateVersion" value="1" />
+  </component>
+  <component name="ProjectId" id="27SVzp4BJPo8bSDN0uqFN3AoBQn" />
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
+  <component name="ProjectViewState">
+    <option name="hideEmptyMiddlePackages" value="true" />
+    <option name="showLibraryContents" value="true" />
+  </component>
+  <component name="PropertiesComponent">
+    <property name="DatabaseDriversLRU" value="postgresql" />
+    <property name="DefaultGoTemplateProperty" value="Go File" />
+    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
+    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
+    <property name="WebServerToolWindowFactoryState" value="false" />
+    <property name="go.format.on.save.advertiser.fired" value="true" />
+    <property name="go.formatter.settings.were.checked" value="true" />
+    <property name="go.import.settings.migrated" value="true" />
+    <property name="go.modules.go.list.on.any.changes.was.set" value="true" />
+    <property name="go.watchers.conflict.with.on.save.actions.check.performed" value="true" />
+    <property name="last_opened_file_path" value="$USER_HOME$/GolandProjects/messenger" />
+    <property name="node.js.detected.package.eslint" value="true" />
+    <property name="node.js.detected.package.tslint" value="true" />
+    <property name="node.js.selected.package.eslint" value="(autodetect)" />
+    <property name="node.js.selected.package.tslint" value="(autodetect)" />
+    <property name="settings.editor.selected.configurable" value="configurable.group.editor" />
+  </component>
+  <component name="RunManager">
+    <configuration name="go build github.com/ZmaximillianZ/local-chain" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+      <module name="local-chain" />
+      <working_directory value="$PROJECT_DIR$/backend" />
+      <kind value="PACKAGE" />
+      <package value="github.com/ZmaximillianZ/local-chain" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$/backend/main.go" />
+      <method v="2" />
+    </configuration>
+    <recent_temporary>
+      <list>
+        <item itemvalue="Go Build.go build github.com/ZmaximillianZ/local-chain" />
+      </list>
+    </recent_temporary>
+  </component>
+  <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
+  <component name="TypeScriptGeneratedFilesManager">
+    <option name="version" value="3" />
+  </component>
+  <component name="VcsManagerConfiguration">
+    <MESSAGE value="crud Getting user by manager." />
+    <MESSAGE value="crud Account dto." />
+    <MESSAGE value="crud Wallet, order dto." />
+    <MESSAGE value="crud Updating swagger documentation." />
+    <option name="LAST_COMMIT_MESSAGE" value="crud Updating swagger documentation." />
+  </component>
+  <component name="VgoProject">
+    <integration-enabled>true</integration-enabled>
+  </component>
+  <component name="XDebuggerManager">
+    <breakpoint-manager>
+      <breakpoints>
+        <line-breakpoint enabled="true" type="DlvLineBreakpoint">
+          <url>file://$PROJECT_DIR$/backend/internal/repository/wallet_repository.go</url>
+          <line>50</line>
+          <option name="timeStamp" value="1" />
+        </line-breakpoint>
+      </breakpoints>
+    </breakpoint-manager>
+  </component>
+</project>

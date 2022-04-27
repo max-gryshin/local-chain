@@ -2,7 +2,9 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
+      <module fileurl="file://$PROJECT_DIR$/../go-ethereum/.idea/go-ethereum.iml" filepath="$PROJECT_DIR$/../go-ethereum/.idea/go-ethereum.iml" />
       <module fileurl="file://$PROJECT_DIR$/.idea/local-chain.iml" filepath="$PROJECT_DIR$/.idea/local-chain.iml" />
+      <module fileurl="file://$USER_HOME$/GolandProjects/messenger/.idea/messenger.iml" filepath="$USER_HOME$/GolandProjects/messenger/.idea/messenger.iml" />
     </modules>
   </component>
 </project>

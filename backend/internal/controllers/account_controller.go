@@ -33,6 +33,7 @@ func NewAccountController(repo contractions.AccountRepository, errorHandler e.Er
 // @Tags         account
 // @Accept       json
 // @Produce      json
+// @Param		 id   path      int  true  "Account ID"
 // @Success      200  {object}   dto.GetAccount
 // @Security     ApiKeyAuth
 // @Router       /api/account/{id} [get]
@@ -77,7 +78,7 @@ func (ctr *AccountController) GetAccounts(c echo.Context) error {
 // @Param        message  body  dto.AccountOwnerUpdateRequest true  "AccountOwnerUpdateRequest"
 // @Success      200  {object}  dto.AccountOwnerUpdate
 // @Security     ApiKeyAuth
-// @Router       /api/account/{id}/ [patch]
+// @Router       /api/account/{id} [patch]
 func (ctr *AccountController) UpdateAccount(c echo.Context) error {
 	return c.JSON(http.StatusOK, []string{"1", "two", "110"})
 }

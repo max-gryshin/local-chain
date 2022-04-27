@@ -80,7 +80,7 @@ func (repo *OrderRepository) Create(order *models.Order) error {
 			order.Amount,
 			order.WalletID,
 			order.Description,
-			order.RequestReason,
+			order.RequestReasons,
 			order.CreatedAt,
 			order.UpdatedAt,
 			order.CreatedBy,

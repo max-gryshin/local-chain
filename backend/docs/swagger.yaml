@@ -274,6 +274,12 @@ paths:
       consumes:
       - application/json
       description: get account by id
+      parameters:
+      - description: Account ID
+        in: path
+        name: id
+        required: true
+        type: integer
       produces:
       - application/json
       responses:
@@ -286,7 +292,6 @@ paths:
       summary: get account
       tags:
       - account
-  /api/account/{id}/:
     patch:
       consumes:
       - application/json

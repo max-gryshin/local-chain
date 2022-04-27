@@ -68,6 +68,15 @@ const docTemplate = `{
                     "account"
                 ],
                 "summary": "get account",
+                "parameters": [
+                    {
+                        "type": "integer",
+                        "description": "Account ID",
+                        "name": "id",
+                        "in": "path",
+                        "required": true
+                    }
+                ],
                 "responses": {
                     "200": {
                         "description": "OK",
@@ -76,9 +85,7 @@ const docTemplate = `{
                         }
                     }
                 }
-            }
-        },
-        "/api/account/{id}/": {
+            },
             "patch": {
                 "security": [
                     {
