@@ -5,22 +5,46 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="5f70db70-f113-44ae-8208-06c911eb11bc" name="Changes" comment="">
-      <change beforePath="$USER_HOME$/GolandProjects/messenger/main.go" beforeDir="false" afterPath="$USER_HOME$/GolandProjects/messenger/main.go" afterDir="false" />
-      <change beforePath="$USER_HOME$/GolandProjects/messenger/server/handle_connection.go" beforeDir="false" afterPath="$USER_HOME$/GolandProjects/messenger/server/handle_connection.go" afterDir="false" />
-      <change beforePath="$USER_HOME$/GolandProjects/messenger/server/tcp.go" beforeDir="false" afterPath="$USER_HOME$/GolandProjects/messenger/server/tcp.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../algorithms_and_data_structures/concurrency/read_var.go" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../goviz/.idea/modules.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../algorithms_and_data_structures/heapsort.go" beforeDir="false" afterPath="$PROJECT_DIR$/../algorithms_and_data_structures/algorythm/sort/heapsort.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../algorithms_and_data_structures/mutex.go" beforeDir="false" afterPath="$PROJECT_DIR$/../algorithms_and_data_structures/concurrency/peterson_mutex.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../algorithms_and_data_structures/stack.go" beforeDir="false" afterPath="$PROJECT_DIR$/../algorithms_and_data_structures/data_structure/stack.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../go-libp2p/examples/chat/chat.go" beforeDir="false" afterPath="$PROJECT_DIR$/../go-libp2p/examples/chat/chat.go" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/local-chain.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/local-chain.iml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/docs/docs.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/docs/docs.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/docs/swagger.json" beforeDir="false" afterPath="$PROJECT_DIR$/backend/docs/swagger.json" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/docs/swagger.yaml" beforeDir="false" afterPath="$PROJECT_DIR$/backend/docs/swagger.yaml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/backend/go.mod" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/backend/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/backend/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/controllers/account_controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/controllers/account_controller.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/dto/order_get.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/dto/order_get.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/models/order.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/models/order.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/models/wallet.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/models/wallet.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/internal/repository/order_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/internal/repository/order_repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/backend/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/go.mod" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/go.sum" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/contractions/user_repotory.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/contractions/user_repotory.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/contractions/workout_type_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/contractions/workout_type_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/contractions/workout_value_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/contractions/workout_value_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/controllers/user_controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/controllers/user_controller.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/controllers/workout_controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/controllers/workout_controller.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/controllers/workout_type_controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/controllers/workout_type_controller.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/controllers/workout_value_controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/controllers/workout_value_controller.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/dto/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/dto/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/dto/workout.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/dto/workout.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/dto/workout_type.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/dto/workout_type.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/dto/workout_value.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/dto/workout_value.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/e/error_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/e/error_handler.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/logging/log.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/logging/log.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/middleware/jwt/jwt.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/middleware/jwt/jwt.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/user_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/user_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/workout_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/workout_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/workout_type_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/workout_type_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/workout_value_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/workout_value_repository.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/routes/api/api.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/routes/api/api.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/routes/api/v1/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/routes/api/v1/user.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/routes/api_v1.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/routes/api_v1.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/setting/setting.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/setting/setting.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/utils/reflection_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/utils/reflection_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/main.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,7 +60,7 @@
   </component>
   <component name="GOROOT" url="file:///usr/local/go" />
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../stskp_sport_api" />
   </component>
   <component name="GoLibraries">
     <option name="indexEntireGoPath" value="false" />
@@ -81,12 +105,20 @@
     <property name="go.import.settings.migrated" value="true" />
     <property name="go.modules.go.list.on.any.changes.was.set" value="true" />
     <property name="go.watchers.conflict.with.on.save.actions.check.performed" value="true" />
-    <property name="last_opened_file_path" value="$USER_HOME$/GolandProjects/messenger" />
+    <property name="last_opened_file_path" value="$PROJECT_DIR$/../stskp_sport_api" />
     <property name="node.js.detected.package.eslint" value="true" />
     <property name="node.js.detected.package.tslint" value="true" />
     <property name="node.js.selected.package.eslint" value="(autodetect)" />
     <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="configurable.group.editor" />
+    <property name="settings.editor.selected.configurable" value="com.goide.configuration.GoProjectSettingsConfigurable" />
+  </component>
+  <component name="RecentsManager">
+    <key name="MoveFile.RECENT_KEYS">
+      <recent name="$PROJECT_DIR$/../algorithms_and_data_structures/concurrency" />
+      <recent name="$PROJECT_DIR$/../algorithms_and_data_structures/algorythm" />
+      <recent name="$PROJECT_DIR$/../algorithms_and_data_structures/data_structure" />
+      <recent name="$PROJECT_DIR$/../algorithms_and_data_structures/sort" />
+    </key>
   </component>
   <component name="RunManager">
     <configuration name="go build github.com/ZmaximillianZ/local-chain" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">

@@ -1,6 +1,6 @@
 package contractions
 
-import "github.com/ZmaximillianZ/local-chain/internal/models"
+import "github.com/max-gryshin/local-chain/internal/models"
 
 // UserRepository is interface to communicate with user storage
 type UserRepository interface {

@@ -5,17 +5,17 @@ import (
 
 	echoSwagger "github.com/swaggo/echo-swagger"
 
-	_ "github.com/ZmaximillianZ/local-chain/docs"
-	"github.com/ZmaximillianZ/local-chain/internal/controllers"
-	"github.com/ZmaximillianZ/local-chain/internal/db"
-	errorhandler "github.com/ZmaximillianZ/local-chain/internal/e"
-	"github.com/ZmaximillianZ/local-chain/internal/logging"
-	"github.com/ZmaximillianZ/local-chain/internal/repository"
-	"github.com/ZmaximillianZ/local-chain/internal/routes"
-	"github.com/ZmaximillianZ/local-chain/internal/setting"
 	"github.com/go-playground/validator"
 	"github.com/joho/godotenv"
 	"github.com/labstack/echo/v4"
+	_ "github.com/max-gryshin/local-chain/docs"
+	"github.com/max-gryshin/local-chain/internal/controllers"
+	"github.com/max-gryshin/local-chain/internal/db"
+	errorhandler "github.com/max-gryshin/local-chain/internal/e"
+	"github.com/max-gryshin/local-chain/internal/logging"
+	"github.com/max-gryshin/local-chain/internal/repository"
+	"github.com/max-gryshin/local-chain/internal/routes"
+	"github.com/max-gryshin/local-chain/internal/setting"
 )
 
 // @title        Local chain API

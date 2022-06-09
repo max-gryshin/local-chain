@@ -3,13 +3,13 @@ package repository
 import (
 	"strings"
 
-	"github.com/ZmaximillianZ/local-chain/internal/logging"
-	"github.com/ZmaximillianZ/local-chain/internal/models"
-	"github.com/ZmaximillianZ/local-chain/internal/utils"
 	"github.com/doug-martin/goqu/v9"
 	_ "github.com/doug-martin/goqu/v9/dialect/postgres" // need to import right dialect
 	"github.com/doug-martin/goqu/v9/exp"
 	"github.com/jmoiron/sqlx"
+	"github.com/max-gryshin/local-chain/internal/logging"
+	"github.com/max-gryshin/local-chain/internal/models"
+	"github.com/max-gryshin/local-chain/internal/utils"
 )
 
 const tagName = "db"

@@ -1,11 +1,21 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <module type="WEB_MODULE" version="4">
-  <component name="Go" enabled="true" />
+  <component name="Go" enabled="true">
+    <buildTags>
+      <option name="goVersion" value="go1.17" />
+    </buildTags>
+  </component>
   <component name="NewModuleRootManager">
     <content url="file://$MODULE_DIR$" />
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />
     <orderEntry type="module" module-name="go-ethereum" />
     <orderEntry type="module" module-name="messenger" />
+    <orderEntry type="module" module-name="go-libp2p" />
+    <orderEntry type="module" module-name="fabric-samples" />
+    <orderEntry type="module" module-name="goviz" />
+    <orderEntry type="module" module-name="algorithms_and_data_structures" />
+    <orderEntry type="module" module-name="medical-db" />
+    <orderEntry type="module" module-name="stskp_sport_api" />
   </component>
 </module>

@@ -1,10 +1,10 @@
 package routes
 
 import (
-	"github.com/ZmaximillianZ/local-chain/internal/controllers"
-	"github.com/ZmaximillianZ/local-chain/internal/middleware/access"
 	"github.com/labstack/echo/v4"
 	"github.com/labstack/echo/v4/middleware"
+	"github.com/max-gryshin/local-chain/internal/controllers"
+	"github.com/max-gryshin/local-chain/internal/middleware/access"
 )
 
 // RegisterAPI initialize routing information

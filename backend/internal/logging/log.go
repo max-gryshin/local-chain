@@ -8,8 +8,8 @@ import (
 	"runtime"
 	"strings"
 
-	"github.com/ZmaximillianZ/local-chain/internal/file"
-	"github.com/ZmaximillianZ/local-chain/internal/setting"
+	"github.com/max-gryshin/local-chain/internal/file"
+	"github.com/max-gryshin/local-chain/internal/setting"
 )
 
 type Level int

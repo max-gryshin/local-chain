@@ -3,12 +3,12 @@ package controllers
 import (
 	"net/http"
 
-	"github.com/ZmaximillianZ/local-chain/internal/contractions"
-	"github.com/ZmaximillianZ/local-chain/internal/dto"
-	"github.com/ZmaximillianZ/local-chain/internal/e"
-	"github.com/ZmaximillianZ/local-chain/internal/models"
 	"github.com/go-playground/validator"
 	"github.com/labstack/echo/v4"
+	"github.com/max-gryshin/local-chain/internal/contractions"
+	"github.com/max-gryshin/local-chain/internal/dto"
+	"github.com/max-gryshin/local-chain/internal/e"
+	"github.com/max-gryshin/local-chain/internal/models"
 )
 
 // WalletController is HTTP controller for manage wallet

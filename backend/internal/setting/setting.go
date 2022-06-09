@@ -3,7 +3,7 @@ package setting
 import (
 	"os"
 
-	"github.com/ZmaximillianZ/local-chain/internal/db"
+	"github.com/max-gryshin/local-chain/internal/db"
 )
 
 // App is a structure for storage app configuration

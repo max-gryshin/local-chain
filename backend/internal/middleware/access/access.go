@@ -4,11 +4,11 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/ZmaximillianZ/local-chain/internal/contractions"
-	"github.com/ZmaximillianZ/local-chain/internal/models"
+	"github.com/max-gryshin/local-chain/internal/contractions"
+	"github.com/max-gryshin/local-chain/internal/models"
 
-	"github.com/ZmaximillianZ/local-chain/internal/utils"
 	"github.com/labstack/echo/v4"
+	"github.com/max-gryshin/local-chain/internal/utils"
 )
 
 const UserID = "userID"

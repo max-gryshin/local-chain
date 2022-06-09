@@ -69,12 +69,12 @@ services:
     # - cli command example
     #  $ ganache-cli --mnemonic "toy echo orbit embrace opinion file client report history bomb regret life"
     #
-  ##ganache:
-  ##  image: trufflesuite/ganache-cli:v6.12.2
-  ##  ports:
-  ##    - "${ETH_RPC_PORT:-8545}:${ETH_PORT}"
-  ##  volumes:
-  ##    - ./docker/nodes/eth/ganache-data:/ganache_data
+    #ganache:
+    #  image: trufflesuite/ganache-cli:v6.12.2
+    #  ports:
+    #    - "${ETH_RPC_PORT:-8545}:${ETH_PORT}"
+    #  volumes:
+    #    - ./docker/nodes/eth/ganache-data:/ganache_data
     # command adds into default ENTRYPOINT
     # https://hub.docker.com/r/trufflesuite/ganache-cli/dockerfile
     # todo: for what is this?

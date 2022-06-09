@@ -1,6 +1,6 @@
 package contractions
 
-import "github.com/ZmaximillianZ/local-chain/internal/models"
+import "github.com/max-gryshin/local-chain/internal/models"
 
 // WalletRepository is interface to communicate with wallet storage
 type WalletRepository interface {

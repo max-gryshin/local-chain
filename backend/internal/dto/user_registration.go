@@ -3,7 +3,7 @@ package dto
 import (
 	"time"
 
-	"github.com/ZmaximillianZ/local-chain/internal/models"
+	"github.com/max-gryshin/local-chain/internal/models"
 )
 
 type UserRegistration struct {

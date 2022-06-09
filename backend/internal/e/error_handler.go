@@ -3,7 +3,7 @@ package e
 import (
 	"net/http"
 
-	"github.com/ZmaximillianZ/local-chain/internal/logging"
+	"github.com/max-gryshin/local-chain/internal/logging"
 
 	"github.com/jackc/pgconn"
 	"github.com/labstack/echo/v4"
