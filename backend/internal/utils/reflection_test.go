@@ -3,7 +3,7 @@ package utils_test
 import (
 	"testing"
 
-	"github.com/ZmaximillianZ/local-chain/internal/utils"
+	"github.com/max-gryshin/local-chain/internal/utils"
 	"github.com/stretchr/testify/assert"
 )
 

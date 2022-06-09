@@ -32,7 +32,7 @@ func (ctr *BaseController) BindAndValidate(c echo.Context, model interface{}) er
 	if errBinding := c.Bind(&model); errBinding != nil {
 		return errBinding
 	}
-	if errValidate := ctr.validator.Struct(testM); errValidate != nil { //todo: fix for workout
+	if errValidate := ctr.validator.Struct(testM); errValidate != nil {
 		return errValidate
 	}
 

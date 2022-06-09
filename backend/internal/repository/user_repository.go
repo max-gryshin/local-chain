@@ -3,13 +3,13 @@ package repository
 import (
 	"strings"
 
-	"github.com/ZmaximillianZ/local-chain/internal/logging"
-	"github.com/ZmaximillianZ/local-chain/internal/models"
-	"github.com/ZmaximillianZ/local-chain/internal/utils"
 	"github.com/doug-martin/goqu/v9"
 	_ "github.com/doug-martin/goqu/v9/dialect/postgres" // need to import right dialect
 	"github.com/doug-martin/goqu/v9/exp"
 	"github.com/jmoiron/sqlx"
+	"github.com/max-gryshin/local-chain/internal/logging"
+	"github.com/max-gryshin/local-chain/internal/models"
+	"github.com/max-gryshin/local-chain/internal/utils"
 )
 
 const tagName = "db"
@@ -92,18 +92,54 @@ func (repo *UserRepository) Create(user *models.User) error {
 		baseQuery.
 		Insert().
 		Into(`user`).
-		Cols("email", "password_hash", "created_at", "updated_at").
-		Vals(goqu.Vals{user.Email, user.Password, user.CreatedAt, user.UpdatedAt})
+		Cols(
+			"email",
+			"password_hash",
+			"status",
+			"first_name",
+			"last_name",
+			"middle_name",
+			"created_at",
+			"updated_at",
+			"created_by",
+			"updated_by",
+			"manager_id",
+			"roles",
+		).
+		Vals(goqu.Vals{
+			user.Email,
+			user.Password,
+			user.Status,
+			user.FirstName,
+			user.LastName,
+			user.MiddleName,
+			user.CreatedAt,
+			user.UpdatedAt,
+			user.CreatedBy,
+			user.UpdatedBy,
+			user.ManagerID,
+			user.Roles,
+		})
 
 	return repo.execInsert(query)
 }
 
 func (repo *UserRepository) Update(user *models.User) error {
-	expr := repo.baseQuery.Update().Set(user).Where(exp.Ex{"id": user.ID})
+	userMap, err := utils.GetMapFromModel(user)
+	if err != nil {
+		return err
+	}
+	expr := repo.baseQuery.Update().Set(userMap).Where(exp.Ex{"id": user.ID})
 	return repo.execUpdate(expr)
 }
 
-func (repo *UserRepository) Delete(user *models.User) error {
-	expr := repo.baseQuery.Delete().Where(exp.Ex{"id": user.ID})
-	return repo.execDelete(expr)
+func (repo *UserRepository) GetManagerIDs() ([]int, error) {
+	query := repo.baseQuery.Select("manager_id").Distinct()
+	sql, p, err := query.ToSQL()
+	if err != nil {
+		return nil, err
+	}
+	res := make([]int, 1)
+	err = repo.db.Select(&res, sql, p...)
+	return res, err
 }

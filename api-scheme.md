@@ -1,8 +1,17 @@
-##API
+## API
 
-#user
+# auth
+ authenticate user
+- Request: `POST /api/auth?email=username@mail.com&password=qwerty123`
+- Response:
+```
+{
+    "jwt": "df34f52454t.."
+}
+```
+# user
  user list.
- - Request: `GET /api/user/all?page=1&limit=30`
+ - Request: `GET /api/user?page=1&limit=30`
  - Response:
 ```
 {
@@ -30,9 +39,9 @@
     ...
 }
 ```
- #account:
+ # account:
  user account
- - Request: `GET /api/user/{id}/account`
+ - Request: `GET /api/account/{id}`
  - Response:
 ```
 {
@@ -43,11 +52,40 @@
     "managerId": 1
 }
 ```
- create an order to cash out
- - Request: `POST /api/account/{id}/{walletId}/cash`
+account list.
+- Request: `GET /api/account?page=1&limit=30`
+- Response:
 ```
 {
-    "amount": 10.00,
+    {
+        "userId": 1,
+        "walletId": 2                      
+    },
+    {
+        "userId": 1,
+        "walletId": 2                
+    },
+    ...
+}
+```
+modify user account
+- Request: `PATCH /api/account/{accountId}`
+```
+{
+    "userId": "1",
+    "ballance": "10"
+    ...
+}
+```
+- Constraints:
+    - modifying available for owner
+
+ create an order to cash out
+ - Request: `POST /api/account/{id}/cash-out`
+```
+{
+    "wallet-id": 1,
+    "amount": 10.00,    
     ...
 }
 ```
@@ -62,8 +100,9 @@
  - Constraints:
    - available only for account and wallet owner
 
- #order:
- - Request: `GET /api/account/{id}/orders`
+ # order:
+ get all orders
+ - Request: `GET /api/order`
  - Response:
 ```
 {
@@ -76,9 +115,29 @@
     ]
 }
 ```
- #wallet:
+ - Constraints:
+    - available only for order owner and it's manager
+
+
+ - Request: `GET /api/order/{id}`
+ - Response:
+```
+{
+    "orders": [
+        {
+            "amount": 10.00,
+            "status": "Pending",
+            ...
+        }
+    ]
+}
+```
+- Constraints:
+    - available only for order owner and it's manager
+
+ # wallet:
  wallet balance
- - Request: `GET /api/wallet/{userId}/{walletId}`
+ - Request: `GET /api/wallet/{walletId}`
 ```
 {
     "id": 1,
@@ -92,12 +151,32 @@
  - Questions:
    - multiple wallets?
 
-#transaction:
- send money
- - Request: `POST /api/transaction/{userId}`
+wallets
+- Request: `GET /api/wallet`
 ```
 {
-    "from": "walletSender"
+    {
+        "id": 1,
+        "ballance": 100.00,
+        "status": "active",
+        ...
+    },
+    {
+        "id": 2,
+        "ballance": 1.00,
+        "status": "inactive",
+        ...
+    }
+}
+```
+- Constraints:
+    - available for owner, manager super admin
+
+# transaction:
+ send money
+ - Request: `POST /api/transaction`
+```
+{    
     "to": "walletReceiver",
     "amount": 10.00
 }
@@ -108,7 +187,7 @@
    - transfer status? (If yes, then we need additional API method to get transfer status)
  
  transaction history
- - Request: `GET /api/transaction/all/?page=1&limit=30`
+ - Request: `GET /api/transaction?page=1&limit=30`
 ```
 {
     "from": "123",
@@ -119,11 +198,11 @@
 }
 ```
  transaction history certain user
- - Request: `GET /api/transaction/{userId}/all?page=1&limit=30`
+ - Request: `GET /api/transaction/{userId}?page=1&limit=30`
 
-#manager
+# manager
  create and modify user
- - Request: `POST|PATCH /api/manager/user`
+ - Request: `POST|PATCH /api/manager/user|/{userId}`
 ```
 {
     "name": "Max",
@@ -135,7 +214,7 @@
    - modifying available for managers that handle their user and super admin
  
 create and modify user account
- - Request: `POST|PATCH /api/manager/account`
+ - Request: `POST|PATCH /api/manager/account|/{accountId}`
 ```
 {
     "userId": "1",
@@ -147,7 +226,7 @@ create and modify user account
    - modifying available for manager that handle this user and super admin
 
 orders to cash out:
- - Request: `GET /api/manager/account/orders?page=1&limit=30&orderStatus=Pending|Done|Rejected`
+ - Request: `GET /api/manager/order?page=1&limit=30&orderStatus=Pending|Done|Rejected`
  - Response:
 ```
 {
@@ -180,8 +259,9 @@ handle an order to cash out
 - Constraints:
   - managers can handle orders only those users, that they handle, but super admin all.
 
-Debet amount from user wallet
-- Request: `POST /api/manager/wallet/{walletId}/debet`
+Debit|Credit amount from user wallet
+- Request: `POST /api/manager/wallet/{walletId}/debit`
+- Request: `POST /api/manager/wallet/{walletId}/credit`
 ```
 {
     "amount": 10.00,
@@ -190,5 +270,5 @@ Debet amount from user wallet
 ```
 - Notes:
     - During this request system create a transaction and transfer money to manager's wallet 
-    - Super admin can debet money from manager's wallets.
-    - Managers can debet money only from those users that they handle
+    - Super admin can debit|credit money from manager's wallets.
+    - Managers can debit|credit money only from those users that they handle

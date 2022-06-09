@@ -2,24 +2,26 @@ package controllers
 
 import (
 	"errors"
-
-	"github.com/ZmaximillianZ/local-chain/internal/dto"
-	"github.com/go-playground/validator"
-
-	"github.com/ZmaximillianZ/local-chain/internal/e"
-	"github.com/ZmaximillianZ/local-chain/internal/models"
-	"github.com/ZmaximillianZ/local-chain/internal/utils"
-	"github.com/labstack/echo/v4"
-
-	"net/http"
+	"strconv"
 	"time"
 
-	"github.com/ZmaximillianZ/local-chain/internal/contractions"
+	"github.com/go-playground/validator"
+	"github.com/max-gryshin/local-chain/internal/dto"
+	"github.com/max-gryshin/local-chain/internal/middleware/access"
+	"github.com/max-gryshin/local-chain/internal/utils"
+
+	"github.com/labstack/echo/v4"
+	"github.com/max-gryshin/local-chain/internal/e"
+	"github.com/max-gryshin/local-chain/internal/models"
+
+	"net/http"
+
+	"github.com/max-gryshin/local-chain/internal/contractions"
 )
 
 // UserController is HTTP controller for manage users
 type UserController struct {
-	repo         contractions.UserRepository
+	Repo         contractions.UserRepository
 	errorHandler e.ErrorHandler
 	BaseController
 }
@@ -27,28 +29,22 @@ type UserController struct {
 // NewUserController return new instance of UserController
 func NewUserController(repo contractions.UserRepository, errorHandler e.ErrorHandler, v *validator.Validate) *UserController {
 	return &UserController{
-		repo:           repo,
+		Repo:           repo,
 		errorHandler:   errorHandler,
 		BaseController: BaseController{*v},
 	}
 }
 
-// GetByID return user by id
-// example: /api/v1/users/{id}/
-func (ctr *UserController) GetByID(c echo.Context) error {
-	var (
-		err  error
-		user models.User
-	)
-	if user, err = ctr.getUserByID(c); err != nil {
-		return err
-	}
-	return c.JSON(http.StatusOK, dto.LoadUserDTOFromModel(&user)) // todo: is it have sense?
-}
-
-// Authenticate @Summary Authenticate
-// description: user authorization
-// example: /api/v1/auth
+// Authenticate  godoc
+// @Summary      authenticate
+// @Description  authenticate user
+// @Tags         auth
+// @Accept       json
+// @Produce      json
+// @Param        email     query  string  true  "email"
+// @Param        password  query  string  true  "password"
+// @Success      200  {string}  dto.Authenticate
+// @Router       /api/auth [post]
 func (ctr *UserController) Authenticate(c echo.Context) error {
 	email := c.QueryParam("email")
 	password := c.QueryParam("password")
@@ -61,97 +57,94 @@ func (ctr *UserController) Authenticate(c echo.Context) error {
 		err   error
 		token string
 	)
-	if user, err = ctr.repo.GetByEmail(email); err != nil {
+	if user, err = ctr.Repo.GetByEmail(email); err != nil {
 		return err
 	}
 	if user.InvalidPassword(password) {
 		return errors.New("invalid password")
 	}
-	if token, err = utils.GenerateToken(a.Email, a.Password, user.ID); err != nil {
+	if token, err = utils.GenerateToken(user.ID); err != nil {
 		return err
 	}
 	return c.JSON(http.StatusOK, map[string]string{"token": token})
 }
 
-// GetUsers return list of users
-// example: /api/v1/users
+// GetByID godoc
+// @Summary      get user
+// @Description  get user by id
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param        id   path      int  true  "User ID"
+// @Success      200  {object}  dto.GetUserOwner
+// @Security     ApiKeyAuth
+// @Router       /api/user/{id} [get]
+func (ctr *UserController) GetByID(c echo.Context) error {
+	var (
+		err  error
+		user models.User
+	)
+	if user, err = ctr.getUserByID(c); err != nil {
+		return err
+	}
+	return c.JSON(http.StatusOK, dto.LoadGetUserOwnerDTOFromModel(&user))
+}
+
+// GetUsers      godoc
+// @Summary      get users
+// @Description  get users
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Success      200  {object} dto.GetUserOwners
+// @Security     ApiKeyAuth
+// @Router       /api/user [get]
 func (ctr *UserController) GetUsers(c echo.Context) error {
 	var (
 		users models.Users
 		err   error
 	)
-	if users, err = ctr.repo.GetAll(); err != nil {
+	if users, err = ctr.Repo.GetAll(); err != nil {
 		return err
 	}
 
-	return c.JSON(http.StatusOK, dto.LoadUserDTOCollectionFromModel(&users))
+	return c.JSON(http.StatusOK, dto.LoadGetUserOwnerDTOCollectionFromModel(users))
 }
 
-// Create create user
-// example: /api/v1/create
-func (ctr *UserController) Create(c echo.Context) error {
-	email := c.QueryParam("email")
-	password := c.QueryParam("password")
-	a := models.Auth{Email: email, Password: password}
-	if errValidation := ctr.BaseController.validator.Struct(&a); errValidation != nil {
-		return errValidation
-	}
-	var (
-		userExist models.User
-		err       error
-		user      models.User
-	)
-	if userExist, err = ctr.repo.GetByEmail(a.Email); err != nil {
-		return err
-	}
-	if userExist.ID != 0 {
-		return errors.New("user with email " + a.Email + " exists")
-	}
-	user = models.User{Email: a.Email, CreatedAt: time.Now(), UpdatedAt: time.Now()}
-	if errSetPassword := user.SetPassword(a.Password); errSetPassword != nil {
-		return errSetPassword
-	}
-	if errCreateUser := ctr.repo.Create(&user); errCreateUser != nil {
-		return errCreateUser
-	}
-	return c.JSON(http.StatusOK, dto.LoadUserDTOFromModel(&user))
-}
-
-// Update return user by id
-// example: /api/v1/users/{id}/
+// Update godoc
+// @Summary      update user
+// @Description  update user
+// @Tags         user
+// @Accept       json
+// @Produce      json
+// @Param        message  body  dto.UpdateUserOwnerRequest  true  "User"
+// @Success      200  {object}  dto.UpdateUserOwnerRequest
+// @Security     ApiKeyAuth
+// @Router       /api/user [patch]
 func (ctr *UserController) Update(c echo.Context) error {
 	var (
-		err  error
-		user models.User
+		userID int
+		err    error
+		user   models.User
 	)
-	if user, err = ctr.getUserByID(c); err != nil {
+	id := c.Get(access.UserID).(string)
+	if userID, err = strconv.Atoi(id); err != nil {
 		return err
 	}
-	dtoUser := dto.LoadUserDTOFromModel(&user)
+	if user, err = ctr.Repo.GetByID(userID); err != nil {
+		return err
+	}
+	dtoUser := dto.LoadUpdateUserOwnerDTOFromModel(&user)
 	if errBindOrValidate := ctr.BindAndValidate(c, dtoUser); errBindOrValidate != nil {
 		return errBindOrValidate
 	}
-	if errUpdateUser := ctr.repo.Update(dto.LoadUserModelFromDTO(dtoUser)); errUpdateUser != nil {
+	newModel := dto.LoadUserModelFromUpdateUserOwnerDTO(dtoUser)
+	newModel.UpdatedBy = userID
+	newModel.UpdatedAt = time.Now()
+	if errUpdateUser := ctr.Repo.Update(newModel); errUpdateUser != nil {
 		return errUpdateUser
 	}
 	return c.JSON(http.StatusOK, dtoUser)
-}
-
-// Delete return user by id
-// description: Delete user by id
-// example: /api/v1/users/{id}/ [delete]
-func (ctr *UserController) Delete(c echo.Context) error {
-	var (
-		err  error
-		user models.User
-	)
-	if user, err = ctr.getUserByID(c); err != nil {
-		return err
-	}
-	if errDelete := ctr.repo.Delete(&user); errDelete != nil {
-		return errDelete
-	}
-	return c.JSON(http.StatusOK, "OK")
 }
 
 func (ctr *UserController) getUserByID(c echo.Context) (models.User, error) {
@@ -163,7 +156,7 @@ func (ctr *UserController) getUserByID(c echo.Context) (models.User, error) {
 	if id, err = ctr.BaseController.GetID(c); err != nil {
 		return user, err
 	}
-	if user, err = ctr.repo.GetByID(int(id)); err != nil {
+	if user, err = ctr.Repo.GetByID(int(id)); err != nil {
 		return user, err
 	}
 
