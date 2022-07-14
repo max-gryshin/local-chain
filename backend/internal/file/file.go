@@ -3,15 +3,16 @@ package file
 import (
 	"fmt"
 	"io"
-	"io/ioutil"
 	"os"
 	"path"
 	"path/filepath"
 )
 
+const ReadAllWriteOwner = 0644
+
 // GetSize get the file size
 func GetSize(f io.Reader) (int, error) {
-	content, err := ioutil.ReadAll(f)
+	content, err := io.ReadAll(f)
 
 	return len(content), err
 }
@@ -83,7 +84,7 @@ func MustOpen(fileName, filePath string) (*os.File, error) {
 		return nil, fmt.Errorf("file.IsNotExistMkDir src: %s, err: %v", src, err)
 	}
 
-	f, err := Open(filepath.Join(src, fileName), os.O_APPEND|os.O_CREATE|os.O_RDWR, 0644)
+	f, err := Open(filepath.Join(src, fileName), os.O_APPEND|os.O_CREATE|os.O_RDWR, ReadAllWriteOwner)
 	if err != nil {
 		return nil, fmt.Errorf("fail to OpenFile :%v", err)
 	}
