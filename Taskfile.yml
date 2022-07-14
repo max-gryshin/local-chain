@@ -8,7 +8,7 @@ vars:
 tasks:
   lint-local: golangci-lint run
 
-  lint: docker run --rm -v $PWD/backend:/app -w /app golangci/golangci-lint:v1.35.2 golangci-lint run -v --fix --timeout 5m
+  lint: docker run --rm -v $PWD/backend:/app -w /app golangci/golangci-lint:v1.46.2 golangci-lint run -v --fix --timeout 5m
 
   clean-deps: go mod tidy
 
