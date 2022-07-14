@@ -6,7 +6,6 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
-	"strings"
 
 	"github.com/max-gryshin/local-chain/internal/file"
 	"github.com/max-gryshin/local-chain/internal/setting"
@@ -37,7 +36,7 @@ const (
 func Setup(config *setting.App) {
 	var err error
 	filePath := filepath.Join(config.RuntimeRootPath, config.LogSavePath)
-	fileName := strings.Join([]string{config.LogSaveName, config.LogFileExt}, ".")
+	fileName := config.LogSaveName + "." + config.LogFileExt
 	f, err = file.MustOpen(fileName, filePath)
 	if err != nil {
 		log.Fatalf("logging.Setup err: %v", err)

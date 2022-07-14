@@ -37,7 +37,7 @@ type User struct {
 
 // SetPassword sets a new password stored as hash.
 func (u *User) SetPassword(password string) error {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(password), 14)
+	bytes, err := bcrypt.GenerateFromPassword([]byte(password), bcrypt.DefaultCost)
 	if err != nil {
 		return err
 	}

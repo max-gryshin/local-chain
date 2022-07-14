@@ -6,7 +6,8 @@ on:
     tags:
       - '*'
   pull_request:
-    branches: '*'
+    branches:
+      - '*'
 
 jobs:
   build:
@@ -24,13 +25,13 @@ jobs:
 
       - name: Lint
         uses: golangci/golangci-lint-action@v2
-        working-directory: backend/
-        #run: golangci-lint run -v --fix --timeout 5m
         with:
-          version: v1.35.2
+          working-directory: ./backend
 
       - name: Build
         run: go build -v
+        working-directory: ./backend
 
       - name: Test
         run: go test -race -cover -covermode=atomic -v ./...
+        working-directory: ./backend
