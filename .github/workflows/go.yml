@@ -24,9 +24,9 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Lint
-        uses: golangci/golangci-lint-action@v2
-        working-directory: backend/
-        #run: golangci-lint run -v --fix --timeout 5m
+        #uses: golangci/golangci-lint-action@v2
+        run: golangci-lint run -v --fix --timeout 5m
+        working-directory: ./backend
         with:
           version: v1.35.2
 
