@@ -11,9 +11,6 @@
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
 
-backend/var/log
-backend/*.pem
 # Dependency directories (remove the comment below to include it)
-# vendor/
 
 todo.md
