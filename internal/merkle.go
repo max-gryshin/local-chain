@@ -3,6 +3,7 @@ package internal
 import (
 	"crypto/sha512"
 	"errors"
+
 	"local-chain/internal/types"
 )
 

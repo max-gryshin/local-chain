@@ -1,8 +1,9 @@
 package internal
 
 import (
-	"local-chain/internal/types"
 	"testing"
+
+	"local-chain/internal/types"
 
 	"github.com/stretchr/testify/require"
 )
