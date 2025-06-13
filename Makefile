@@ -5,6 +5,7 @@ REQUIRED_JUNITREPORT_VERSION ?= v2.0.0
 REQUIRED_GO_IMPORTS_VERSION ?= v0.3.0
 GO_IMPORTS := $(shell command -v goimports 2> /dev/null)
 REQUIRED_GOFUMPT_VERSION ?= v0.6.0
+PKGS := $(shell go list ./...)
 
 .PHONY: lint
 lint:
@@ -21,7 +22,7 @@ test: unit-test
 
 .PHONY: unit-test
 unit-test: install-junit-report install-cobertura
-	@go test -short -mod=vendor -cover -count=1 -p=4 -covermode atomic -coverprofile=unit-cover.log \
+	@go test -short -mod=vendor -cover -count=1 -p=4 -covermode atomic -coverprofile=unit-cover.log $(PWD)/internal \
 	-v $(PKGS) 2>&1 | tee unit-test.log
 	@go tool cover -func=unit-cover.log | grep -E 'total:\s+\(statements\)\s+'
 	@gocover-cobertura < unit-cover.log > unit-coverage.xml

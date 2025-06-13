@@ -82,7 +82,7 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 				require.NoError(t1, err)
 				fakeFrom, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 				require.NoError(t1, err)
-				fakeFrom.PublicKey = from.PublicKey // make fakeFrom have the same public key as "from"
+				fakeFrom.PublicKey = from.PublicKey // make fakeFrom have the same public key as "	from"
 				to, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 				require.NoError(t1, err)
 				pool := NewMockTxPool(ctrl)

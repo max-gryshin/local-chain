@@ -30,28 +30,26 @@ func NewTransactor(txPool TxPool) *Transactor {
 // private key corresponding to the public key.
 func (t *Transactor) CreateTx(privKey *ecdsa.PrivateKey, toPubKey *ecdsa.PublicKey, amount types.Amount, utxos []*types.UTXO) (*types.Transaction, error) {
 	newTx := types.NewTransaction()
-	txs := make([]*types.Transaction, 0, len(utxos))
 	inputs := make([]*types.TxIn, 0, len(utxos))
 	balance := types.Amount{}
 	for id, utxo := range utxos {
 		tx := t.txPool.Get(utxo.TxHash)
-		txs = append(txs, tx)
 		if int(utxo.Index) >= len(tx.Outputs) {
-			return nil, errors.New(fmt.Sprintf("UTXO index %d is out of bounds for transaction %s", utxo.Index, string(utxo.TxHash)))
+			return nil, fmt.Errorf("UTXO index %d is out of bounds for transaction %s", utxo.Index, string(utxo.TxHash))
 		}
 		output := tx.Outputs[utxo.Index]
 		// Check if the output belongs to the sender
 		if output.PubKey != types.ToHashString(&privKey.PublicKey) {
-			return nil, errors.New(fmt.Sprintf("sender do not own transaction's output: tx:%s", string(utxo.TxHash)))
+			return nil, fmt.Errorf("sender do not own transaction's output: tx:%s", string(utxo.TxHash))
 		}
 
 		r, s, err := utxo.Sign(privKey)
 		if err != nil {
-			return nil, errors.New(fmt.Sprintf("sign UTXO:%s err:%s", string(utxo.TxHash), err.Error()))
+			return nil, fmt.Errorf("sign UTXO:%s err:%s", string(utxo.TxHash), err.Error())
 		}
 
 		if !utxo.Verify(privKey.PublicKey, r, s) {
-			return nil, errors.New(fmt.Sprintf("can not verify UTXO:%s err: not valid private key", string(utxo.TxHash)))
+			return nil, fmt.Errorf("can not verify UTXO:%s err: not valid private key", string(utxo.TxHash))
 		}
 
 		input := &types.TxIn{
