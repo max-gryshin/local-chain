@@ -4,47 +4,18 @@
     <option name="autoReloadType" value="ALL" />
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="5f70db70-f113-44ae-8208-06c911eb11bc" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/../algorithms_and_data_structures/concurrency/read_var.go" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/../goviz/.idea/modules.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../algorithms_and_data_structures/heapsort.go" beforeDir="false" afterPath="$PROJECT_DIR$/../algorithms_and_data_structures/algorythm/sort/heapsort.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../algorithms_and_data_structures/mutex.go" beforeDir="false" afterPath="$PROJECT_DIR$/../algorithms_and_data_structures/concurrency/peterson_mutex.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../algorithms_and_data_structures/stack.go" beforeDir="false" afterPath="$PROJECT_DIR$/../algorithms_and_data_structures/data_structure/stack.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../go-libp2p/examples/chat/chat.go" beforeDir="false" afterPath="$PROJECT_DIR$/../go-libp2p/examples/chat/chat.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/local-chain.iml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/local-chain.iml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/.idea/modules.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/modules.xml" afterDir="false" />
+    <list default="true" id="5f70db70-f113-44ae-8208-06c911eb11bc" name="Changes" comment="crud Updating swagger documentation.">
+      <change afterPath="$PROJECT_DIR$/internal/transaction_test.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.github/workflows/go.yml" beforeDir="false" afterPath="$PROJECT_DIR$/.github/workflows/go.yml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.gitignore" beforeDir="false" afterPath="$PROJECT_DIR$/.gitignore" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources.local.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/dataSources.local.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/dataSources/51bbd263-fda4-42f9-b500-eb02ce9d8a59.xml" beforeDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/vcs.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/vcs.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/backend/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/backend/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/backend/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/docker-compose.yml" beforeDir="false" afterPath="$PROJECT_DIR$/docker-compose.yml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/go.mod" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/go.mod" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/go.sum" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/go.sum" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/contractions/user_repotory.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/contractions/user_repotory.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/contractions/workout_type_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/contractions/workout_type_repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/contractions/workout_value_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/contractions/workout_value_repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/controllers/user_controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/controllers/user_controller.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/controllers/workout_controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/controllers/workout_controller.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/controllers/workout_type_controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/controllers/workout_type_controller.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/controllers/workout_value_controller.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/controllers/workout_value_controller.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/dto/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/dto/user.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/dto/workout.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/dto/workout.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/dto/workout_type.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/dto/workout_type.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/dto/workout_value.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/dto/workout_value.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/e/error_handler.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/e/error_handler.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/logging/log.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/logging/log.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/middleware/jwt/jwt.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/middleware/jwt/jwt.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/user.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/user_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/user_repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/workout_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/workout_repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/workout_type_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/workout_type_repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/workout_value_repository.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/repository/workout_value_repository.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/routes/api/api.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/routes/api/api.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/routes/api/v1/user.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/routes/api/v1/user.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/routes/api_v1.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/routes/api_v1.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/setting/setting.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/setting/setting.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/internal/utils/reflection_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/internal/utils/reflection_test.go" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../stskp_sport_api/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/../stskp_sport_api/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Makefile" beforeDir="false" afterPath="$PROJECT_DIR$/Makefile" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/cmd/main.go" beforeDir="false" afterPath="$PROJECT_DIR$/cmd/main.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/service/transactor.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/service/transactor.go" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/internal/service/transactor_test.go" beforeDir="false" afterPath="$PROJECT_DIR$/internal/service/transactor_test.go" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -58,9 +29,9 @@
       </list>
     </option>
   </component>
-  <component name="GOROOT" url="file:///usr/local/go" />
+  <component name="GOROOT" url="file://$USER_HOME$/dev/go/pkg/mod/golang.org/toolchain@v0.0.1-go1.24.0.darwin-arm64" />
   <component name="Git.Settings">
-    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$/../stskp_sport_api" />
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
   </component>
   <component name="GoLibraries">
     <option name="indexEntireGoPath" value="false" />
@@ -88,30 +59,35 @@
   <component name="MarkdownSettingsMigration">
     <option name="stateVersion" value="1" />
   </component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 0
+}</component>
   <component name="ProjectId" id="27SVzp4BJPo8bSDN0uqFN3AoBQn" />
   <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent">
-    <property name="DatabaseDriversLRU" value="postgresql" />
-    <property name="DefaultGoTemplateProperty" value="Go File" />
-    <property name="RunOnceActivity.OpenProjectViewOnStart" value="true" />
-    <property name="RunOnceActivity.ShowReadmeOnStart" value="true" />
-    <property name="WebServerToolWindowFactoryState" value="false" />
-    <property name="go.format.on.save.advertiser.fired" value="true" />
-    <property name="go.formatter.settings.were.checked" value="true" />
-    <property name="go.import.settings.migrated" value="true" />
-    <property name="go.modules.go.list.on.any.changes.was.set" value="true" />
-    <property name="go.watchers.conflict.with.on.save.actions.check.performed" value="true" />
-    <property name="last_opened_file_path" value="$PROJECT_DIR$/../stskp_sport_api" />
-    <property name="node.js.detected.package.eslint" value="true" />
-    <property name="node.js.detected.package.tslint" value="true" />
-    <property name="node.js.selected.package.eslint" value="(autodetect)" />
-    <property name="node.js.selected.package.tslint" value="(autodetect)" />
-    <property name="settings.editor.selected.configurable" value="com.goide.configuration.GoProjectSettingsConfigurable" />
-  </component>
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;Go Build.go build example.go.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestMerkleTree_VerifyTransaction in local-chain/internal.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestTransactor_CreateTx in local-chain/internal/service.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestTransactor_CreateTx/err_sender_is_fake in local-chain/internal/service.executor&quot;: &quot;Debug&quot;,
+    &quot;Go Test.TestTransactor_CreateTx/err_sender_is_not_owner_of_output in local-chain/internal/service.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestTransactor_CreateTx/err_sender_is_not_owner_of_the_output in local-chain/internal/service.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestTransactor_CreateTx/ok in local-chain/internal/service.executor&quot;: &quot;Run&quot;,
+    &quot;Go Test.TestTransactor_CreateTx/ok_full_amount in local-chain/internal/service.executor&quot;: &quot;Debug&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.formatter.settings.were.checked&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.migrated.go.modules.settings&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.go.modules.go.list.on.any.changes.was.set&quot;: &quot;true&quot;,
+    &quot;git-widget-placeholder&quot;: &quot;main&quot;,
+    &quot;go.import.settings.migrated&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/Users/maksim.hryshyn/projects/local-chain&quot;,
+    &quot;settings.editor.selected.configurable&quot;: &quot;preferences.lookFeel&quot;
+  }
+}</component>
   <component name="RecentsManager">
     <key name="MoveFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/../algorithms_and_data_structures/concurrency" />
@@ -120,35 +96,121 @@
       <recent name="$PROJECT_DIR$/../algorithms_and_data_structures/sort" />
     </key>
   </component>
-  <component name="RunManager">
-    <configuration name="go build github.com/ZmaximillianZ/local-chain" type="GoApplicationRunConfiguration" factoryName="Go Application" temporary="true" nameIsGenerated="true">
+  <component name="RunManager" selected="Go Test.TestTransactor_CreateTx in local-chain/internal/service">
+    <configuration name="TestMerkleTree_VerifyTransaction in local-chain/internal" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
       <module name="local-chain" />
-      <working_directory value="$PROJECT_DIR$/backend" />
+      <working_directory value="$PROJECT_DIR$/internal" />
+      <root_directory value="$PROJECT_DIR$" />
       <kind value="PACKAGE" />
-      <package value="github.com/ZmaximillianZ/local-chain" />
+      <package value="local-chain/internal" />
       <directory value="$PROJECT_DIR$" />
-      <filePath value="$PROJECT_DIR$/backend/main.go" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestMerkleTree_VerifyTransaction\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestTransactor_CreateTx in local-chain/internal/service" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="local-chain" />
+      <working_directory value="$PROJECT_DIR$/internal/service" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="local-chain/internal/service" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestTransactor_CreateTx\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestTransactor_CreateTx/err_sender_is_not_owner_of_output in local-chain/internal/service" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="local-chain" />
+      <working_directory value="$PROJECT_DIR$/internal/service" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="local-chain/internal/service" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestTransactor_CreateTx\E$/^\Qerr_sender_is_not_owner_of_output\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestTransactor_CreateTx/err_sender_is_not_owner_of_the_output in local-chain/internal/service" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="local-chain" />
+      <working_directory value="$PROJECT_DIR$/internal/service" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="local-chain/internal/service" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestTransactor_CreateTx\E$/^\Qerr_sender_is_not_owner_of_the_output\E$" />
+      <method v="2" />
+    </configuration>
+    <configuration name="TestTransactor_CreateTx/ok_full_amount in local-chain/internal/service" type="GoTestRunConfiguration" factoryName="Go Test" temporary="true" nameIsGenerated="true">
+      <module name="local-chain" />
+      <working_directory value="$PROJECT_DIR$/internal/service" />
+      <root_directory value="$PROJECT_DIR$" />
+      <kind value="PACKAGE" />
+      <package value="local-chain/internal/service" />
+      <directory value="$PROJECT_DIR$" />
+      <filePath value="$PROJECT_DIR$" />
+      <framework value="gotest" />
+      <pattern value="^\QTestTransactor_CreateTx\E$/^\Qok_full_amount\E$" />
       <method v="2" />
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Go Build.go build github.com/ZmaximillianZ/local-chain" />
+        <item itemvalue="Go Test.TestTransactor_CreateTx in local-chain/internal/service" />
+        <item itemvalue="Go Test.TestMerkleTree_VerifyTransaction in local-chain/internal" />
+        <item itemvalue="Go Test.TestTransactor_CreateTx/ok_full_amount in local-chain/internal/service" />
+        <item itemvalue="Go Test.TestTransactor_CreateTx/err_sender_is_not_owner_of_the_output in local-chain/internal/service" />
+        <item itemvalue="Go Test.TestTransactor_CreateTx/err_sender_is_not_owner_of_output in local-chain/internal/service" />
       </list>
     </recent_temporary>
+  </component>
+  <component name="SharedIndexes">
+    <attachedChunks>
+      <set>
+        <option value="bundled-gosdk-d297c17c1fbd-57c114c3cede-org.jetbrains.plugins.go.sharedIndexes.bundled-GO-243.26053.20" />
+      </set>
+    </attachedChunks>
   </component>
   <component name="SpellCheckerSettings" RuntimeDictionaries="0" Folders="0" CustomDictionaries="0" DefaultDictionary="application-level" UseSingleDictionary="true" transferred="true" />
   <component name="TypeScriptGeneratedFilesManager">
     <option name="version" value="3" />
+  </component>
+  <component name="Vcs.Log.Tabs.Properties">
+    <option name="TAB_STATES">
+      <map>
+        <entry key="MAIN">
+          <value>
+            <State>
+              <option name="FILTERS">
+                <map>
+                  <entry key="roots">
+                    <value>
+                      <list>
+                        <option value="$PROJECT_DIR$" />
+                      </list>
+                    </value>
+                  </entry>
+                </map>
+              </option>
+            </State>
+          </value>
+        </entry>
+      </map>
+    </option>
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="crud Getting user by manager." />
     <MESSAGE value="crud Account dto." />
     <MESSAGE value="crud Wallet, order dto." />
     <MESSAGE value="crud Updating swagger documentation." />
-    <option name="LAST_COMMIT_MESSAGE" value="crud Updating swagger documentation." />
+    <MESSAGE value="Add transactor with CreateTx func which create new tx entity." />
+    <option name="LAST_COMMIT_MESSAGE" value="Add transactor with CreateTx func which create new tx entity." />
   </component>
   <component name="VgoProject">
-    <integration-enabled>true</integration-enabled>
+    <settings-migrated>true</settings-migrated>
   </component>
   <component name="XDebuggerManager">
     <breakpoint-manager>

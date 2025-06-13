@@ -25,13 +25,13 @@ jobs:
 
       - name: Lint
         run: make lint
-        working-directory: ./internal
+        working-directory: .
 
 #      skip until cmd is ready
 #      - name: Build
 #        run: go build -v
-#        working-directory: ./internal
+#        working-directory: .
 
       - name: Test
         run: make test
-        working-directory: ./internal
+        working-directory: .
