@@ -18,6 +18,7 @@ type Transaction struct {
 	ID        uuid.UUID
 	Timestamp int64
 	nLockTime uint32
+	BlockHash []byte
 
 	Salt [16]byte
 	Hash []byte
@@ -61,7 +62,7 @@ func (tx *Transaction) WithOutputs(outputs ...*TxOut) *Transaction {
 	return tx
 }
 
-func (tx *Transaction) ComputeHash() []byte {
+func (tx *Transaction) ComputeHash() {
 	data := make([]byte, 0, 256)
 	data = append(data, tx.ID[:]...)
 	timestamp := make([]byte, 8)
@@ -70,19 +71,6 @@ func (tx *Transaction) ComputeHash() []byte {
 	nLockTime := make([]byte, 8)
 	binary.LittleEndian.PutUint64(timestamp, uint64(tx.nLockTime))
 	data = append(data, nLockTime...)
-	//for _, in := range tx.Inputs {
-	//	data = append(data, in.PubKey.X.Bytes()...)
-	//	data = append(data, in.PubKey.Y.Bytes()...)
-	//	nSequence := make([]byte, 8)
-	//	binary.LittleEndian.PutUint64(timestamp, uint64(in.NSequence))
-	//	data = append(data, nSequence...)
-	//	data = append(data, in.SignatureR.Bytes()...)
-	//	data = append(data, in.SignatureS.Bytes()...)
-	//	data = append(data, in.Prev.TxHash...)
-	//	prevUTXOIndex := make([]byte, 8)
-	//	binary.LittleEndian.PutUint64(prevUTXOIndex, uint64(in.Prev.Index))
-	//	data = append(data, prevUTXOIndex...)
-	//}
 	for _, out := range tx.Outputs {
 		data = append(data, out.TxID[:]...)
 		data = append(data, []byte(out.PubKey)...)
@@ -90,13 +78,12 @@ func (tx *Transaction) ComputeHash() []byte {
 	}
 	hash := sha512.New()
 	hash.Write(data)
-
-	return hash.Sum(nil)
+	tx.Hash = hash.Sum(nil)
 }
 
 func (tx *Transaction) GetHash() []byte {
 	if tx.Hash == nil {
-		tx.Hash = tx.ComputeHash()
+		tx.ComputeHash()
 	}
 	return tx.Hash
 }

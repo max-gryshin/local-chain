@@ -75,6 +75,7 @@ func (t *Transactor) CreateTx(privKey *ecdsa.PrivateKey, toPubKey *ecdsa.PublicK
 		outputs = append(outputs, &types.TxOut{TxID: newTx.ID, Amount: balance, PubKey: types.ToHashString(&privKey.PublicKey)})
 	}
 	newTx = newTx.WithOutputs(outputs...)
+	newTx.ComputeHash()
 
 	return newTx, nil
 }
