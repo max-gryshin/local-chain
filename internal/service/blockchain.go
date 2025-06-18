@@ -16,7 +16,7 @@ type Blockchain struct {
 // NewBlockchain creates a new blockchain with a genesis block.
 func NewBlockchain() *Blockchain {
 	genesisBlock := &types.Block{
-		Timestamp: time.Now().UnixNano(),
+		Timestamp: uint64(time.Now().UnixNano()),
 		PrevHash:  []byte{},
 		Hash:      []byte{},
 	}
@@ -39,7 +39,7 @@ func (bc *Blockchain) AddBlock(pool *types.Pool) error {
 	}
 
 	newBlock := &types.Block{
-		Timestamp:  time.Now().UnixNano(),
+		Timestamp:  uint64(time.Now().UnixNano()),
 		PrevHash:   prevBlock.ComputeHash(),
 		MerkleRoot: merkleTree.Root.Hash,
 	}
