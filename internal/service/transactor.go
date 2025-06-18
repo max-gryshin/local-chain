@@ -57,7 +57,7 @@ func (t *Transactor) CreateTx(privKey *ecdsa.PrivateKey, toPubKey *ecdsa.PublicK
 			PubKey:     &privKey.PublicKey,
 			SignatureR: r,
 			SignatureS: s,
-			NSequence:  int32(id),
+			NSequence:  uint32(id),
 		}
 		inputs = append(inputs, input)
 		// calculate balance

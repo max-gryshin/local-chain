@@ -16,7 +16,7 @@ const CurrencyUnit = 100000000
 
 type Transaction struct {
 	ID        uuid.UUID
-	Timestamp int64
+	Timestamp uint64
 	nLockTime uint32
 	BlockHash []byte
 
@@ -30,7 +30,7 @@ type Transaction struct {
 func NewTransaction() *Transaction {
 	tx := &Transaction{
 		ID:        uuid.New(),
-		Timestamp: time.Now().UnixNano(),
+		Timestamp: uint64(time.Now().UnixNano()),
 		Salt:      [16]byte(uuid.New()),
 	}
 	return tx
@@ -93,7 +93,7 @@ type TxIn struct {
 	PubKey     *ecdsa.PublicKey
 	SignatureR *big.Int
 	SignatureS *big.Int
-	NSequence  int32
+	NSequence  uint32
 }
 
 type TxOut struct {
@@ -115,7 +115,7 @@ func ToHashString(pubKey *ecdsa.PublicKey) string {
 type UTXO struct {
 	TxHash []byte
 	// Index of the output in the transaction
-	Index int32
+	Index uint32
 }
 
 func (u *UTXO) Sign(key *ecdsa.PrivateKey) (*big.Int, *big.Int, error) {
@@ -132,8 +132,8 @@ func (u *UTXO) Verify(pubKey ecdsa.PublicKey, r, s *big.Int) bool {
 }
 
 type Amount struct {
-	Value int64
-	Unit  int32
+	Value uint64
+	Unit  uint32
 }
 
 func (a *Amount) ToBytes() []byte {
@@ -145,7 +145,7 @@ func (a *Amount) ToBytes() []byte {
 	return append(amount, unit...)
 }
 
-func NewAmount(value int64) *Amount {
+func NewAmount(value uint64) *Amount {
 	return &Amount{
 		Value: value,
 		Unit:  CurrencyUnit,
