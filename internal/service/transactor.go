@@ -12,6 +12,7 @@ import (
 
 type TransactionStore interface {
 	Get(txHash []byte) (*types.Transaction, error)
+	Put(*types.Transaction) error
 }
 
 type Transactor struct {
