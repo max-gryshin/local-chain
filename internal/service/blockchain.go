@@ -1,6 +1,8 @@
 package service
 
 import (
+	"fmt"
+	"local-chain/internal/adapters/outbound/leveldb"
 	"time"
 
 	"local-chain/internal"
@@ -10,19 +12,33 @@ import (
 
 // Blockchain represents a private blockchain.
 type Blockchain struct {
-	Blocks []*types.Block
+	BlockchainStore  leveldb.BlockchainStore
+	TransactionStore leveldb.TransactionStore
+	Blocks           []*types.Block
 }
 
 // NewBlockchain creates a new blockchain with a genesis block.
-func NewBlockchain() *Blockchain {
-	genesisBlock := &types.Block{
-		Timestamp: uint64(time.Now().UnixNano()),
-		PrevHash:  []byte{},
-		Hash:      []byte{},
+func NewBlockchain(blockchainStore *leveldb.BlockchainStore, txStore *leveldb.TransactionStore) *Blockchain {
+	b := &Blockchain{
+		BlockchainStore:  *blockchainStore,
+		TransactionStore: *txStore,
 	}
-	return &Blockchain{
-		Blocks: []*types.Block{genesisBlock},
+	blocks, err := b.BlockchainStore.Get()
+	if err != nil {
+		panic(err)
 	}
+	if len(blocks) == 0 {
+		genesisBlock := &types.Block{
+			Timestamp: uint64(time.Now().UnixNano()),
+			PrevHash:  []byte{},
+			Hash:      []byte{},
+		}
+		b.Blocks = append(b.Blocks, genesisBlock)
+	} else {
+		b.Blocks = blocks
+	}
+
+	return b
 }
 
 // AddBlock adds a new block to the blockchain.
@@ -45,6 +61,18 @@ func (bc *Blockchain) AddBlock(pool *types.Pool) error {
 	}
 	bc.Blocks = append(bc.Blocks, newBlock)
 
-	// todo: assign block hash to transactions
+	err = bc.BlockchainStore.Put(newBlock)
+	if err != nil {
+		return fmt.Errorf("failed to put new block: %w", err)
+	}
+	blockHash := newBlock.ComputeHash()
+	for _, tx := range txs {
+		tx.BlockHash = blockHash
+		err = bc.TransactionStore.Put(tx)
+		if err != nil {
+			return fmt.Errorf("failed to put transaction: %w", err)
+		}
+	}
+
 	return nil
 }

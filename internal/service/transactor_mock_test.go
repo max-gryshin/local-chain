@@ -11,39 +11,40 @@ import (
 	gomock "github.com/golang/mock/gomock"
 )
 
-// MockTxPool is a mock of TxPool interface.
-type MockTxPool struct {
+// MockTransactionStore is a mock of TransactionStore interface.
+type MockTransactionStore struct {
 	ctrl     *gomock.Controller
-	recorder *MockTxPoolMockRecorder
+	recorder *MockTransactionStoreMockRecorder
 }
 
-// MockTxPoolMockRecorder is the mock recorder for MockTxPool.
-type MockTxPoolMockRecorder struct {
-	mock *MockTxPool
+// MockTransactionStoreMockRecorder is the mock recorder for MockTransactionStore.
+type MockTransactionStoreMockRecorder struct {
+	mock *MockTransactionStore
 }
 
-// NewMockTxPool creates a new mock instance.
-func NewMockTxPool(ctrl *gomock.Controller) *MockTxPool {
-	mock := &MockTxPool{ctrl: ctrl}
-	mock.recorder = &MockTxPoolMockRecorder{mock}
+// NewMockTransactionStore creates a new mock instance.
+func NewMockTransactionStore(ctrl *gomock.Controller) *MockTransactionStore {
+	mock := &MockTransactionStore{ctrl: ctrl}
+	mock.recorder = &MockTransactionStoreMockRecorder{mock}
 	return mock
 }
 
 // EXPECT returns an object that allows the caller to indicate expected use.
-func (m *MockTxPool) EXPECT() *MockTxPoolMockRecorder {
+func (m *MockTransactionStore) EXPECT() *MockTransactionStoreMockRecorder {
 	return m.recorder
 }
 
 // Get mocks base method.
-func (m *MockTxPool) Get(txHash []byte) *types.Transaction {
+func (m *MockTransactionStore) Get(txHash []byte) (*types.Transaction, error) {
 	m.ctrl.T.Helper()
 	ret := m.ctrl.Call(m, "Get", txHash)
 	ret0, _ := ret[0].(*types.Transaction)
-	return ret0
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
 }
 
 // Get indicates an expected call of Get.
-func (mr *MockTxPoolMockRecorder) Get(txHash interface{}) *gomock.Call {
+func (mr *MockTransactionStoreMockRecorder) Get(txHash interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockTxPool)(nil).Get), txHash)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockTransactionStore)(nil).Get), txHash)
 }

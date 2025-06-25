@@ -8,19 +8,19 @@ import (
 	"local-chain/internal/types"
 )
 
-//go:generate mockgen -source transactor.go -destination transactor_mock_test.go -package service_test -mock_names riskManager=MockTxPool
+//go:generate mockgen -source transactor.go -destination transactor_mock_test.go -package service_test -mock_names TransactionStore=MockTransactionStore
 
-type TxPool interface {
-	Get(txHash []byte) *types.Transaction
+type TransactionStore interface {
+	Get(txHash []byte) (*types.Transaction, error)
 }
 
 type Transactor struct {
-	txPool TxPool
+	txStore TransactionStore
 }
 
-func NewTransactor(txPool TxPool) *Transactor {
+func NewTransactor(txStore TransactionStore) *Transactor {
 	return &Transactor{
-		txPool: txPool,
+		txStore: txStore,
 	}
 }
 
@@ -33,7 +33,10 @@ func (t *Transactor) CreateTx(privKey *ecdsa.PrivateKey, toPubKey *ecdsa.PublicK
 	inputs := make([]*types.TxIn, 0, len(utxos))
 	balance := types.Amount{}
 	for id, utxo := range utxos {
-		tx := t.txPool.Get(utxo.TxHash)
+		tx, err := t.txStore.Get(utxo.TxHash)
+		if err != nil {
+			return nil, fmt.Errorf("get utxo tx hash err: %v", err)
+		}
 		if int(utxo.Index) >= len(tx.Outputs) {
 			return nil, fmt.Errorf("UTXO index %d is out of bounds for transaction %s", utxo.Index, string(utxo.TxHash))
 		}

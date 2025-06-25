@@ -20,7 +20,7 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 		toPubKey *ecdsa.PublicKey
 		amount   *types.Amount
 		utxos    []*types.UTXO
-		txPool   service.TxPool
+		txPool   service.TransactionStore
 	}
 	tests := []struct {
 		name       string
@@ -36,13 +36,13 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 				require.NoError(t1, err)
 				to, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 				require.NoError(t1, err)
-				pool := NewMockTxPool(ctrl)
+				txStore := NewMockTransactionStore(ctrl)
 				tx1 := types.NewTransaction().WithOutput(types.NewAmount(30), &from.PublicKey)
-				pool.EXPECT().Get(tx1.GetHash()).Return(tx1).Times(1)
+				txStore.EXPECT().Get(tx1.GetHash()).Return(tx1, nil).Times(1)
 				tx2 := types.NewTransaction().WithOutput(types.NewAmount(50), &from.PublicKey)
-				pool.EXPECT().Get(tx2.GetHash()).Return(tx2).Times(1)
+				txStore.EXPECT().Get(tx2.GetHash()).Return(tx2, nil).Times(1)
 				tx3 := types.NewTransaction().WithOutput(types.NewAmount(20), &from.PublicKey)
-				pool.EXPECT().Get(tx3.GetHash()).Return(tx3).Times(1)
+				txStore.EXPECT().Get(tx3.GetHash()).Return(tx3, nil).Times(1)
 
 				return args{
 					privKey:  from,
@@ -62,7 +62,7 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 							Index:  0,
 						},
 					},
-					txPool: pool,
+					txPool: txStore,
 				}
 			},
 			transactor: func(args args) *service.Transactor {
@@ -85,7 +85,7 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 				fakeFrom.PublicKey = from.PublicKey // make fakeFrom have the same public key as "	from"
 				to, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 				require.NoError(t1, err)
-				pool := NewMockTxPool(ctrl)
+				pool := NewMockTransactionStore(ctrl)
 				utxoTx1 := &types.UTXO{
 					TxHash: types.NewTransaction().GetHash(),
 					Index:  0,
@@ -99,7 +99,7 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 					SignatureS: s,
 					NSequence:  0,
 				})
-				pool.EXPECT().Get(tx1.GetHash()).Return(tx1).Times(1)
+				pool.EXPECT().Get(tx1.GetHash()).Return(tx1, nil).Times(1)
 
 				return args{
 					privKey:  fakeFrom,
