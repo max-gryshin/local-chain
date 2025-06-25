@@ -2,7 +2,6 @@ package service
 
 import (
 	"fmt"
-	"local-chain/internal/adapters/outbound/leveldb"
 	"time"
 
 	"local-chain/internal"
@@ -10,18 +9,23 @@ import (
 	"local-chain/internal/types"
 )
 
+type BlockchainStore interface {
+	Get() ([]*types.Block, error)
+	Put(*types.Block) error
+}
+
 // Blockchain represents a private blockchain.
 type Blockchain struct {
-	BlockchainStore  leveldb.BlockchainStore
-	TransactionStore leveldb.TransactionStore
+	BlockchainStore  BlockchainStore
+	TransactionStore TransactionStore
 	Blocks           []*types.Block
 }
 
 // NewBlockchain creates a new blockchain with a genesis block.
-func NewBlockchain(blockchainStore *leveldb.BlockchainStore, txStore *leveldb.TransactionStore) *Blockchain {
+func NewBlockchain(blockchainStore BlockchainStore, txStore TransactionStore) *Blockchain {
 	b := &Blockchain{
-		BlockchainStore:  *blockchainStore,
-		TransactionStore: *txStore,
+		BlockchainStore:  blockchainStore,
+		TransactionStore: txStore,
 	}
 	blocks, err := b.BlockchainStore.Get()
 	if err != nil {

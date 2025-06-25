@@ -48,3 +48,17 @@ func (mr *MockTransactionStoreMockRecorder) Get(txHash interface{}) *gomock.Call
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockTransactionStore)(nil).Get), txHash)
 }
+
+// Put mocks base method.
+func (m *MockTransactionStore) Put(arg0 *types.Transaction) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Put", arg0)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Put indicates an expected call of Put.
+func (mr *MockTransactionStoreMockRecorder) Put(arg0 interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Put", reflect.TypeOf((*MockTransactionStore)(nil).Put), arg0)
+}
