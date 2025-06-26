@@ -22,3 +22,6 @@ todo.md
 *junit-report.xml
 *coverage.txt
 *coverage.xml
+*modules.xml
+*vcs.xml
+*workspace.xml
