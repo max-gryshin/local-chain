@@ -1,0 +1,12 @@
+version: v1
+name: buf.build/local-chain/rpc
+build:
+  excludes:
+    - vendor
+breaking:
+  use:
+    - FILE
+lint:
+  use:
+    - DEFAULT
+  allow_comment_ignores: true
