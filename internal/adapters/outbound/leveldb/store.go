@@ -10,7 +10,6 @@ type Database interface {
 }
 
 type Store struct {
-	db          Database
 	transaction *TransactionStore
 	blockchain  *BlockchainStore
 	utxo        *UtxoStore
@@ -18,7 +17,6 @@ type Store struct {
 
 func New(db Database) *Store {
 	return &Store{
-		db:          db,
 		transaction: NewTransactionStore(db),
 		blockchain:  NewBlockchainStore(db),
 		utxo:        NewUtxoStore(db),

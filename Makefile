@@ -1,3 +1,4 @@
+REQUIRED_BUF_VERSION := latest
 REQUIRED_GOLANG_CI_LINT_VERSION := 2.1.6
 INSTALLED_GOLANG_CI_LINT_VERSION := $(shell golangci-lint --version 2> /dev/null | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' | head -1 )
 CODE := $(shell find . -type f -name '*.go' -not -name '*mock.go' -not -name '*mock_test.go' -not -name '*_gen.go' -not -name '*.pb.go' -not -path "./vendor/*" -not -path "./output/*")
@@ -16,6 +17,33 @@ endif
 
 REQUIRED_MOCKGEN_VERSION ?= v1.6.0
 INSTALLED_MOCKGEN_VERSION := $(shell mockgen --version 2> /dev/null)
+
+.PHONY: proto
+proto: update lint generate format
+
+.PHONY: update
+update: install-buf
+	@buf dep update
+
+.PHONY: generate
+generate: install-buf clean
+ifdef JQ_INSTALLED
+		@buf build --exclude-source-info -o -#format=json | jq '.file[] | .name'
+else
+		@buf build --exclude-source-info
+endif
+	@buf generate
+	@go mod tidy
+
+.PHONY: install-buf
+install-buf:
+ifndef BUF_INSTALLED
+	@go install github.com/bufbuild/buf/cmd/buf@$(REQUIRED_BUF_VERSION)
+endif
+
+.PHONY:
+clean:
+	@rm -fr gen
 
 .PHONY: test
 test: unit-test
