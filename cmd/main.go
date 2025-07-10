@@ -12,9 +12,12 @@ import (
 	transport2 "local-chain/transport/gen/transport"
 	"log"
 	"log/slog"
+	"net"
 	"os"
+	"time"
 
 	transport "github.com/Jille/raft-grpc-transport"
+	"github.com/gotidy/ptr"
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -49,7 +52,7 @@ func main() {
 
 	db, err := leveldb.OpenFile(fsmDbPath, nil)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	defer db.Close() // nolint:errcheck
 
@@ -58,28 +61,38 @@ func main() {
 
 	logStore, err := raftboltdb.NewBoltStore(logDbPath)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	defer logStore.Close() // nolint:errcheck
 	stableStore, err := raftboltdb.NewBoltStore(stableDbPath)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
 	defer stableStore.Close() // nolint:errcheck
 
 	snapshotStore, err := raft.NewFileSnapshotStore(snapshotDbPath, 3, os.Stderr)
 	if err != nil {
-		panic(err)
+		log.Fatal(err)
 	}
-	transportManager := transport.New("localhost", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
 
+	tr, err := raft.NewTCPTransport(
+		ptr.ToString(myAddr),
+		&net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: 8001},
+		3,
+		10*time.Second,
+		os.Stderr,
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+	_ = transport.New("localhost", []grpc.DialOption{grpc.WithTransportCredentials(insecure.NewCredentials())})
 	r, err := raft.NewRaft(
 		raft.DefaultConfig(),
 		fsmStore,
 		logStore,
 		stableStore,
 		snapshotStore,
-		transportManager.Transport(),
+		tr,
 	)
 	if err != nil {
 		log.Fatal(err)
@@ -98,16 +111,16 @@ func main() {
 		}
 	}
 	transactor := service.NewTransactor(store.Transaction())
-	tm := mapper.NewTransacitonMapper(transactor)
+	tm := mapper.NewTransactionMapper()
 	txPool := inMem.NewTxPool()
-	localChainManager := grpc2.NewLocalChainManager(r, raft.ServerID(*raftId), txPool, tm)
+	localChainManager := grpc2.NewLocalChainManager(r, raft.ServerID(*raftId), txPool, tm, transactor)
 
 	grpcRunner := runners.New(9001, func(s *grpc.Server) {
 		transport2.RegisterLocalChainManagerServer(s, localChainManager)
 	}, *logger)
 
 	blockchain := service.NewBlockchain(store.Blockchain(), store.Transaction())
-	blockchainScheduler := runners.NewBlockchainScheduler(blockchain, txPool)
+	blockchainScheduler := runners.NewBlockchainScheduler(r, blockchain, txPool)
 
 	runnable := []pkg.Runner{
 		grpcRunner,
@@ -117,7 +130,7 @@ func main() {
 	firstError := pkg.Run(ctx, logger, runnable...)
 
 	if firstError != nil {
-		logger.With(firstError).Error("runner finished with an error")
+		logger.Error("runner finished with an error", slog.Any("error", firstError))
 	} else {
 		logger.Info("runner finished successfully")
 	}

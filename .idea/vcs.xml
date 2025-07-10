@@ -4,5 +4,7 @@
     <mapping directory="" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../algorithms_and_data_structures" vcs="Git" />
     <mapping directory="$PROJECT_DIR$/../go-ethereum" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../raft-grpc-example" vcs="Git" />
+    <mapping directory="$PROJECT_DIR$/../vault" vcs="Git" />
   </component>
 </project>

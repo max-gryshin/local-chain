@@ -9,21 +9,13 @@ import (
 	grpcPkg "local-chain/transport/gen/transport"
 )
 
-type Transactor interface {
-	CreateTx(privKey *ecdsa.PrivateKey, toPubKey *ecdsa.PublicKey, amount types.Amount, utxos []*types.UTXO) (*types.Transaction, error)
+type TransactionMapper struct{}
+
+func NewTransactionMapper() *TransactionMapper {
+	return &TransactionMapper{}
 }
 
-type TransactionMapper struct {
-	transactor Transactor
-}
-
-func NewTransacitonMapper(transactor Transactor) *TransactionMapper {
-	return &TransactionMapper{
-		transactor: transactor,
-	}
-}
-
-func (tp *TransactionMapper) RpcToTransaction(req *grpcPkg.AddTransactionRequest) (*types.Transaction, error) {
+func (tp *TransactionMapper) RpcToTransaction(req *grpcPkg.AddTransactionRequest) (*types.TransactionRequest, error) {
 	amount := types.Amount{Value: req.GetAmount().GetValue(), Unit: req.GetAmount().GetUnit()}
 	publicBlock, _ := pem.Decode([]byte(req.Receiver))
 	if publicBlock == nil || publicBlock.Type != "PUBLIC KEY" {
@@ -46,11 +38,13 @@ func (tp *TransactionMapper) RpcToTransaction(req *grpcPkg.AddTransactionRequest
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse private key: %v", err)
 	}
-	tx, err := tp.transactor.CreateTx(sender, receiver, amount, rpcToUtxos(req.GetUtxos()))
-	if err != nil {
-		return nil, fmt.Errorf("transactor.CreateTx: %w", err)
-	}
-	return tx, nil
+
+	return &types.TransactionRequest{
+		Sender:   sender,
+		Receiver: receiver,
+		Amount:   amount,
+		Utxos:    rpcToUtxos(req.GetUtxos()),
+	}, nil
 }
 
 func rpcToUtxos(rpcUtxos []*grpcPkg.Utxo) []*types.UTXO {

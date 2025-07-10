@@ -2,7 +2,6 @@ package grpc
 
 import (
 	"context"
-	"crypto/ecdsa"
 	"errors"
 	"fmt"
 	"time"
@@ -27,12 +26,12 @@ type txPool interface {
 	AddTx(tx *types.Transaction) error
 }
 
-type transactionMapper interface {
-	RpcToTransaction(req *grpcPkg.AddTransactionRequest) (*types.Transaction, error)
+type Transactor interface {
+	CreateTx(txReq *types.TransactionRequest) (*types.Transaction, error)
 }
 
-type Transactor interface {
-	CreateTx(privKey *ecdsa.PrivateKey, toPubKey *ecdsa.PublicKey, amount types.Amount, utxos []*types.UTXO) (*types.Transaction, error)
+type transactionMapper interface {
+	RpcToTransaction(req *grpcPkg.AddTransactionRequest) (*types.TransactionRequest, error)
 }
 
 type LocalChainManager struct {
@@ -41,6 +40,7 @@ type LocalChainManager struct {
 	txPool   txPool
 	tm       transactionMapper
 	grpcPkg.UnimplementedLocalChainManagerServer
+	transactor Transactor
 }
 
 func NewLocalChainManager(
@@ -48,12 +48,14 @@ func NewLocalChainManager(
 	serverID raft.ServerID,
 	txPool txPool,
 	tm transactionMapper,
+	transactor Transactor,
 ) *LocalChainManager {
 	return &LocalChainManager{
-		raftAPI:  raftAPI,
-		serverID: serverID,
-		txPool:   txPool,
-		tm:       tm,
+		raftAPI:    raftAPI,
+		serverID:   serverID,
+		txPool:     txPool,
+		tm:         tm,
+		transactor: transactor,
 	}
 }
 
@@ -124,9 +126,13 @@ func (s *LocalChainManager) AddTransaction(ctx context.Context, req *grpcPkg.Add
 		}
 		return client.AddTransaction(ctx, req)
 	}
-	tx, err := s.tm.RpcToTransaction(req)
+	txReq, err := s.tm.RpcToTransaction(req)
 	if err != nil {
 		return &grpcPkg.AddTransactionResponse{Success: false}, fmt.Errorf("failed to marshal add transaction request: %w", err)
+	}
+	tx, err := s.transactor.CreateTx(txReq)
+	if err != nil {
+		return nil, fmt.Errorf("transactor.CreateTx: %w", err)
 	}
 	err = s.txPool.AddTx(tx)
 	if err != nil {
@@ -136,7 +142,7 @@ func (s *LocalChainManager) AddTransaction(ctx context.Context, req *grpcPkg.Add
 	// validate req transaction* can skip it to speed up the implementation
 	// transactor.CreateTx
 	// txPool.AddTx
-	// implement scheduler which with start a process of creating a new block
+	// implement scheduler which will start a process of creating a new block
 	// scheduler calls blockchain.AddBlock with the pool of transactions
 	// and broadcast it to all peers by raft.Apply
 

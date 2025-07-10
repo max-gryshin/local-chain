@@ -10,7 +10,9 @@
       <module fileurl="file://$PROJECT_DIR$/.idea/local-chain.iml" filepath="$PROJECT_DIR$/.idea/local-chain.iml" />
       <module fileurl="file://$PROJECT_DIR$/../medical-db/.idea/medical-db.iml" filepath="$PROJECT_DIR$/../medical-db/.idea/medical-db.iml" />
       <module fileurl="file://$USER_HOME$/GolandProjects/messenger/.idea/messenger.iml" filepath="$USER_HOME$/GolandProjects/messenger/.idea/messenger.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../raft-grpc-example/.idea/raft-grpc-example.iml" filepath="$PROJECT_DIR$/../raft-grpc-example/.idea/raft-grpc-example.iml" />
       <module fileurl="file://$PROJECT_DIR$/../stskp_sport_api/.idea/stskp_sport_api.iml" filepath="$PROJECT_DIR$/../stskp_sport_api/.idea/stskp_sport_api.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../vault/.idea/vault.iml" filepath="$PROJECT_DIR$/../vault/.idea/vault.iml" />
     </modules>
   </component>
 </project>

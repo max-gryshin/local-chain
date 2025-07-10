@@ -151,3 +151,10 @@ func NewAmount(value uint64) *Amount {
 		Unit:  CurrencyUnit,
 	}
 }
+
+type TransactionRequest struct {
+	Sender   *ecdsa.PrivateKey
+	Receiver *ecdsa.PublicKey
+	Amount   Amount
+	Utxos    []*UTXO
+}

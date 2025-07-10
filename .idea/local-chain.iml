@@ -17,5 +17,7 @@
     <orderEntry type="module" module-name="algorithms_and_data_structures" />
     <orderEntry type="module" module-name="medical-db" />
     <orderEntry type="module" module-name="stskp_sport_api" />
+    <orderEntry type="module" module-name="raft-grpc-example" />
+    <orderEntry type="module" module-name="vault" />
   </component>
 </module>
