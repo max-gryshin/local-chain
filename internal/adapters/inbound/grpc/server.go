@@ -23,7 +23,7 @@ type RaftAPI interface {
 }
 
 type txPool interface {
-	AddTx(tx *types.Transaction) error
+	AddTx(tx *types.Transaction)
 }
 
 type Transactor interface {
@@ -134,16 +134,13 @@ func (s *LocalChainManager) AddTransaction(ctx context.Context, req *grpcPkg.Add
 	if err != nil {
 		return nil, fmt.Errorf("transactor.CreateTx: %w", err)
 	}
-	err = s.txPool.AddTx(tx)
-	if err != nil {
-		return &grpcPkg.AddTransactionResponse{Success: false}, fmt.Errorf("failed to add transaction to the pool: %w", err)
-	}
+	s.txPool.AddTx(tx)
 	// todo:
 	// validate req transaction* can skip it to speed up the implementation
 	// transactor.CreateTx
 	// txPool.AddTx
 	// implement scheduler which will start a process of creating a new block
-	// scheduler calls blockchain.AddBlock with the pool of transactions
+	// scheduler calls blockchain.CreateBlock with the pool of transactions
 	// and broadcast it to all peers by raft.Apply
 
 	return &grpcPkg.AddTransactionResponse{Success: true}, nil

@@ -7,6 +7,18 @@ REQUIRED_GO_IMPORTS_VERSION ?= v0.3.0
 GO_IMPORTS := $(shell command -v goimports 2> /dev/null)
 REQUIRED_GOFUMPT_VERSION ?= v0.6.0
 PKGS := $(shell go list ./...)
+CGO_ENABLED ?= 0
+APPS = local-chain
+PREFIX ?= bin/
+
+$(APPS):
+	CGO_ENABLED=$(CGO_ENABLED) go build -mod=vendor -installsuffix cgo -o $(PREFIX)$@ ./cmd/$@
+
+.PHONY: build
+build: build-apps
+
+.PHONY: build-apps $(APPS)
+build-apps: $(APPS)
 
 .PHONY: lint
 lint:

@@ -1,11 +1,13 @@
 package leveldb
 
 import (
+	"errors"
 	"fmt"
 
 	"local-chain/internal/types"
 
 	"github.com/ethereum/go-ethereum/rlp"
+	leveldberrors "github.com/syndtr/goleveldb/leveldb/errors"
 )
 
 const BlockchainKey = "blockchain"
@@ -20,10 +22,11 @@ func NewBlockchainStore(conn Database) *BlockchainStore {
 	}
 }
 
+// todo store as map, key is block hash
 func (s *BlockchainStore) Get() ([]*types.Block, error) {
 	raw, err := s.db.Get([]byte(BlockchainKey), nil)
 	if err != nil {
-		return nil, fmt.Errorf("get blockchain error: %w", err)
+		return nil, fmt.Errorf("BlockchainStore.Get get blockchain error: %w", err)
 	}
 
 	var blocks []*types.Block
@@ -35,10 +38,11 @@ func (s *BlockchainStore) Get() ([]*types.Block, error) {
 }
 
 func (s *BlockchainStore) Put(block *types.Block) error {
+	var blockchain []*types.Block
 	// todo: think about cache
 	blockchain, err := s.Get()
-	if err != nil {
-		return fmt.Errorf("get blockchain error: %w", err)
+	if err != nil && !errors.Is(err, leveldberrors.ErrNotFound) {
+		return fmt.Errorf("BlockchainStore.Put get blockchain error: %w", err)
 	}
 
 	blockchain = append(blockchain, block)

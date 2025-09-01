@@ -16,18 +16,29 @@ type Fsm struct {
 }
 
 func New(store *leveldb.Store) *Fsm {
-	return &Fsm{
-		store: store,
-	}
+	return &Fsm{store: store}
 }
 
 func (f *Fsm) Apply(log *raft.Log) interface{} {
 	switch log.Type {
 	case raft.LogCommand:
-		// todo:
-		// switch on types of messages (block, transaction, utxo, etc.)
-		// deserialize log into msg
-		// put msg into appropriate store
+		envelope, err := types.EnvelopeFromBytes(log.Data)
+		if err != nil {
+			return err
+		}
+		switch envelope.Type {
+		case types.EnvelopeTypeBlock:
+			block := &types.Block{}
+			if err = block.FromBytes(envelope.Data); err != nil {
+				return err
+			}
+			// should we check if the block already exists?
+			if err = f.store.Blockchain().Put(block); err != nil {
+				return err
+			}
+		case types.EnvelopeTypeTransaction:
+
+		}
 		return nil
 	default:
 		return nil

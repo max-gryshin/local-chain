@@ -45,13 +45,14 @@ func NewBlockchain(blockchainStore BlockchainStore, txStore TransactionStore) *B
 	return b
 }
 
-// AddBlock adds a new block to the blockchain.
-func (bc *Blockchain) AddBlock(txs []*types.Transaction) error {
+// CreateBlock adds a new block to the blockchain.
+func (bc *Blockchain) CreateBlock(txs []*types.Transaction) (*types.Block, error) {
+	//todo: get last block from store
 	prevBlock := bc.Blocks[len(bc.Blocks)-1]
 
 	merkleTree, err := internal.NewMerkleTree(txs)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	newBlock := &types.Block{
@@ -64,16 +65,16 @@ func (bc *Blockchain) AddBlock(txs []*types.Transaction) error {
 
 	err = bc.BlockchainStore.Put(newBlock)
 	if err != nil {
-		return fmt.Errorf("failed to put new block: %w", err)
+		return nil, fmt.Errorf("failed to put new block: %w", err)
 	}
 	blockHash := newBlock.ComputeHash()
 	for _, tx := range txs {
 		tx.BlockHash = blockHash
 		err = bc.TransactionStore.Put(tx)
 		if err != nil {
-			return fmt.Errorf("failed to put transaction: %w", err)
+			return nil, fmt.Errorf("failed to put transaction: %w", err)
 		}
 	}
 
-	return nil
+	return newBlock, nil
 }

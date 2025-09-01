@@ -2,21 +2,30 @@ package inMem
 
 import "local-chain/internal/types"
 
+type TxPoolMap map[string]*types.Transaction
+
+func (pool TxPoolMap) InSlice() []*types.Transaction {
+	txs := make([]*types.Transaction, 0, len(pool))
+	for _, tx := range pool {
+		txs = append(txs, tx)
+	}
+	return txs
+}
+
 type TxPool struct {
-	pool map[string]*types.Transaction
+	pool TxPoolMap
 }
 
 func NewTxPool() *TxPool {
 	return &TxPool{
-		pool: make(map[string]*types.Transaction),
+		pool: make(TxPoolMap),
 	}
 }
 
-func (tp TxPool) AddTx(tx *types.Transaction) error {
+func (tp TxPool) AddTx(tx *types.Transaction) {
 	tp.pool[string(tx.GetHash())] = tx
-	return nil
 }
 
-func (tp TxPool) GetPool() map[string]*types.Transaction {
+func (tp TxPool) GetPool() TxPoolMap {
 	return tp.pool
 }

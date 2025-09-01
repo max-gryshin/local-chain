@@ -17,6 +17,9 @@
 
 todo.md
 
+./bin/*
+./db/*
+
 *unit-cover.log
 *unit-test.log
 *junit-report.xml
