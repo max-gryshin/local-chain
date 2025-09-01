@@ -1,0 +1,33 @@
+package types
+
+import "github.com/ethereum/go-ethereum/rlp"
+
+type EnvelopeType int
+
+const (
+	EnvelopeTypeBlock = iota
+	EnvelopeTypeTransaction
+)
+
+type Envelope struct {
+	Type EnvelopeType
+	Data []byte
+}
+
+func NewEnvelope(t EnvelopeType, data []byte) *Envelope {
+	return &Envelope{
+		Type: t,
+		Data: data,
+	}
+}
+
+func (e *Envelope) ToBytes() ([]byte, error) {
+	return rlp.EncodeToBytes(e)
+}
+
+func EnvelopeFromBytes(data []byte) (*Envelope, error) {
+	envelope := &Envelope{}
+	err := rlp.DecodeBytes(data, envelope)
+
+	return envelope, err
+}

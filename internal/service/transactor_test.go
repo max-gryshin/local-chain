@@ -16,11 +16,8 @@ import (
 
 func TestTransactor_CreateTx(t1 *testing.T) {
 	type args struct {
-		privKey  *ecdsa.PrivateKey
-		toPubKey *ecdsa.PublicKey
-		amount   *types.Amount
-		utxos    []*types.UTXO
-		txPool   service.TransactionStore
+		txReq  *types.TransactionRequest
+		txPool service.TransactionStore
 	}
 	tests := []struct {
 		name       string
@@ -45,21 +42,23 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 				txStore.EXPECT().Get(tx3.GetHash()).Return(tx3, nil).Times(1)
 
 				return args{
-					privKey:  from,
-					toPubKey: &to.PublicKey,
-					amount:   types.NewAmount(100),
-					utxos: []*types.UTXO{
-						{
-							TxHash: tx1.GetHash(),
-							Index:  0,
-						},
-						{
-							TxHash: tx2.GetHash(),
-							Index:  0,
-						},
-						{
-							TxHash: tx3.GetHash(),
-							Index:  0,
+					txReq: &types.TransactionRequest{
+						Sender:   from,
+						Receiver: &to.PublicKey,
+						Amount:   *types.NewAmount(100),
+						Utxos: []*types.UTXO{
+							{
+								TxHash: tx1.GetHash(),
+								Index:  0,
+							},
+							{
+								TxHash: tx2.GetHash(),
+								Index:  0,
+							},
+							{
+								TxHash: tx3.GetHash(),
+								Index:  0,
+							},
 						},
 					},
 					txPool: txStore,
@@ -71,7 +70,7 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 				return t
 			},
 			want: func(args args) *types.Transaction {
-				return types.NewTransaction().WithOutput(types.NewAmount(100), args.toPubKey)
+				return types.NewTransaction().WithOutput(types.NewAmount(100), args.txReq.Receiver)
 			},
 			wantErr: false,
 		},
@@ -102,13 +101,15 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 				pool.EXPECT().Get(tx1.GetHash()).Return(tx1, nil).Times(1)
 
 				return args{
-					privKey:  fakeFrom,
-					toPubKey: &to.PublicKey,
-					amount:   types.NewAmount(100),
-					utxos: []*types.UTXO{
-						{
-							TxHash: tx1.GetHash(),
-							Index:  0,
+					txReq: &types.TransactionRequest{
+						Sender:   fakeFrom,
+						Receiver: &to.PublicKey,
+						Amount:   *types.NewAmount(100),
+						Utxos: []*types.UTXO{
+							{
+								TxHash: tx1.GetHash(),
+								Index:  0,
+							},
 						},
 					},
 					txPool: pool,
@@ -120,7 +121,7 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 				return t
 			},
 			want: func(args args) *types.Transaction {
-				return types.NewTransaction().WithOutput(types.NewAmount(100), args.toPubKey)
+				return types.NewTransaction().WithOutput(types.NewAmount(100), args.txReq.Receiver)
 			},
 			wantErr: true,
 		},
@@ -130,7 +131,7 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 			ctrl := gomock.NewController(t1)
 			tArgs := tt.args(ctrl)
 			transactor := tt.transactor(tArgs)
-			newTx, err := transactor.CreateTx(tArgs.privKey, tArgs.toPubKey, *tArgs.amount, tArgs.utxos)
+			newTx, err := transactor.CreateTx(tArgs.txReq)
 			if (err != nil) != tt.wantErr {
 				t1.Errorf("CreateTx() error = %v, wantErr %v", err, tt.wantErr)
 				return
