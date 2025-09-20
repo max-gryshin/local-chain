@@ -26,7 +26,7 @@ func NewBlockchainStore(conn Database) *BlockchainStore {
 func (s *BlockchainStore) Get() ([]*types.Block, error) {
 	raw, err := s.db.Get([]byte(BlockchainKey), nil)
 	if err != nil {
-		return nil, fmt.Errorf("BlockchainStore.Get get blockchain error: %w", err)
+		return nil, fmt.Errorf("blockchainStore.Get get blockchain error: %w", err)
 	}
 
 	var blocks []*types.Block
@@ -42,7 +42,7 @@ func (s *BlockchainStore) Put(block *types.Block) error {
 	// todo: think about cache
 	blockchain, err := s.Get()
 	if err != nil && !errors.Is(err, leveldberrors.ErrNotFound) {
-		return fmt.Errorf("BlockchainStore.Put get blockchain error: %w", err)
+		return fmt.Errorf("blockchainStore.Put get blockchain error: %w", err)
 	}
 
 	blockchain = append(blockchain, block)

@@ -151,8 +151,8 @@ func main() {
 		transport2.RegisterLocalChainManagerServer(s, localChainManager)
 	}, *logger)
 
-	blockchain := service.NewBlockchain(store.Blockchain(), store.Transaction())
-	blockchainScheduler := runners.NewBlockchainScheduler(r, blockchain, txPool)
+	blockchain := service.NewBlockchain(r, store.Blockchain(), store.Transaction(), txPool)
+	blockchainScheduler := runners.NewBlockchainScheduler(blockchain)
 
 	runnable := []pkg.Runner{
 		grpcRunner,

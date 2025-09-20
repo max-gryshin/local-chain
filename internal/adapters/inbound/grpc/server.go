@@ -60,6 +60,9 @@ func NewLocalChainManager(
 }
 
 func (s *LocalChainManager) AddPeer(ctx context.Context, req *grpcPkg.AddPeerRequest) (*grpcPkg.AddPeerResponse, error) {
+	if req.GetId() == "" || req.GetAddress() == "" {
+		return &grpcPkg.AddPeerResponse{Success: false}, errors.New("peer ID and address must be provided")
+	}
 	leaderServer, leaderID := s.raftAPI.LeaderWithID()
 	if leaderID != s.serverID {
 		client, err := s.leaderClient(string(leaderServer))
@@ -67,9 +70,6 @@ func (s *LocalChainManager) AddPeer(ctx context.Context, req *grpcPkg.AddPeerReq
 			return &grpcPkg.AddPeerResponse{Success: false}, errors.New("failed to connect to leader")
 		}
 		return client.AddPeer(ctx, req)
-	}
-	if req.GetId() == "" || req.GetAddress() == "" {
-		return &grpcPkg.AddPeerResponse{Success: false}, errors.New("peer ID and address must be provided")
 	}
 	future := s.raftAPI.AddNonvoter(raft.ServerID(req.GetId()), raft.ServerAddress(req.GetAddress()), 0, 0)
 	if err := future.Error(); err != nil {
@@ -80,6 +80,9 @@ func (s *LocalChainManager) AddPeer(ctx context.Context, req *grpcPkg.AddPeerReq
 }
 
 func (s *LocalChainManager) RemovePeer(ctx context.Context, req *grpcPkg.RemovePeerRequest) (*grpcPkg.RemovePeerResponse, error) {
+	if req.GetId() == "" || req.GetAddress() == "" {
+		return &grpcPkg.RemovePeerResponse{Success: false}, errors.New("peer ID and address must be provided")
+	}
 	leaderServer, leaderID := s.raftAPI.LeaderWithID()
 	if leaderID != s.serverID {
 		client, err := s.leaderClient(string(leaderServer))
@@ -87,9 +90,6 @@ func (s *LocalChainManager) RemovePeer(ctx context.Context, req *grpcPkg.RemoveP
 			return &grpcPkg.RemovePeerResponse{Success: false}, errors.New("failed to connect to leader")
 		}
 		return client.RemovePeer(ctx, req)
-	}
-	if req.GetId() == "" || req.GetAddress() == "" {
-		return &grpcPkg.RemovePeerResponse{Success: false}, errors.New("peer ID and address must be provided")
 	}
 	future := s.raftAPI.RemoveServer(raft.ServerID(req.GetId()), 0, 0)
 	if err := future.Error(); err != nil {

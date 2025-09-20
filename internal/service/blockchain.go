@@ -2,11 +2,18 @@ package service
 
 import (
 	"fmt"
+	"local-chain/internal/adapters/outbound/inMem"
 	"time"
 
 	"local-chain/internal"
 
 	"local-chain/internal/types"
+
+	"github.com/hashicorp/raft"
+)
+
+const (
+	applyTimeout = 1 * time.Minute
 )
 
 type BlockchainStore interface {
@@ -14,20 +21,38 @@ type BlockchainStore interface {
 	Put(*types.Block) error
 }
 
+type txPool interface {
+	GetPool() inMem.TxPoolMap
+	Purge()
+}
+
+type RaftAPI interface {
+	Apply(cmd []byte, timeout time.Duration) raft.ApplyFuture
+}
+
 // Blockchain represents a private blockchain.
 type Blockchain struct {
-	BlockchainStore  BlockchainStore
-	TransactionStore TransactionStore
+	raftApi          RaftAPI
+	blockchainStore  BlockchainStore
+	transactionStore TransactionStore
 	Blocks           []*types.Block
+	txPool           txPool
 }
 
 // NewBlockchain creates a new blockchain with a genesis block.
-func NewBlockchain(blockchainStore BlockchainStore, txStore TransactionStore) *Blockchain {
+func NewBlockchain(
+	raftApi RaftAPI,
+	blockchainStore BlockchainStore,
+	txStore TransactionStore,
+	txPool txPool,
+) *Blockchain {
 	b := &Blockchain{
-		BlockchainStore:  blockchainStore,
-		TransactionStore: txStore,
+		raftApi:          raftApi,
+		blockchainStore:  blockchainStore,
+		transactionStore: txStore,
+		txPool:           txPool,
 	}
-	blocks, err := b.BlockchainStore.Get()
+	blocks, err := b.blockchainStore.Get()
 	if err != nil {
 		panic(err)
 	}
@@ -46,13 +71,18 @@ func NewBlockchain(blockchainStore BlockchainStore, txStore TransactionStore) *B
 }
 
 // CreateBlock adds a new block to the blockchain.
-func (bc *Blockchain) CreateBlock(txs []*types.Transaction) (*types.Block, error) {
+func (bc *Blockchain) CreateBlock() error {
 	//todo: get last block from store
 	prevBlock := bc.Blocks[len(bc.Blocks)-1]
 
+	txs := bc.txPool.GetPool().AsSlice()
+	if len(txs) == 0 {
+		return nil
+	}
+
 	merkleTree, err := internal.NewMerkleTree(txs)
 	if err != nil {
-		return nil, err
+		return fmt.Errorf("failed to create merkle tree: %w", err)
 	}
 
 	newBlock := &types.Block{
@@ -63,18 +93,31 @@ func (bc *Blockchain) CreateBlock(txs []*types.Transaction) (*types.Block, error
 	//todo: get blocks from store
 	bc.Blocks = append(bc.Blocks, newBlock)
 
-	err = bc.BlockchainStore.Put(newBlock)
+	err = bc.blockchainStore.Put(newBlock)
 	if err != nil {
-		return nil, fmt.Errorf("failed to put new block: %w", err)
+		return fmt.Errorf("failed to put new block: %w", err)
 	}
 	blockHash := newBlock.ComputeHash()
 	for _, tx := range txs {
 		tx.BlockHash = blockHash
-		err = bc.TransactionStore.Put(tx)
+		err = bc.transactionStore.Put(tx)
 		if err != nil {
-			return nil, fmt.Errorf("failed to put transaction: %w", err)
+			return fmt.Errorf("failed to put transaction: %w", err)
 		}
 	}
 
-	return newBlock, nil
+	blockBytes, err := newBlock.ToBytes()
+	if err != nil {
+		return fmt.Errorf("error while encoding block: %w", err)
+	}
+	envelopeBytes, err := types.NewEnvelope(types.EnvelopeTypeBlock, blockBytes).ToBytes()
+	if err != nil {
+		return fmt.Errorf("error while encoding envelope: %w", err)
+	}
+	if err := bc.raftApi.Apply(envelopeBytes, applyTimeout).Error(); err != nil {
+		return fmt.Errorf("error while applying block to raft: %w", err)
+	}
+	bc.txPool.Purge()
+
+	return nil
 }
