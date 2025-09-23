@@ -14,6 +14,8 @@ type Block struct {
 	MerkleRoot []byte
 }
 
+type Blocks []*Block
+
 // ComputeHash computes the hash of a block.
 func (b *Block) ComputeHash() []byte {
 	hash := sha512.New()
@@ -28,5 +30,13 @@ func (b *Block) ToBytes() ([]byte, error) {
 }
 
 func (b *Block) FromBytes(data []byte) error {
+	return rlp.DecodeBytes(data, b)
+}
+
+func (b *Blocks) ToBytes() ([]byte, error) {
+	return rlp.EncodeToBytes(b)
+}
+
+func (b *Blocks) FromBytes(data []byte) error {
 	return rlp.DecodeBytes(data, b)
 }

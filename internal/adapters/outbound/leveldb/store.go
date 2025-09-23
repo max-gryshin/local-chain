@@ -7,6 +7,7 @@ import (
 type Database interface {
 	Get(key []byte, ro *opt.ReadOptions) (value []byte, err error)
 	Put(key, value []byte, wo *opt.WriteOptions) error
+	Delete(key []byte, wo *opt.WriteOptions) error
 }
 
 type Store struct {
