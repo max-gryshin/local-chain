@@ -5,8 +5,10 @@ import (
 	"crypto/x509"
 	"encoding/pem"
 	"fmt"
-	"local-chain/internal/types"
+
 	grpcPkg "local-chain/transport/gen/transport"
+
+	"local-chain/internal/types"
 )
 
 type TransactionMapper struct{}

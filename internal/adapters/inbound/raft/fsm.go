@@ -2,6 +2,7 @@ package raft
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 
 	"local-chain/internal/types"
@@ -30,11 +31,11 @@ func (f *Fsm) Apply(log *raft.Log) interface{} {
 		case types.EnvelopeTypeBlock:
 			block := &types.Block{}
 			if err = block.FromBytes(envelope.Data); err != nil {
-				return err
+				return fmt.Errorf("failed to decode block: %w", err)
 			}
 			// should we check if the block already exists?
 			if err = f.store.Blockchain().Put(block); err != nil {
-				return err
+				return fmt.Errorf("failed to save block: %w", err)
 			}
 		case types.EnvelopeTypeTransaction:
 

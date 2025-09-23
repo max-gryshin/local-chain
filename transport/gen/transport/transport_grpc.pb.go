@@ -18,194 +18,194 @@ import (
 // Requires gRPC-Go v1.32.0 or later.
 const _ = grpc.SupportPackageIsVersion7
 
-// LocalChainManagerClient is the client API for LocalChainManager service.
+// LocalChainClient is the client API for LocalChain service.
 //
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
-type LocalChainManagerClient interface {
+type LocalChainClient interface {
 	AddPeer(ctx context.Context, in *AddPeerRequest, opts ...grpc.CallOption) (*AddPeerResponse, error)
 	RemovePeer(ctx context.Context, in *RemovePeerRequest, opts ...grpc.CallOption) (*RemovePeerResponse, error)
 	AddVoter(ctx context.Context, in *AddVoterRequest, opts ...grpc.CallOption) (*AddVoterResponse, error)
 	AddTransaction(ctx context.Context, in *AddTransactionRequest, opts ...grpc.CallOption) (*AddTransactionResponse, error)
 }
 
-type localChainManagerClient struct {
+type localChainClient struct {
 	cc grpc.ClientConnInterface
 }
 
-func NewLocalChainManagerClient(cc grpc.ClientConnInterface) LocalChainManagerClient {
-	return &localChainManagerClient{cc}
+func NewLocalChainClient(cc grpc.ClientConnInterface) LocalChainClient {
+	return &localChainClient{cc}
 }
 
-func (c *localChainManagerClient) AddPeer(ctx context.Context, in *AddPeerRequest, opts ...grpc.CallOption) (*AddPeerResponse, error) {
+func (c *localChainClient) AddPeer(ctx context.Context, in *AddPeerRequest, opts ...grpc.CallOption) (*AddPeerResponse, error) {
 	out := new(AddPeerResponse)
-	err := c.cc.Invoke(ctx, "/LocalChainManager/AddPeer", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/LocalChain/AddPeer", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *localChainManagerClient) RemovePeer(ctx context.Context, in *RemovePeerRequest, opts ...grpc.CallOption) (*RemovePeerResponse, error) {
+func (c *localChainClient) RemovePeer(ctx context.Context, in *RemovePeerRequest, opts ...grpc.CallOption) (*RemovePeerResponse, error) {
 	out := new(RemovePeerResponse)
-	err := c.cc.Invoke(ctx, "/LocalChainManager/RemovePeer", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/LocalChain/RemovePeer", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *localChainManagerClient) AddVoter(ctx context.Context, in *AddVoterRequest, opts ...grpc.CallOption) (*AddVoterResponse, error) {
+func (c *localChainClient) AddVoter(ctx context.Context, in *AddVoterRequest, opts ...grpc.CallOption) (*AddVoterResponse, error) {
 	out := new(AddVoterResponse)
-	err := c.cc.Invoke(ctx, "/LocalChainManager/AddVoter", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/LocalChain/AddVoter", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-func (c *localChainManagerClient) AddTransaction(ctx context.Context, in *AddTransactionRequest, opts ...grpc.CallOption) (*AddTransactionResponse, error) {
+func (c *localChainClient) AddTransaction(ctx context.Context, in *AddTransactionRequest, opts ...grpc.CallOption) (*AddTransactionResponse, error) {
 	out := new(AddTransactionResponse)
-	err := c.cc.Invoke(ctx, "/LocalChainManager/AddTransaction", in, out, opts...)
+	err := c.cc.Invoke(ctx, "/LocalChain/AddTransaction", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
 	return out, nil
 }
 
-// LocalChainManagerServer is the server API for LocalChainManager service.
-// All implementations must embed UnimplementedLocalChainManagerServer
+// LocalChainServer is the server API for LocalChain service.
+// All implementations must embed UnimplementedLocalChainServer
 // for forward compatibility
-type LocalChainManagerServer interface {
+type LocalChainServer interface {
 	AddPeer(context.Context, *AddPeerRequest) (*AddPeerResponse, error)
 	RemovePeer(context.Context, *RemovePeerRequest) (*RemovePeerResponse, error)
 	AddVoter(context.Context, *AddVoterRequest) (*AddVoterResponse, error)
 	AddTransaction(context.Context, *AddTransactionRequest) (*AddTransactionResponse, error)
-	mustEmbedUnimplementedLocalChainManagerServer()
+	mustEmbedUnimplementedLocalChainServer()
 }
 
-// UnimplementedLocalChainManagerServer must be embedded to have forward compatible implementations.
-type UnimplementedLocalChainManagerServer struct {
+// UnimplementedLocalChainServer must be embedded to have forward compatible implementations.
+type UnimplementedLocalChainServer struct {
 }
 
-func (UnimplementedLocalChainManagerServer) AddPeer(context.Context, *AddPeerRequest) (*AddPeerResponse, error) {
+func (UnimplementedLocalChainServer) AddPeer(context.Context, *AddPeerRequest) (*AddPeerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddPeer not implemented")
 }
-func (UnimplementedLocalChainManagerServer) RemovePeer(context.Context, *RemovePeerRequest) (*RemovePeerResponse, error) {
+func (UnimplementedLocalChainServer) RemovePeer(context.Context, *RemovePeerRequest) (*RemovePeerResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method RemovePeer not implemented")
 }
-func (UnimplementedLocalChainManagerServer) AddVoter(context.Context, *AddVoterRequest) (*AddVoterResponse, error) {
+func (UnimplementedLocalChainServer) AddVoter(context.Context, *AddVoterRequest) (*AddVoterResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddVoter not implemented")
 }
-func (UnimplementedLocalChainManagerServer) AddTransaction(context.Context, *AddTransactionRequest) (*AddTransactionResponse, error) {
+func (UnimplementedLocalChainServer) AddTransaction(context.Context, *AddTransactionRequest) (*AddTransactionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddTransaction not implemented")
 }
-func (UnimplementedLocalChainManagerServer) mustEmbedUnimplementedLocalChainManagerServer() {}
+func (UnimplementedLocalChainServer) mustEmbedUnimplementedLocalChainServer() {}
 
-// UnsafeLocalChainManagerServer may be embedded to opt out of forward compatibility for this service.
-// Use of this interface is not recommended, as added methods to LocalChainManagerServer will
+// UnsafeLocalChainServer may be embedded to opt out of forward compatibility for this service.
+// Use of this interface is not recommended, as added methods to LocalChainServer will
 // result in compilation errors.
-type UnsafeLocalChainManagerServer interface {
-	mustEmbedUnimplementedLocalChainManagerServer()
+type UnsafeLocalChainServer interface {
+	mustEmbedUnimplementedLocalChainServer()
 }
 
-func RegisterLocalChainManagerServer(s grpc.ServiceRegistrar, srv LocalChainManagerServer) {
-	s.RegisterService(&LocalChainManager_ServiceDesc, srv)
+func RegisterLocalChainServer(s grpc.ServiceRegistrar, srv LocalChainServer) {
+	s.RegisterService(&LocalChain_ServiceDesc, srv)
 }
 
-func _LocalChainManager_AddPeer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _LocalChain_AddPeer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AddPeerRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LocalChainManagerServer).AddPeer(ctx, in)
+		return srv.(LocalChainServer).AddPeer(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/LocalChainManager/AddPeer",
+		FullMethod: "/LocalChain/AddPeer",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LocalChainManagerServer).AddPeer(ctx, req.(*AddPeerRequest))
+		return srv.(LocalChainServer).AddPeer(ctx, req.(*AddPeerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LocalChainManager_RemovePeer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _LocalChain_RemovePeer_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(RemovePeerRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LocalChainManagerServer).RemovePeer(ctx, in)
+		return srv.(LocalChainServer).RemovePeer(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/LocalChainManager/RemovePeer",
+		FullMethod: "/LocalChain/RemovePeer",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LocalChainManagerServer).RemovePeer(ctx, req.(*RemovePeerRequest))
+		return srv.(LocalChainServer).RemovePeer(ctx, req.(*RemovePeerRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LocalChainManager_AddVoter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _LocalChain_AddVoter_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AddVoterRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LocalChainManagerServer).AddVoter(ctx, in)
+		return srv.(LocalChainServer).AddVoter(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/LocalChainManager/AddVoter",
+		FullMethod: "/LocalChain/AddVoter",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LocalChainManagerServer).AddVoter(ctx, req.(*AddVoterRequest))
+		return srv.(LocalChainServer).AddVoter(ctx, req.(*AddVoterRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-func _LocalChainManager_AddTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+func _LocalChain_AddTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
 	in := new(AddTransactionRequest)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
 	if interceptor == nil {
-		return srv.(LocalChainManagerServer).AddTransaction(ctx, in)
+		return srv.(LocalChainServer).AddTransaction(ctx, in)
 	}
 	info := &grpc.UnaryServerInfo{
 		Server:     srv,
-		FullMethod: "/LocalChainManager/AddTransaction",
+		FullMethod: "/LocalChain/AddTransaction",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LocalChainManagerServer).AddTransaction(ctx, req.(*AddTransactionRequest))
+		return srv.(LocalChainServer).AddTransaction(ctx, req.(*AddTransactionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
 
-// LocalChainManager_ServiceDesc is the grpc.ServiceDesc for LocalChainManager service.
+// LocalChain_ServiceDesc is the grpc.ServiceDesc for LocalChain service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
-var LocalChainManager_ServiceDesc = grpc.ServiceDesc{
-	ServiceName: "LocalChainManager",
-	HandlerType: (*LocalChainManagerServer)(nil),
+var LocalChain_ServiceDesc = grpc.ServiceDesc{
+	ServiceName: "LocalChain",
+	HandlerType: (*LocalChainServer)(nil),
 	Methods: []grpc.MethodDesc{
 		{
 			MethodName: "AddPeer",
-			Handler:    _LocalChainManager_AddPeer_Handler,
+			Handler:    _LocalChain_AddPeer_Handler,
 		},
 		{
 			MethodName: "RemovePeer",
-			Handler:    _LocalChainManager_RemovePeer_Handler,
+			Handler:    _LocalChain_RemovePeer_Handler,
 		},
 		{
 			MethodName: "AddVoter",
-			Handler:    _LocalChainManager_AddVoter_Handler,
+			Handler:    _LocalChain_AddVoter_Handler,
 		},
 		{
 			MethodName: "AddTransaction",
-			Handler:    _LocalChainManager_AddTransaction_Handler,
+			Handler:    _LocalChain_AddTransaction_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

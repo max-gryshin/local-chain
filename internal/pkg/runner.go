@@ -2,9 +2,8 @@ package pkg
 
 import (
 	"context"
-	"sync"
-
 	"log/slog"
+	"sync"
 )
 
 type Runner interface {
