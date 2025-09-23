@@ -38,9 +38,9 @@ const (
 )
 
 var (
-	myAddr = flag.String("address", "127.0.0.1:8001", "TCP host+port for this node")
-	raftId = flag.String("raft_id", "10252f31-151b-457d-b8de-e4a6f1552b62", "Node id used by Raft")
-
+	myAddr        = flag.String("address", "127.0.0.1:8001", "TCP host+port for this node")
+	raftId        = flag.String("raft_id", "10252f31-151b-457d-b8de-e4a6f1552b62", "Node id used by Raft")
+	serverID      = raft.ServerID(ptr.ToString(raftId))
 	raftBootstrap = flag.Bool("raft_bootstrap", true, "Whether to bootstrap the Raft cluster")
 )
 
@@ -49,7 +49,7 @@ func main() {
 
 	fmt.Println("raftBootstrap:", *raftBootstrap)
 	logger := slog.Default()
-	ctx := context.Background()
+	ctx := pkg.ContextWithServerID(context.Background(), serverID)
 
 	//ex, err := os.Executable()
 	//if err != nil {
@@ -109,7 +109,7 @@ func main() {
 		SnapshotThreshold:  8192,
 		LeaderLeaseTimeout: 500 * time.Millisecond,
 		LogLevel:           "DEBUG",
-		LocalID:            raft.ServerID(ptr.ToString(raftId)),
+		LocalID:            serverID,
 	}
 	r, err := raft.NewRaft(
 		raftConfig,
@@ -126,7 +126,7 @@ func main() {
 		configFuture := r.BootstrapCluster(raft.Configuration{
 			Servers: []raft.Server{
 				{
-					ID:      raft.ServerID(ptr.ToString(raftId)),
+					ID:      serverID,
 					Address: raft.ServerAddress(ptr.ToString(myAddr)),
 				},
 			},
@@ -145,7 +145,7 @@ func main() {
 	transactor := service.NewTransactor(store.Transaction())
 	tm := mapper.NewTransactionMapper()
 	txPool := inMem.NewTxPool()
-	localChainManager := grpc2.NewLocalChainManager(r, raft.ServerID(*raftId), txPool, tm, transactor)
+	localChainManager := grpc2.NewLocalChainManager(r, txPool, tm, transactor)
 
 	grpcRunner := runners.New(9001, func(s *grpc.Server) {
 		transport2.RegisterLocalChainManagerServer(s, localChainManager)

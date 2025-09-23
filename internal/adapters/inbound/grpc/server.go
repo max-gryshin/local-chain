@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"local-chain/internal/pkg"
 	"time"
 
 	"github.com/hashicorp/raft"
@@ -35,24 +36,21 @@ type transactionMapper interface {
 }
 
 type LocalChainManager struct {
-	raftAPI  RaftAPI
-	serverID raft.ServerID
-	txPool   txPool
-	tm       transactionMapper
+	raftAPI RaftAPI
+	txPool  txPool
+	tm      transactionMapper
 	grpcPkg.UnimplementedLocalChainManagerServer
 	transactor Transactor
 }
 
 func NewLocalChainManager(
 	raftAPI RaftAPI,
-	serverID raft.ServerID,
 	txPool txPool,
 	tm transactionMapper,
 	transactor Transactor,
 ) *LocalChainManager {
 	return &LocalChainManager{
 		raftAPI:    raftAPI,
-		serverID:   serverID,
 		txPool:     txPool,
 		tm:         tm,
 		transactor: transactor,
@@ -64,7 +62,7 @@ func (s *LocalChainManager) AddPeer(ctx context.Context, req *grpcPkg.AddPeerReq
 		return &grpcPkg.AddPeerResponse{Success: false}, errors.New("peer ID and address must be provided")
 	}
 	leaderServer, leaderID := s.raftAPI.LeaderWithID()
-	if leaderID != s.serverID {
+	if leaderID != pkg.ServerIDFromContext(ctx) {
 		client, err := s.leaderClient(string(leaderServer))
 		if err != nil {
 			return &grpcPkg.AddPeerResponse{Success: false}, errors.New("failed to connect to leader")
@@ -84,7 +82,7 @@ func (s *LocalChainManager) RemovePeer(ctx context.Context, req *grpcPkg.RemoveP
 		return &grpcPkg.RemovePeerResponse{Success: false}, errors.New("peer ID and address must be provided")
 	}
 	leaderServer, leaderID := s.raftAPI.LeaderWithID()
-	if leaderID != s.serverID {
+	if leaderID != pkg.ServerIDFromContext(ctx) {
 		client, err := s.leaderClient(string(leaderServer))
 		if err != nil {
 			return &grpcPkg.RemovePeerResponse{Success: false}, errors.New("failed to connect to leader")
@@ -100,7 +98,7 @@ func (s *LocalChainManager) RemovePeer(ctx context.Context, req *grpcPkg.RemoveP
 
 func (s *LocalChainManager) AddVoter(ctx context.Context, req *grpcPkg.AddVoterRequest) (*grpcPkg.AddVoterResponse, error) {
 	leaderServer, leaderID := s.raftAPI.LeaderWithID()
-	if leaderID != s.serverID {
+	if leaderID != pkg.ServerIDFromContext(ctx) {
 		client, err := s.leaderClient(string(leaderServer))
 		if err != nil {
 			return &grpcPkg.AddVoterResponse{Success: false}, errors.New("failed to connect to leader")
@@ -119,7 +117,7 @@ func (s *LocalChainManager) AddVoter(ctx context.Context, req *grpcPkg.AddVoterR
 
 func (s *LocalChainManager) AddTransaction(ctx context.Context, req *grpcPkg.AddTransactionRequest) (*grpcPkg.AddTransactionResponse, error) {
 	leaderServer, leaderID := s.raftAPI.LeaderWithID()
-	if leaderID != s.serverID {
+	if leaderID != pkg.ServerIDFromContext(ctx) {
 		client, err := s.leaderClient(string(leaderServer))
 		if err != nil {
 			return &grpcPkg.AddTransactionResponse{Success: false}, errors.New("failed to connect to leader")

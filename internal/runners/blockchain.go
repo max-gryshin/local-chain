@@ -13,7 +13,7 @@ const (
 )
 
 type blockchain interface {
-	CreateBlock() error
+	CreateBlock(ctx context.Context) error
 }
 
 type BlockchainRunner struct {
@@ -41,7 +41,7 @@ func (bs *BlockchainRunner) Run(ctx context.Context) error {
 			return errors.New("blockchain scheduler reached the error threshold")
 		case <-tAddBlock.C:
 			pkg.GoWithRecoverAndSemaphore(func() {
-				if err := bs.blockchain.CreateBlock(); err != nil {
+				if err := bs.blockchain.CreateBlock(ctx); err != nil {
 					bs.errDone <- struct{}{}
 					fmt.Println("failed to add block:", err)
 				}
