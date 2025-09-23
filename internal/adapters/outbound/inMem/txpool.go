@@ -8,8 +8,8 @@ import (
 
 type TxPoolMap map[string]*types.Transaction
 
-func (pool TxPoolMap) AsSlice() []*types.Transaction {
-	txs := make([]*types.Transaction, 0, len(pool))
+func (pool TxPoolMap) AsSlice() types.Transactions {
+	txs := make(types.Transactions, 0, len(pool))
 	for _, tx := range pool {
 		txs = append(txs, tx)
 	}
