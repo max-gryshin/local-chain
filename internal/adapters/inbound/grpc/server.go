@@ -4,15 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"local-chain/internal/pkg"
 	"time"
+
+	"local-chain/internal/pkg"
 
 	"github.com/hashicorp/raft"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
 
-	"local-chain/internal/types"
 	grpcPkg "local-chain/transport/gen/transport"
+
+	"local-chain/internal/types"
 )
 
 type RaftAPI interface {
@@ -35,21 +37,21 @@ type transactionMapper interface {
 	RpcToTransaction(req *grpcPkg.AddTransactionRequest) (*types.TransactionRequest, error)
 }
 
-type LocalChainManager struct {
+type LocalChainServer struct {
 	raftAPI RaftAPI
 	txPool  txPool
 	tm      transactionMapper
-	grpcPkg.UnimplementedLocalChainManagerServer
+	grpcPkg.UnimplementedLocalChainServer
 	transactor Transactor
 }
 
-func NewLocalChainManager(
+func NewLocalChain(
 	raftAPI RaftAPI,
 	txPool txPool,
 	tm transactionMapper,
 	transactor Transactor,
-) *LocalChainManager {
-	return &LocalChainManager{
+) *LocalChainServer {
+	return &LocalChainServer{
 		raftAPI:    raftAPI,
 		txPool:     txPool,
 		tm:         tm,
@@ -57,7 +59,7 @@ func NewLocalChainManager(
 	}
 }
 
-func (s *LocalChainManager) AddPeer(ctx context.Context, req *grpcPkg.AddPeerRequest) (*grpcPkg.AddPeerResponse, error) {
+func (s *LocalChainServer) AddPeer(ctx context.Context, req *grpcPkg.AddPeerRequest) (*grpcPkg.AddPeerResponse, error) {
 	if req.GetId() == "" || req.GetAddress() == "" {
 		return &grpcPkg.AddPeerResponse{Success: false}, errors.New("peer ID and address must be provided")
 	}
@@ -77,7 +79,7 @@ func (s *LocalChainManager) AddPeer(ctx context.Context, req *grpcPkg.AddPeerReq
 	return &grpcPkg.AddPeerResponse{Success: true}, nil
 }
 
-func (s *LocalChainManager) RemovePeer(ctx context.Context, req *grpcPkg.RemovePeerRequest) (*grpcPkg.RemovePeerResponse, error) {
+func (s *LocalChainServer) RemovePeer(ctx context.Context, req *grpcPkg.RemovePeerRequest) (*grpcPkg.RemovePeerResponse, error) {
 	if req.GetId() == "" || req.GetAddress() == "" {
 		return &grpcPkg.RemovePeerResponse{Success: false}, errors.New("peer ID and address must be provided")
 	}
@@ -96,7 +98,7 @@ func (s *LocalChainManager) RemovePeer(ctx context.Context, req *grpcPkg.RemoveP
 	return &grpcPkg.RemovePeerResponse{Success: true}, nil
 }
 
-func (s *LocalChainManager) AddVoter(ctx context.Context, req *grpcPkg.AddVoterRequest) (*grpcPkg.AddVoterResponse, error) {
+func (s *LocalChainServer) AddVoter(ctx context.Context, req *grpcPkg.AddVoterRequest) (*grpcPkg.AddVoterResponse, error) {
 	leaderServer, leaderID := s.raftAPI.LeaderWithID()
 	if leaderID != pkg.ServerIDFromContext(ctx) {
 		client, err := s.leaderClient(string(leaderServer))
@@ -115,7 +117,7 @@ func (s *LocalChainManager) AddVoter(ctx context.Context, req *grpcPkg.AddVoterR
 	return &grpcPkg.AddVoterResponse{Success: true}, nil
 }
 
-func (s *LocalChainManager) AddTransaction(ctx context.Context, req *grpcPkg.AddTransactionRequest) (*grpcPkg.AddTransactionResponse, error) {
+func (s *LocalChainServer) AddTransaction(ctx context.Context, req *grpcPkg.AddTransactionRequest) (*grpcPkg.AddTransactionResponse, error) {
 	leaderServer, leaderID := s.raftAPI.LeaderWithID()
 	if leaderID != pkg.ServerIDFromContext(ctx) {
 		client, err := s.leaderClient(string(leaderServer))
@@ -144,7 +146,7 @@ func (s *LocalChainManager) AddTransaction(ctx context.Context, req *grpcPkg.Add
 	return &grpcPkg.AddTransactionResponse{Success: true}, nil
 }
 
-func (s *LocalChainManager) leaderClient(leaderAddr string) (grpcPkg.LocalChainManagerClient, error) {
+func (s *LocalChainServer) leaderClient(leaderAddr string) (grpcPkg.LocalChainClient, error) {
 	conn, err := grpc.NewClient(leaderAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
 	if err != nil {
 		return nil, err
@@ -156,5 +158,5 @@ func (s *LocalChainManager) leaderClient(leaderAddr string) (grpcPkg.LocalChainM
 		}
 	}(conn)
 
-	return grpcPkg.NewLocalChainManagerClient(conn), nil
+	return grpcPkg.NewLocalChainClient(conn), nil
 }

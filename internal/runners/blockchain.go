@@ -4,8 +4,9 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"local-chain/internal/pkg"
 	"time"
+
+	"local-chain/internal/pkg"
 )
 
 const (

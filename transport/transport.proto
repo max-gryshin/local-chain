@@ -1,6 +1,6 @@
 syntax = "proto3";
 
-service LocalChainManager {
+service LocalChain {
   rpc AddPeer(AddPeerRequest) returns (AddPeerResponse) {}
   rpc RemovePeer(RemovePeerRequest) returns (RemovePeerResponse) {}
   rpc AddVoter(AddVoterRequest) returns (AddVoterResponse) {}

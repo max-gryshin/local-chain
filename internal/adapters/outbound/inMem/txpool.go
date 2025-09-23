@@ -1,8 +1,9 @@
 package inMem
 
 import (
-	"local-chain/internal/types"
 	"sync"
+
+	"local-chain/internal/types"
 )
 
 type TxPoolMap map[string]*types.Transaction

@@ -4,19 +4,21 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"log"
+	"log/slog"
+	"net"
+	"os"
+	"time"
+
 	grpc2 "local-chain/internal/adapters/inbound/grpc"
 	"local-chain/internal/adapters/inbound/grpc/mapper"
 	"local-chain/internal/adapters/outbound/inMem"
 	"local-chain/internal/pkg"
 	"local-chain/internal/runners"
 	"local-chain/internal/service"
-	"local-chain/internal/types"
 	transport2 "local-chain/transport/gen/transport"
-	"log"
-	"log/slog"
-	"net"
-	"os"
-	"time"
+
+	"local-chain/internal/types"
 
 	"github.com/gotidy/ptr"
 	"github.com/hashicorp/raft"
@@ -145,10 +147,10 @@ func main() {
 	transactor := service.NewTransactor(store.Transaction())
 	tm := mapper.NewTransactionMapper()
 	txPool := inMem.NewTxPool()
-	localChainManager := grpc2.NewLocalChainManager(r, txPool, tm, transactor)
+	localChainManager := grpc2.NewLocalChain(r, txPool, tm, transactor)
 
 	grpcRunner := runners.New(9001, func(s *grpc.Server) {
-		transport2.RegisterLocalChainManagerServer(s, localChainManager)
+		transport2.RegisterLocalChainServer(s, localChainManager)
 	}, *logger)
 
 	blockchain := service.NewBlockchain(r, store.Blockchain(), store.Transaction(), txPool)
