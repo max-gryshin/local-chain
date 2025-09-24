@@ -107,29 +107,22 @@ func (bc *Blockchain) CreateBlock(ctx context.Context) error {
 	if err != nil {
 		return fmt.Errorf("error while encoding block: %w", err)
 	}
+	// todo: put txs to envelope to guarantee that tx pool from the leader will be in tx store
 	envelopeBytes, err := types.NewEnvelope(types.EnvelopeTypeBlock, blockBytes).ToBytes()
 	if err != nil {
 		return fmt.Errorf("error while encoding envelope: %w", err)
 	}
-	if err = bc.raftApi.Apply(envelopeBytes, applyTimeout).Error(); err != nil {
+	future := bc.raftApi.Apply(envelopeBytes, applyTimeout)
+	if err = future.Error(); err != nil {
 		return fmt.Errorf("error while applying block to raft: %w", err)
 	}
-
-	err = bc.blockchainStore.Put(newBlock)
-	if err != nil {
-		return fmt.Errorf("failed to put new block: %w", err)
-	}
-	bc.prevBlock = newBlock
-
-	blockHash := newBlock.ComputeHash()
-	for _, tx := range txs {
-		tx.BlockHash = blockHash
-		err = bc.transactionStore.Put(tx)
-		if err != nil {
-			return fmt.Errorf("failed to put transaction: %w", err)
+	if response := future.Response(); response != nil {
+		if err, ok := response.(error); ok {
+			return fmt.Errorf("FSM failed to apply block: %w", err)
 		}
 	}
-	bc.txPool.Purge()
+
+	bc.prevBlock = newBlock
 
 	return nil
 }

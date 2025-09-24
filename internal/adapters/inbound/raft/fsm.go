@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+	"local-chain/internal/adapters/outbound/inMem"
 
 	"local-chain/internal/types"
 
@@ -12,12 +13,21 @@ import (
 	"local-chain/internal/adapters/outbound/leveldb"
 )
 
-type Fsm struct {
-	store *leveldb.Store
+type txPool interface {
+	GetPool() inMem.TxPoolMap
+	Purge()
 }
 
-func New(store *leveldb.Store) *Fsm {
-	return &Fsm{store: store}
+type Fsm struct {
+	store  *leveldb.Store
+	txPool txPool
+}
+
+func New(store *leveldb.Store, txPool txPool) *Fsm {
+	return &Fsm{
+		store:  store,
+		txPool: txPool,
+	}
 }
 
 func (f *Fsm) Apply(log *raft.Log) interface{} {
@@ -37,6 +47,16 @@ func (f *Fsm) Apply(log *raft.Log) interface{} {
 			if err = f.store.Blockchain().Put(block); err != nil {
 				return fmt.Errorf("failed to save block: %w", err)
 			}
+			blockHash := block.ComputeHash()
+			txs := f.txPool.GetPool().AsSlice()
+			for _, tx := range txs {
+				tx.BlockHash = blockHash
+				err = f.store.Transaction().Put(tx)
+				if err != nil {
+					return fmt.Errorf("failed to put transaction: %w", err)
+				}
+			}
+			f.txPool.Purge()
 		case types.EnvelopeTypeTransaction:
 
 		}
