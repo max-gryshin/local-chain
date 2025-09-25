@@ -97,18 +97,13 @@ func (bc *Blockchain) CreateBlock(ctx context.Context) error {
 		return fmt.Errorf("failed to create merkle tree: %w", err)
 	}
 
-	newBlock := &types.Block{
-		Timestamp:  uint64(time.Now().UnixNano()),
-		PrevHash:   bc.prevBlock.ComputeHash(),
-		MerkleRoot: merkleTree.Root.Hash,
-	}
-
-	blockBytes, err := newBlock.ToBytes()
+	block := types.NewBlock(bc.prevBlock.ComputeHash(), merkleTree.Root.Hash)
+	blockTxsEnvelope := types.NewBlockTxsEnvelope(block, txs)
+	bytes, err := blockTxsEnvelope.ToBytes()
 	if err != nil {
-		return fmt.Errorf("error while encoding block: %w", err)
+		return fmt.Errorf("error while encoding block with txs: %w", err)
 	}
-	// todo: put txs to envelope to guarantee that tx pool from the leader will be in tx store
-	envelopeBytes, err := types.NewEnvelope(types.EnvelopeTypeBlock, blockBytes).ToBytes()
+	envelopeBytes, err := types.NewEnvelope(types.EnvelopeTypeBlock, bytes).ToBytes()
 	if err != nil {
 		return fmt.Errorf("error while encoding envelope: %w", err)
 	}
@@ -122,7 +117,7 @@ func (bc *Blockchain) CreateBlock(ctx context.Context) error {
 		}
 	}
 
-	bc.prevBlock = newBlock
+	bc.prevBlock = block
 
 	return nil
 }

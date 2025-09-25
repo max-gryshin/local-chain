@@ -39,17 +39,16 @@ func (f *Fsm) Apply(log *raft.Log) interface{} {
 		}
 		switch envelope.Type {
 		case types.EnvelopeTypeBlock:
-			block := &types.Block{}
-			if err = block.FromBytes(envelope.Data); err != nil {
+			blockTxsEnvelope := types.NewBlockTxsEnvelope(nil, nil)
+			if err = blockTxsEnvelope.FromBytes(envelope.Data); err != nil {
 				return fmt.Errorf("failed to decode block: %w", err)
 			}
 			// should we check if the block already exists?
-			if err = f.store.Blockchain().Put(block); err != nil {
+			if err = f.store.Blockchain().Put(blockTxsEnvelope.Block); err != nil {
 				return fmt.Errorf("failed to save block: %w", err)
 			}
-			blockHash := block.ComputeHash()
-			txs := f.txPool.GetPool().AsSlice()
-			for _, tx := range txs {
+			blockHash := blockTxsEnvelope.Block.ComputeHash()
+			for _, tx := range blockTxsEnvelope.Txs {
 				tx.BlockHash = blockHash
 				err = f.store.Transaction().Put(tx)
 				if err != nil {

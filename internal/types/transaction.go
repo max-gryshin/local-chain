@@ -9,6 +9,7 @@ import (
 	"math/big"
 	"time"
 
+	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/google/uuid"
 )
 
@@ -150,6 +151,16 @@ func NewAmount(value uint64) *Amount {
 		Value: value,
 		Unit:  CurrencyUnit,
 	}
+}
+
+type Transactions []*Transaction
+
+func (t Transactions) ToBytes() ([]byte, error) {
+	return rlp.EncodeToBytes(t)
+}
+
+func (t Transactions) FromBytes(data []byte) error {
+	return rlp.DecodeBytes(data, t)
 }
 
 type TransactionRequest struct {
