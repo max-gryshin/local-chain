@@ -68,7 +68,8 @@ func main() {
 	defer db.Close() // nolint:errcheck
 
 	store := leveldbpkg.New(db)
-	fsmStore := fsm.New(store)
+	txPool := inMem.NewTxPool()
+	fsmStore := fsm.New(store, txPool)
 
 	logStore, err := raftboltdb.NewBoltStore(logDb)
 	if err != nil {
@@ -146,7 +147,6 @@ func main() {
 	}
 	transactor := service.NewTransactor(store.Transaction())
 	tm := mapper.NewTransactionMapper()
-	txPool := inMem.NewTxPool()
 	localChainManager := grpc2.NewLocalChain(r, txPool, tm, transactor)
 
 	grpcRunner := runners.New(9001, func(s *grpc.Server) {

@@ -97,39 +97,27 @@ func (bc *Blockchain) CreateBlock(ctx context.Context) error {
 		return fmt.Errorf("failed to create merkle tree: %w", err)
 	}
 
-	newBlock := &types.Block{
-		Timestamp:  uint64(time.Now().UnixNano()),
-		PrevHash:   bc.prevBlock.ComputeHash(),
-		MerkleRoot: merkleTree.Root.Hash,
-	}
-
-	blockBytes, err := newBlock.ToBytes()
+	block := types.NewBlock(bc.prevBlock.ComputeHash(), merkleTree.Root.Hash)
+	blockTxsEnvelope := types.NewBlockTxsEnvelope(block, txs)
+	bytes, err := blockTxsEnvelope.ToBytes()
 	if err != nil {
-		return fmt.Errorf("error while encoding block: %w", err)
+		return fmt.Errorf("error while encoding block with txs: %w", err)
 	}
-	envelopeBytes, err := types.NewEnvelope(types.EnvelopeTypeBlock, blockBytes).ToBytes()
+	envelopeBytes, err := types.NewEnvelope(types.EnvelopeTypeBlock, bytes).ToBytes()
 	if err != nil {
 		return fmt.Errorf("error while encoding envelope: %w", err)
 	}
-	if err = bc.raftApi.Apply(envelopeBytes, applyTimeout).Error(); err != nil {
+	future := bc.raftApi.Apply(envelopeBytes, applyTimeout)
+	if err = future.Error(); err != nil {
 		return fmt.Errorf("error while applying block to raft: %w", err)
 	}
-
-	err = bc.blockchainStore.Put(newBlock)
-	if err != nil {
-		return fmt.Errorf("failed to put new block: %w", err)
-	}
-	bc.prevBlock = newBlock
-
-	blockHash := newBlock.ComputeHash()
-	for _, tx := range txs {
-		tx.BlockHash = blockHash
-		err = bc.transactionStore.Put(tx)
-		if err != nil {
-			return fmt.Errorf("failed to put transaction: %w", err)
+	if response := future.Response(); response != nil {
+		if err, ok := response.(error); ok {
+			return fmt.Errorf("FSM failed to apply block: %w", err)
 		}
 	}
-	bc.txPool.Purge()
+
+	bc.prevBlock = block
 
 	return nil
 }

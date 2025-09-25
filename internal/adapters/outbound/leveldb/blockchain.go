@@ -56,3 +56,10 @@ func (s *BlockchainStore) Put(block *types.Block) error {
 	}
 	return nil
 }
+
+func (s *BlockchainStore) Delete() error {
+	if err := s.db.Delete([]byte(BlockchainKey), nil); err != nil {
+		return fmt.Errorf("failed to clear blockchain: %w", err)
+	}
+	return nil
+}
