@@ -1,10 +1,9 @@
 package mapper
 
 import (
-	"crypto/ecdsa"
-	"crypto/x509"
-	"encoding/pem"
 	"fmt"
+
+	"local-chain/internal/pkg/crypto"
 
 	grpcPkg "local-chain/transport/gen/transport"
 
@@ -18,25 +17,11 @@ func NewTransactionMapper() *TransactionMapper {
 }
 
 func (tp *TransactionMapper) RpcToTransaction(req *grpcPkg.AddTransactionRequest) (*types.TransactionRequest, error) {
-	amount := types.Amount{Value: req.GetAmount().GetValue(), Unit: req.GetAmount().GetUnit()}
-	publicBlock, _ := pem.Decode([]byte(req.Receiver))
-	if publicBlock == nil || publicBlock.Type != "PUBLIC KEY" {
-		return nil, fmt.Errorf("invalid public key PEM")
-	}
-	publicKey, err := x509.ParsePKIXPublicKey(publicBlock.Bytes)
+	receiver, err := crypto.PublicKeyFromBytes(req.Receiver)
 	if err != nil {
-		return nil, fmt.Errorf("failed to parse public key: %v", err)
-	}
-	receiver, ok := publicKey.(*ecdsa.PublicKey)
-	if !ok {
 		return nil, fmt.Errorf("public key is not ECDSA")
 	}
-
-	privateBlock, _ := pem.Decode([]byte(req.Sender))
-	if privateBlock == nil || privateBlock.Type != "EC PRIVATE KEY" {
-		return nil, fmt.Errorf("invalid private key PEM")
-	}
-	sender, err := x509.ParseECPrivateKey(privateBlock.Bytes)
+	sender, err := crypto.PrivateKeyFromBytes(req.Sender)
 	if err != nil {
 		return nil, fmt.Errorf("failed to parse private key: %v", err)
 	}
@@ -44,7 +29,7 @@ func (tp *TransactionMapper) RpcToTransaction(req *grpcPkg.AddTransactionRequest
 	return &types.TransactionRequest{
 		Sender:   sender,
 		Receiver: receiver,
-		Amount:   amount,
+		Amount:   types.Amount{Value: req.GetAmount().GetValue(), Unit: req.GetAmount().GetUnit()},
 		Utxos:    rpcToUtxos(req.GetUtxos()),
 	}, nil
 }

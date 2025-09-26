@@ -38,20 +38,23 @@ type transactionMapper interface {
 }
 
 type LocalChainServer struct {
-	raftAPI RaftAPI
-	txPool  txPool
-	tm      transactionMapper
+	serverID raft.ServerID
+	raftAPI  RaftAPI
+	txPool   txPool
+	tm       transactionMapper
 	grpcPkg.UnimplementedLocalChainServer
 	transactor Transactor
 }
 
 func NewLocalChain(
+	serverID raft.ServerID,
 	raftAPI RaftAPI,
 	txPool txPool,
 	tm transactionMapper,
 	transactor Transactor,
 ) *LocalChainServer {
 	return &LocalChainServer{
+		serverID:   serverID,
 		raftAPI:    raftAPI,
 		txPool:     txPool,
 		tm:         tm,
@@ -119,7 +122,7 @@ func (s *LocalChainServer) AddVoter(ctx context.Context, req *grpcPkg.AddVoterRe
 
 func (s *LocalChainServer) AddTransaction(ctx context.Context, req *grpcPkg.AddTransactionRequest) (*grpcPkg.AddTransactionResponse, error) {
 	leaderServer, leaderID := s.raftAPI.LeaderWithID()
-	if leaderID != pkg.ServerIDFromContext(ctx) {
+	if leaderID != s.serverID {
 		client, err := s.leaderClient(string(leaderServer))
 		if err != nil {
 			return &grpcPkg.AddTransactionResponse{Success: false}, errors.New("failed to connect to leader")

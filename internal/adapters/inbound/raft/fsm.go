@@ -4,6 +4,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
+
 	"local-chain/internal/adapters/outbound/inMem"
 
 	"local-chain/internal/types"
