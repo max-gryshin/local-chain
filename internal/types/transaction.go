@@ -6,6 +6,7 @@ import (
 	"crypto/sha512"
 	"encoding/binary"
 	"fmt"
+	"local-chain/internal/pkg/crypto"
 	"math/big"
 	"time"
 
@@ -29,12 +30,11 @@ type Transaction struct {
 }
 
 func NewTransaction() *Transaction {
-	tx := &Transaction{
+	return &Transaction{
 		ID:        uuid.New(),
 		Timestamp: uint64(time.Now().UnixNano()),
 		Salt:      [16]byte(uuid.New()),
 	}
-	return tx
 }
 
 func (tx *Transaction) WithInputs(inputs ...*TxIn) *Transaction {
@@ -42,25 +42,21 @@ func (tx *Transaction) WithInputs(inputs ...*TxIn) *Transaction {
 	return tx
 }
 
-func (tx *Transaction) WithInput(input *TxIn) *Transaction {
+func (tx *Transaction) AddInput(input *TxIn) {
 	tx.Inputs = append(tx.Inputs, input)
-
-	return tx
 }
 
 func (tx *Transaction) WithOutput(amount *Amount, key *ecdsa.PublicKey) *Transaction {
 	tx.Outputs = append(tx.Outputs, &TxOut{
 		TxID:   tx.ID,
 		Amount: *amount,
-		PubKey: ToHashString(key),
+		PubKey: crypto.PublicKeyToBytes(key),
 	})
 	return tx
 }
 
-func (tx *Transaction) WithOutputs(outputs ...*TxOut) *Transaction {
-	tx.Outputs = append(tx.Outputs, outputs...)
-
-	return tx
+func (tx *Transaction) AddOutput(output *TxOut) {
+	tx.Outputs = append(tx.Outputs, output)
 }
 
 func (tx *Transaction) ComputeHash() {
@@ -100,17 +96,15 @@ type TxIn struct {
 type TxOut struct {
 	TxID   uuid.UUID
 	Amount Amount
-	PubKey string
+	PubKey []byte
 }
 
-func ToHashString(pubKey *ecdsa.PublicKey) string {
-	if pubKey == nil {
-		return ""
+func NewTxOut(id uuid.UUID, amount Amount, pubKey []byte) *TxOut {
+	return &TxOut{
+		TxID:   id,
+		Amount: amount,
+		PubKey: pubKey,
 	}
-	pubKeyBytes := append(pubKey.X.Bytes(), pubKey.Y.Bytes()...)
-	hash := sha512.Sum512(pubKeyBytes)
-
-	return string(hash[:])
 }
 
 type UTXO struct {
