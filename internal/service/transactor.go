@@ -4,6 +4,7 @@ import (
 	"errors"
 	"fmt"
 
+	"local-chain/internal/pkg/crypto"
 	"local-chain/internal/types"
 )
 
@@ -30,7 +31,6 @@ func NewTransactor(txStore TransactionStore) *Transactor {
 // private key corresponding to the public key.
 func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transaction, error) {
 	newTx := types.NewTransaction()
-	inputs := make([]*types.TxIn, 0, len(txReq.Utxos))
 	balance := types.Amount{}
 	for id, utxo := range txReq.Utxos {
 		tx, err := t.txStore.Get(utxo.TxHash)
@@ -42,13 +42,17 @@ func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transacti
 		}
 		output := tx.Outputs[utxo.Index]
 		// Check if the output belongs to the sender
-		if output.PubKey != types.ToHashString(&txReq.Sender.PublicKey) {
-			return nil, fmt.Errorf("sender do not own transaction's output: tx:%s", string(utxo.TxHash))
+		outputPubKey, err := crypto.PublicKeyFromBytes(output.PubKey)
+		if err != nil {
+			return nil, fmt.Errorf("get output public key err: %v", err)
+		}
+		if !outputPubKey.Equal(&txReq.Sender.PublicKey) {
+			return nil, fmt.Errorf("sender do not own transaction's output: tx: %s", string(utxo.TxHash))
 		}
 
 		r, s, err := utxo.Sign(txReq.Sender)
 		if err != nil {
-			return nil, fmt.Errorf("sign UTXO:%s err:%s", string(utxo.TxHash), err.Error())
+			return nil, fmt.Errorf("sign UTXO:%s err: %s", string(utxo.TxHash), err.Error())
 		}
 
 		if !utxo.Verify(txReq.Sender.PublicKey, r, s) {
@@ -57,12 +61,12 @@ func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transacti
 
 		input := &types.TxIn{
 			Prev:       utxo,
-			PubKey:     &txReq.Sender.PublicKey,
+			PubKey:     crypto.PublicKeyToBytes(&txReq.Sender.PublicKey),
 			SignatureR: r,
 			SignatureS: s,
 			NSequence:  uint32(id),
 		}
-		inputs = append(inputs, input)
+		newTx.AddInput(input)
 		// calculate balance
 		balance.Value += output.Amount.Value
 	}
@@ -70,14 +74,12 @@ func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transacti
 	if balance.Value < txReq.Amount.Value {
 		return nil, errors.New("insufficient balance")
 	}
-	newTx = newTx.WithInputs(inputs...)
-	var outputs []*types.TxOut
-	outputs = append(outputs, &types.TxOut{TxID: newTx.ID, Amount: txReq.Amount, PubKey: types.ToHashString(txReq.Receiver)})
+
+	newTx.AddOutput(types.NewTxOut(newTx.ID, txReq.Amount, crypto.PublicKeyToBytes(txReq.Receiver)))
 	if balance.Value > txReq.Amount.Value {
 		balance.Value -= txReq.Amount.Value
-		outputs = append(outputs, &types.TxOut{TxID: newTx.ID, Amount: balance, PubKey: types.ToHashString(&txReq.Sender.PublicKey)})
+		newTx.AddOutput(types.NewTxOut(newTx.ID, balance, crypto.PublicKeyToBytes(&txReq.Sender.PublicKey)))
 	}
-	newTx = newTx.WithOutputs(outputs...)
 	newTx.ComputeHash()
 
 	return newTx, nil

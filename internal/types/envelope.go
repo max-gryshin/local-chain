@@ -2,11 +2,11 @@ package types
 
 import "github.com/ethereum/go-ethereum/rlp"
 
-type EnvelopeType int
+type EnvelopeType string
 
 const (
-	EnvelopeTypeBlock = iota
-	EnvelopeTypeTransaction
+	EnvelopeTypeBlock       EnvelopeType = "block_type"
+	EnvelopeTypeTransaction EnvelopeType = "transaction_type"
 )
 
 type Envelope struct {

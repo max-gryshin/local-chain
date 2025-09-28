@@ -20,6 +20,7 @@ import (
 
 	"local-chain/internal/types"
 
+	"github.com/google/uuid"
 	"github.com/gotidy/ptr"
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb"
@@ -134,11 +135,11 @@ func main() {
 				},
 			},
 		})
-		// genesis block
-		if err = store.Blockchain().Put(&types.Block{
-			Timestamp: 0,
-			Hash:      []byte("genesis"),
-		}); err != nil {
+		genesisBlock := types.NewBlock(nil, []byte("genesis"))
+		if err = store.Blockchain().Put(genesisBlock); err != nil {
+			log.Fatal(err)
+		}
+		if err = store.Transaction().Put(genesisTx(genesisBlock)); err != nil {
 			log.Fatal(err)
 		}
 		if err = configFuture.Error(); err != nil {
@@ -147,7 +148,7 @@ func main() {
 	}
 	transactor := service.NewTransactor(store.Transaction())
 	tm := mapper.NewTransactionMapper()
-	localChainManager := grpc2.NewLocalChain(r, txPool, tm, transactor)
+	localChainManager := grpc2.NewLocalChain(serverID, r, txPool, tm, transactor)
 
 	grpcRunner := runners.New(9001, func(s *grpc.Server) {
 		transport2.RegisterLocalChainServer(s, localChainManager)
@@ -167,5 +168,25 @@ func main() {
 		logger.Error("runner finished with an error", slog.Any("error", firstError))
 	} else {
 		logger.Info("runner finished successfully")
+	}
+}
+
+func genesisTx(genesisBlock *types.Block) *types.Transaction {
+	return &types.Transaction{
+		BlockHash: genesisBlock.ComputeHash(),
+		Outputs: []*types.TxOut{
+			{
+				TxID: uuid.MustParse("10252f31-151b-457d-b8de-e4a6f1552b62"),
+				Amount: types.Amount{
+					Value: 100000000,
+					Unit:  100,
+				},
+				PubKey: []byte(`-----BEGIN PUBLIC KEY-----
+MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEa/KaLpP9gikVe2ZXkp74RE+QmdDd
+hJxRIN+5upGQgZyYFOqC7uwgXk0PS7GUNTl1aECoAKa2WEIWKL2PmTNZvg==
+-----END PUBLIC KEY-----`),
+			},
+		},
+		Hash: []byte("genesis"),
 	}
 }

@@ -4,13 +4,14 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"crypto/rand"
+	"local-chain/internal/pkg/crypto"
 	"testing"
 
 	"local-chain/internal/service"
 
 	"local-chain/internal/types"
 
-	gomock "github.com/golang/mock/gomock"
+	"github.com/golang/mock/gomock"
 	"github.com/stretchr/testify/require"
 )
 
@@ -29,10 +30,8 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 		{
 			name: "ok full amount",
 			args: func(ctrl *gomock.Controller) args {
-				from, err := ecdsa.GenerateKey(elliptic.P256().Params(), rand.Reader)
-				require.NoError(t1, err)
-				to, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
-				require.NoError(t1, err)
+				from := crypto.GenerateKeyEllipticP256()
+				to := crypto.GenerateKeyEllipticP256()
 				txStore := NewMockTransactionStore(ctrl)
 				tx1 := types.NewTransaction().WithOutput(types.NewAmount(30), &from.PublicKey)
 				txStore.EXPECT().Get(tx1.GetHash()).Return(tx1, nil).Times(1)
@@ -81,7 +80,7 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 				require.NoError(t1, err)
 				fakeFrom, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 				require.NoError(t1, err)
-				fakeFrom.PublicKey = from.PublicKey // make fakeFrom have the same public key as "	from"
+				fakeFrom.PublicKey = from.PublicKey // make fakeFrom have the same public key as "from"
 				to, err := ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
 				require.NoError(t1, err)
 				pool := NewMockTransactionStore(ctrl)
@@ -91,9 +90,10 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 				}
 				r, s, err := utxoTx1.Sign(from)
 				require.NoError(t1, err)
-				tx1 := types.NewTransaction().WithOutput(types.NewAmount(100), &from.PublicKey).WithInput(&types.TxIn{
+				tx1 := types.NewTransaction().WithOutput(types.NewAmount(100), &from.PublicKey)
+				tx1.AddInput(&types.TxIn{
 					Prev:       utxoTx1,
-					PubKey:     &from.PublicKey,
+					PubKey:     crypto.PublicKeyToBytes(&from.PublicKey),
 					SignatureR: r,
 					SignatureS: s,
 					NSequence:  0,

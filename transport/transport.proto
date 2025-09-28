@@ -35,8 +35,8 @@ message AddVoterResponse {
 }
 
 message AddTransactionRequest {
-  string sender = 1;
-  string receiver = 2;
+  bytes sender = 1;
+  bytes receiver = 2;
   Amount amount = 3;
   repeated Utxo utxos = 4;
 }
