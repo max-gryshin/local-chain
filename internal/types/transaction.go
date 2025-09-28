@@ -87,7 +87,7 @@ func (tx *Transaction) GetHash() []byte {
 
 type TxIn struct {
 	Prev       *UTXO
-	PubKey     *ecdsa.PublicKey
+	PubKey     []byte
 	SignatureR *big.Int
 	SignatureS *big.Int
 	NSequence  uint32

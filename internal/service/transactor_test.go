@@ -93,7 +93,7 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 				tx1 := types.NewTransaction().WithOutput(types.NewAmount(100), &from.PublicKey)
 				tx1.AddInput(&types.TxIn{
 					Prev:       utxoTx1,
-					PubKey:     &from.PublicKey,
+					PubKey:     crypto.PublicKeyToBytes(&from.PublicKey),
 					SignatureR: r,
 					SignatureS: s,
 					NSequence:  0,

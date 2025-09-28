@@ -42,7 +42,7 @@ func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transacti
 		}
 		output := tx.Outputs[utxo.Index]
 		// Check if the output belongs to the sender
-		outputPubKey, err := crypto.PublicKeyFromBytes([]byte(output.PubKey))
+		outputPubKey, err := crypto.PublicKeyFromBytes(output.PubKey)
 		if err != nil {
 			return nil, fmt.Errorf("get output public key err: %v", err)
 		}
@@ -61,7 +61,7 @@ func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transacti
 
 		input := &types.TxIn{
 			Prev:       utxo,
-			PubKey:     &txReq.Sender.PublicKey,
+			PubKey:     crypto.PublicKeyToBytes(&txReq.Sender.PublicKey),
 			SignatureR: r,
 			SignatureS: s,
 			NSequence:  uint32(id),
