@@ -1,11 +1,13 @@
 package leveldb
 
 import (
+	"errors"
 	"fmt"
 
 	"local-chain/internal/types"
 
 	"github.com/ethereum/go-ethereum/rlp"
+	leveldbErrors "github.com/syndtr/goleveldb/leveldb/errors"
 )
 
 type UtxoStore struct {
@@ -18,9 +20,12 @@ func NewUtxoStore(conn Database) *UtxoStore {
 	}
 }
 
-func (s *UtxoStore) Get(pubKeyHash []byte) ([]*types.UTXO, error) {
-	value, err := s.db.Get(pubKeyHash, nil)
+func (s *UtxoStore) Get(pubKey []byte) ([]*types.UTXO, error) {
+	value, err := s.db.Get(pubKey, nil)
 	if err != nil {
+		if errors.As(err, &leveldbErrors.ErrNotFound) { // nolint:govet
+			return []*types.UTXO{}, nil
+		}
 		return nil, fmt.Errorf("failed to get utxos: %w", err)
 	}
 	var utxos []*types.UTXO
@@ -31,12 +36,12 @@ func (s *UtxoStore) Get(pubKeyHash []byte) ([]*types.UTXO, error) {
 	return utxos, nil
 }
 
-func (s *UtxoStore) Put(pubKeyHash []byte, utxos []*types.UTXO) error {
+func (s *UtxoStore) Put(pubKey []byte, utxos []*types.UTXO) error {
 	encoded, err := rlp.EncodeToBytes(utxos)
 	if err != nil {
 		return fmt.Errorf("failed to encode utxos: %w", err)
 	}
-	if err = s.db.Put(pubKeyHash, encoded, nil); err != nil {
+	if err = s.db.Put(pubKey, encoded, nil); err != nil {
 		return fmt.Errorf("failed to put utxos: %w", err)
 	}
 

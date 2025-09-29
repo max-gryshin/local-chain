@@ -31,6 +31,7 @@ type txPool interface {
 
 type Transactor interface {
 	CreateTx(txReq *types.TransactionRequest) (*types.Transaction, error)
+	GetBalance(pubKey []byte) (*types.Amount, error)
 }
 
 type transactionMapper interface {
@@ -138,15 +139,28 @@ func (s *LocalChainServer) AddTransaction(ctx context.Context, req *grpcPkg.AddT
 		return nil, fmt.Errorf("transactor.CreateTx: %w", err)
 	}
 	s.txPool.AddTx(tx)
-	// todo:
-	// validate req transaction* can skip it to speed up the implementation
-	// transactor.CreateTx
-	// txPool.AddTx
-	// implement scheduler which will start a process of creating a new block
-	// scheduler calls blockchain.CreateBlock with the pool of transactions
-	// and broadcast it to all peers by raft.Apply
+	// todo: validate req transaction* can skip it to speed up the implementation
 
 	return &grpcPkg.AddTransactionResponse{Success: true}, nil
+}
+
+func (s *LocalChainServer) GetBalance(ctx context.Context, req *grpcPkg.GetBalanceRequest) (*grpcPkg.GetBalanceResponse, error) {
+	resp := &grpcPkg.GetBalanceResponse{Amount: &grpcPkg.Amount{}}
+	leaderServer, leaderID := s.raftAPI.LeaderWithID()
+	if leaderID != s.serverID {
+		client, err := s.leaderClient(string(leaderServer))
+		if err != nil {
+			return resp, errors.New("failed to connect to leader")
+		}
+		return client.GetBalance(ctx, req)
+	}
+	amount, err := s.transactor.GetBalance(req.Sender)
+	if err != nil {
+		return resp, fmt.Errorf("transactor.GetBalance: %w", err)
+	}
+	resp.Amount = &grpcPkg.Amount{Value: amount.Value, Unit: amount.Unit}
+
+	return resp, err
 }
 
 func (s *LocalChainServer) leaderClient(leaderAddr string) (grpcPkg.LocalChainClient, error) {

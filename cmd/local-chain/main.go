@@ -4,6 +4,7 @@ import (
 	"context"
 	"flag"
 	"fmt"
+	"local-chain/internal/pkg/crypto"
 	"log"
 	"log/slog"
 	"net"
@@ -139,14 +140,28 @@ func main() {
 		if err = store.Blockchain().Put(genesisBlock); err != nil {
 			log.Fatal(err)
 		}
-		if err = store.Transaction().Put(genesisTx(genesisBlock)); err != nil {
+		outputs := genesisOutputs()
+		tx := genesisTx(genesisBlock, outputs)
+		tx.ComputeHash()
+		if err = store.Transaction().Put(tx); err != nil {
 			log.Fatal(err)
+		}
+		for _, output := range outputs {
+			utxos := make([]*types.UTXO, 0)
+			pubKey, err := crypto.PublicKeyFromBytes(output.PubKey)
+			if err != nil {
+				log.Fatal(err)
+			}
+			utxos = append(utxos, &types.UTXO{TxHash: tx.GetHash(), Index: 0})
+			if err = store.Utxo().Put(crypto.PublicKeyToBytes(pubKey), utxos); err != nil {
+				log.Fatal(err)
+			}
 		}
 		if err = configFuture.Error(); err != nil {
 			log.Fatal(err)
 		}
 	}
-	transactor := service.NewTransactor(store.Transaction())
+	transactor := service.NewTransactor(store.Transaction(), store.Utxo())
 	tm := mapper.NewTransactionMapper()
 	localChainManager := grpc2.NewLocalChain(serverID, r, txPool, tm, transactor)
 
@@ -171,22 +186,25 @@ func main() {
 	}
 }
 
-func genesisTx(genesisBlock *types.Block) *types.Transaction {
+func genesisTx(genesisBlock *types.Block, outputs []*types.TxOut) *types.Transaction {
 	return &types.Transaction{
 		BlockHash: genesisBlock.ComputeHash(),
-		Outputs: []*types.TxOut{
-			{
-				TxID: uuid.MustParse("10252f31-151b-457d-b8de-e4a6f1552b62"),
-				Amount: types.Amount{
-					Value: 100000000,
-					Unit:  100,
-				},
-				PubKey: []byte(`-----BEGIN PUBLIC KEY-----
+		Outputs:   outputs,
+		Hash:      []byte("genesis"),
+	}
+}
+
+func genesisOutputs() []*types.TxOut {
+	return []*types.TxOut{
+		types.NewTxOut(
+			uuid.MustParse("10252f31-151b-457d-b8de-e4a6f1552b62"),
+			types.Amount{
+				Value: 100000000,
+				Unit:  100,
+			},
+			[]byte(`-----BEGIN PUBLIC KEY-----
 MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEa/KaLpP9gikVe2ZXkp74RE+QmdDd
 hJxRIN+5upGQgZyYFOqC7uwgXk0PS7GUNTl1aECoAKa2WEIWKL2PmTNZvg==
------END PUBLIC KEY-----`),
-			},
-		},
-		Hash: []byte("genesis"),
+-----END PUBLIC KEY-----`)),
 	}
 }

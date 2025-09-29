@@ -5,6 +5,7 @@ service LocalChain {
   rpc RemovePeer(RemovePeerRequest) returns (RemovePeerResponse) {}
   rpc AddVoter(AddVoterRequest) returns (AddVoterResponse) {}
   rpc AddTransaction(AddTransactionRequest) returns (AddTransactionResponse) {}
+  rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse) {}
 }
 
 message AddPeerRequest {
@@ -38,7 +39,14 @@ message AddTransactionRequest {
   bytes sender = 1;
   bytes receiver = 2;
   Amount amount = 3;
-  repeated Utxo utxos = 4;
+}
+
+message GetBalanceRequest {
+  bytes sender = 1;
+}
+
+message GetBalanceResponse {
+    Amount amount = 1;
 }
 
 message AddTransactionResponse {

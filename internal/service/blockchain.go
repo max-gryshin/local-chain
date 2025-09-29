@@ -20,7 +20,7 @@ const (
 )
 
 type BlockchainStore interface {
-	Get() ([]*types.Block, error)
+	Get() (types.Blocks, error)
 	Put(*types.Block) error
 }
 

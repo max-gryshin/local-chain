@@ -26,6 +26,7 @@ type LocalChainClient interface {
 	RemovePeer(ctx context.Context, in *RemovePeerRequest, opts ...grpc.CallOption) (*RemovePeerResponse, error)
 	AddVoter(ctx context.Context, in *AddVoterRequest, opts ...grpc.CallOption) (*AddVoterResponse, error)
 	AddTransaction(ctx context.Context, in *AddTransactionRequest, opts ...grpc.CallOption) (*AddTransactionResponse, error)
+	GetBalance(ctx context.Context, in *GetBalanceRequest, opts ...grpc.CallOption) (*GetBalanceResponse, error)
 }
 
 type localChainClient struct {
@@ -72,6 +73,15 @@ func (c *localChainClient) AddTransaction(ctx context.Context, in *AddTransactio
 	return out, nil
 }
 
+func (c *localChainClient) GetBalance(ctx context.Context, in *GetBalanceRequest, opts ...grpc.CallOption) (*GetBalanceResponse, error) {
+	out := new(GetBalanceResponse)
+	err := c.cc.Invoke(ctx, "/LocalChain/GetBalance", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // LocalChainServer is the server API for LocalChain service.
 // All implementations must embed UnimplementedLocalChainServer
 // for forward compatibility
@@ -80,6 +90,7 @@ type LocalChainServer interface {
 	RemovePeer(context.Context, *RemovePeerRequest) (*RemovePeerResponse, error)
 	AddVoter(context.Context, *AddVoterRequest) (*AddVoterResponse, error)
 	AddTransaction(context.Context, *AddTransactionRequest) (*AddTransactionResponse, error)
+	GetBalance(context.Context, *GetBalanceRequest) (*GetBalanceResponse, error)
 	mustEmbedUnimplementedLocalChainServer()
 }
 
@@ -98,6 +109,9 @@ func (UnimplementedLocalChainServer) AddVoter(context.Context, *AddVoterRequest)
 }
 func (UnimplementedLocalChainServer) AddTransaction(context.Context, *AddTransactionRequest) (*AddTransactionResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method AddTransaction not implemented")
+}
+func (UnimplementedLocalChainServer) GetBalance(context.Context, *GetBalanceRequest) (*GetBalanceResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBalance not implemented")
 }
 func (UnimplementedLocalChainServer) mustEmbedUnimplementedLocalChainServer() {}
 
@@ -184,6 +198,24 @@ func _LocalChain_AddTransaction_Handler(srv interface{}, ctx context.Context, de
 	return interceptor(ctx, in, info, handler)
 }
 
+func _LocalChain_GetBalance_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBalanceRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LocalChainServer).GetBalance(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/LocalChain/GetBalance",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LocalChainServer).GetBalance(ctx, req.(*GetBalanceRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // LocalChain_ServiceDesc is the grpc.ServiceDesc for LocalChain service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -206,6 +238,10 @@ var LocalChain_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "AddTransaction",
 			Handler:    _LocalChain_AddTransaction_Handler,
+		},
+		{
+			MethodName: "GetBalance",
+			Handler:    _LocalChain_GetBalance_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

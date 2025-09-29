@@ -45,26 +45,26 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 						Sender:   from,
 						Receiver: &to.PublicKey,
 						Amount:   *types.NewAmount(100),
-						Utxos: []*types.UTXO{
-							{
-								TxHash: tx1.GetHash(),
-								Index:  0,
-							},
-							{
-								TxHash: tx2.GetHash(),
-								Index:  0,
-							},
-							{
-								TxHash: tx3.GetHash(),
-								Index:  0,
-							},
-						},
+						//Utxos: []*types.UTXO{
+						//	{
+						//		TxHash: tx1.GetHash(),
+						//		Index:  0,
+						//	},
+						//	{
+						//		TxHash: tx2.GetHash(),
+						//		Index:  0,
+						//	},
+						//	{
+						//		TxHash: tx3.GetHash(),
+						//		Index:  0,
+						//	},
+						//},
 					},
 					txPool: txStore,
 				}
 			},
 			transactor: func(args args) *service.Transactor {
-				t := service.NewTransactor(args.txPool)
+				t := service.NewTransactor(args.txPool, nil)
 
 				return t
 			},
@@ -105,18 +105,18 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 						Sender:   fakeFrom,
 						Receiver: &to.PublicKey,
 						Amount:   *types.NewAmount(100),
-						Utxos: []*types.UTXO{
-							{
-								TxHash: tx1.GetHash(),
-								Index:  0,
-							},
-						},
+						//Utxos: []*types.UTXO{
+						//	{
+						//		TxHash: tx1.GetHash(),
+						//		Index:  0,
+						//	},
+						//},
 					},
 					txPool: pool,
 				}
 			},
 			transactor: func(args args) *service.Transactor {
-				t := service.NewTransactor(args.txPool)
+				t := service.NewTransactor(args.txPool, nil)
 
 				return t
 			},
