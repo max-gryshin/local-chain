@@ -6,9 +6,10 @@ import (
 	"crypto/sha512"
 	"encoding/binary"
 	"fmt"
-	"local-chain/internal/pkg/crypto"
 	"math/big"
 	"time"
+
+	"local-chain/internal/pkg/crypto"
 
 	"github.com/ethereum/go-ethereum/rlp"
 	"github.com/google/uuid"
@@ -27,13 +28,15 @@ type Transaction struct {
 
 	Inputs  []*TxIn
 	Outputs []*TxOut
+
+	UTXO []*UTXO
 }
 
 func NewTransaction() *Transaction {
 	return &Transaction{
 		ID:        uuid.New(),
 		Timestamp: uint64(time.Now().UnixNano()),
-		Salt:      [16]byte(uuid.New()),
+		Salt:      uuid.New(),
 	}
 }
 
@@ -63,14 +66,14 @@ func (tx *Transaction) ComputeHash() {
 	data := make([]byte, 0, 256)
 	data = append(data, tx.ID[:]...)
 	timestamp := make([]byte, 8)
-	binary.LittleEndian.PutUint64(timestamp, uint64(tx.Timestamp))
+	binary.LittleEndian.PutUint64(timestamp, tx.Timestamp)
 	data = append(data, timestamp...)
 	nLockTime := make([]byte, 8)
 	binary.LittleEndian.PutUint64(timestamp, uint64(tx.nLockTime))
 	data = append(data, nLockTime...)
 	for _, out := range tx.Outputs {
 		data = append(data, out.TxID[:]...)
-		data = append(data, []byte(out.PubKey)...)
+		data = append(data, out.PubKey...)
 		data = append(data, out.Amount.ToBytes()...)
 	}
 	hash := sha512.New()
@@ -131,6 +134,13 @@ type Amount struct {
 	Unit  uint32
 }
 
+func NewAmount(value uint64) *Amount {
+	return &Amount{
+		Value: value,
+		Unit:  CurrencyUnit,
+	}
+}
+
 func (a *Amount) ToBytes() []byte {
 	amount := make([]byte, 8)
 	binary.LittleEndian.PutUint64(amount, uint64(a.Value))
@@ -138,13 +148,6 @@ func (a *Amount) ToBytes() []byte {
 	binary.LittleEndian.PutUint32(unit, uint32(a.Unit))
 
 	return append(amount, unit...)
-}
-
-func NewAmount(value uint64) *Amount {
-	return &Amount{
-		Value: value,
-		Unit:  CurrencyUnit,
-	}
 }
 
 type Transactions []*Transaction
@@ -161,5 +164,4 @@ type TransactionRequest struct {
 	Sender   *ecdsa.PrivateKey
 	Receiver *ecdsa.PublicKey
 	Amount   Amount
-	Utxos    []*UTXO
 }

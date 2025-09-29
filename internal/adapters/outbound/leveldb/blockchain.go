@@ -22,14 +22,14 @@ func NewBlockchainStore(conn Database) *BlockchainStore {
 	}
 }
 
-// todo store as map, key is block hash
-func (s *BlockchainStore) Get() ([]*types.Block, error) {
+// Get todo: store as map, key is block hash
+func (s *BlockchainStore) Get() (types.Blocks, error) {
 	raw, err := s.db.Get([]byte(BlockchainKey), nil)
 	if err != nil {
 		return nil, fmt.Errorf("blockchainStore.Get get blockchain error: %w", err)
 	}
 
-	var blocks []*types.Block
+	var blocks types.Blocks
 	if err = rlp.DecodeBytes(raw, &blocks); err != nil {
 		return nil, fmt.Errorf("failed to decode blockchain: %w", err)
 	}
@@ -38,15 +38,12 @@ func (s *BlockchainStore) Get() ([]*types.Block, error) {
 }
 
 func (s *BlockchainStore) Put(block *types.Block) error {
-	var blockchain []*types.Block
-	// todo: think about cache
 	blockchain, err := s.Get()
 	if err != nil && !errors.Is(err, leveldberrors.ErrNotFound) {
 		return fmt.Errorf("blockchainStore.Put get blockchain error: %w", err)
 	}
 
 	blockchain = append(blockchain, block)
-
 	encoded, err := rlp.EncodeToBytes(blockchain)
 	if err != nil {
 		return fmt.Errorf("failed to encode blockchain: %w", err)

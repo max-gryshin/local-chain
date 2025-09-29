@@ -5,6 +5,7 @@ import (
 	"fmt"
 
 	"local-chain/internal/pkg/crypto"
+
 	"local-chain/internal/types"
 )
 
@@ -15,13 +16,20 @@ type TransactionStore interface {
 	Put(*types.Transaction) error
 }
 
-type Transactor struct {
-	txStore TransactionStore
+type UTXOStore interface {
+	Get(pubKey []byte) ([]*types.UTXO, error)
+	Put(pubKey []byte, utxos []*types.UTXO) error
 }
 
-func NewTransactor(txStore TransactionStore) *Transactor {
+type Transactor struct {
+	txStore   TransactionStore
+	utxoStore UTXOStore
+}
+
+func NewTransactor(txStore TransactionStore, UTXOStore UTXOStore) *Transactor {
 	return &Transactor{
-		txStore: txStore,
+		txStore:   txStore,
+		utxoStore: UTXOStore,
 	}
 }
 
@@ -32,7 +40,12 @@ func NewTransactor(txStore TransactionStore) *Transactor {
 func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transaction, error) {
 	newTx := types.NewTransaction()
 	balance := types.Amount{}
-	for id, utxo := range txReq.Utxos {
+	senderPubKey := crypto.PublicKeyToBytes(&txReq.Sender.PublicKey)
+	utxos, err := t.utxoStore.Get(senderPubKey)
+	if err != nil {
+		return nil, fmt.Errorf("error getting sender's utxos : %v", err)
+	}
+	for id, utxo := range utxos {
 		tx, err := t.txStore.Get(utxo.TxHash)
 		if err != nil {
 			return nil, fmt.Errorf("get utxo tx hash err: %v", err)
@@ -61,7 +74,7 @@ func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transacti
 
 		input := &types.TxIn{
 			Prev:       utxo,
-			PubKey:     crypto.PublicKeyToBytes(&txReq.Sender.PublicKey),
+			PubKey:     senderPubKey,
 			SignatureR: r,
 			SignatureS: s,
 			NSequence:  uint32(id),
@@ -83,4 +96,30 @@ func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transacti
 	newTx.ComputeHash()
 
 	return newTx, nil
+}
+
+func (t *Transactor) GetBalance(pubKey []byte) (*types.Amount, error) {
+	pubKeyEcdsa, err := crypto.PublicKeyFromBytes(pubKey)
+	if err != nil {
+		return nil, fmt.Errorf("public key is not ECDSA")
+	}
+	utxos, err := t.utxoStore.Get(crypto.PublicKeyToBytes(pubKeyEcdsa))
+	if err != nil {
+		return nil, fmt.Errorf("error getting utxos : %v", err)
+	}
+	balance := &types.Amount{}
+	for _, utxo := range utxos {
+		tx, err := t.txStore.Get(utxo.TxHash)
+		if err != nil {
+			return nil, fmt.Errorf("get utxo tx hash err: %v", err)
+		}
+		if int(utxo.Index) >= len(tx.Outputs) {
+			return nil, fmt.Errorf("UTXO index %d is out of bounds for transaction %s", utxo.Index, string(utxo.TxHash))
+		}
+		output := tx.Outputs[utxo.Index]
+		balance.Value += output.Amount.Value
+		// assume all outputs have the same unit
+		balance.Unit = output.Amount.Unit
+	}
+	return balance, nil
 }

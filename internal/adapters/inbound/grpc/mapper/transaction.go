@@ -30,18 +30,5 @@ func (tp *TransactionMapper) RpcToTransaction(req *grpcPkg.AddTransactionRequest
 		Sender:   sender,
 		Receiver: receiver,
 		Amount:   types.Amount{Value: req.GetAmount().GetValue(), Unit: req.GetAmount().GetUnit()},
-		Utxos:    rpcToUtxos(req.GetUtxos()),
 	}, nil
-}
-
-func rpcToUtxos(rpcUtxos []*grpcPkg.Utxo) []*types.UTXO {
-	utxos := make([]*types.UTXO, 0, len(rpcUtxos))
-	for _, rpcUtxo := range rpcUtxos {
-		utxo := &types.UTXO{
-			TxHash: rpcUtxo.TxHash,
-			Index:  rpcUtxo.Index,
-		}
-		utxos = append(utxos, utxo)
-	}
-	return utxos
 }
