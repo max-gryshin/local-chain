@@ -3,14 +3,6 @@ package main
 import (
 	"context"
 	"fmt"
-	"local-chain/internal/pkg/crypto"
-	"log"
-	"log/slog"
-	"net"
-	"net/netip"
-	"os"
-	"time"
-
 	grpc2 "local-chain/internal/adapters/inbound/grpc"
 	"local-chain/internal/adapters/inbound/grpc/mapper"
 	"local-chain/internal/adapters/outbound/inMem"
@@ -18,10 +10,10 @@ import (
 	"local-chain/internal/runners"
 	"local-chain/internal/service"
 	transport2 "local-chain/transport/gen/transport"
+	"log"
+	"log/slog"
+	"os"
 
-	"local-chain/internal/types"
-
-	"github.com/google/uuid"
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -49,6 +41,11 @@ func main() {
 	fmt.Println("raftBootstrap:", bootstrap)
 	logger := slog.Default()
 	ctx := pkg.ContextWithServerID(context.Background(), serverID)
+	cfg, err := NewConfig(serverID)
+	if err != nil {
+		log.Printf("error prepare configs: %v", err)
+		return
+	}
 
 	//ex, err := os.Executable()
 	//if err != nil {
@@ -86,39 +83,18 @@ func main() {
 		log.Printf("error create snapshotStore: %v", err)
 		return
 	}
-
-	raftAddrPort, err := netip.ParseAddrPort(raftAddr)
-	if err != nil {
-		log.Printf("error parse raft addr: %v", err)
-		return
-	}
-
 	tr, err := raft.NewTCPTransport(
 		raftAddr,
-		net.TCPAddrFromAddrPort(raftAddrPort),
-		3,
-		10*time.Second,
-		os.Stderr,
+		cfg.TCPTransport.Address,
+		cfg.TCPTransport.MaxPool,
+		cfg.TCPTransport.Timeout,
+		cfg.TCPTransport.LogOutput,
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	raftConfig := &raft.Config{
-		ProtocolVersion:    raft.ProtocolVersionMax,
-		HeartbeatTimeout:   1000 * time.Millisecond,
-		ElectionTimeout:    1000 * time.Millisecond,
-		CommitTimeout:      50 * time.Millisecond,
-		MaxAppendEntries:   64,
-		ShutdownOnRemove:   true,
-		TrailingLogs:       10240,
-		SnapshotInterval:   120 * time.Second,
-		SnapshotThreshold:  8192,
-		LeaderLeaseTimeout: 500 * time.Millisecond,
-		LogLevel:           "DEBUG",
-		LocalID:            serverID,
-	}
 	r, err := raft.NewRaft(
-		raftConfig,
+		cfg.Raft,
 		fsmStore,
 		logStore,
 		stableStore,
@@ -129,38 +105,7 @@ func main() {
 		log.Fatal(err)
 	}
 	if bootstrap {
-		configFuture := r.BootstrapCluster(raft.Configuration{
-			Servers: []raft.Server{
-				{
-					ID:      serverID,
-					Address: raft.ServerAddress(raftAddr),
-				},
-			},
-		})
-		genesisBlock := types.NewBlock(nil, []byte("genesis"))
-		if err = store.Blockchain().Put(genesisBlock); err != nil {
-			log.Fatal(err)
-		}
-		outputs := genesisOutputs()
-		tx := genesisTx(genesisBlock, outputs)
-		tx.ComputeHash()
-		if err = store.Transaction().Put(tx); err != nil {
-			log.Fatal(err)
-		}
-		for _, output := range outputs {
-			utxos := make([]*types.UTXO, 0)
-			pubKey, err := crypto.PublicKeyFromBytes(output.PubKey)
-			if err != nil {
-				log.Fatal(err)
-			}
-			utxos = append(utxos, &types.UTXO{TxHash: tx.GetHash(), Index: 0})
-			if err = store.Utxo().Put(crypto.PublicKeyToBytes(pubKey), utxos); err != nil {
-				log.Fatal(err)
-			}
-		}
-		if err = configFuture.Error(); err != nil {
-			log.Fatal(err)
-		}
+		configureBootstrap(r, store)
 	}
 	transactor := service.NewTransactor(store.Transaction(), store.Utxo())
 	tm := mapper.NewTransactionMapper()
@@ -184,28 +129,5 @@ func main() {
 		logger.Error("runner finished with an error", slog.Any("error", firstError))
 	} else {
 		logger.Info("runner finished successfully")
-	}
-}
-
-func genesisTx(genesisBlock *types.Block, outputs []*types.TxOut) *types.Transaction {
-	return &types.Transaction{
-		BlockHash: genesisBlock.ComputeHash(),
-		Outputs:   outputs,
-		Hash:      []byte("genesis"),
-	}
-}
-
-func genesisOutputs() []*types.TxOut {
-	return []*types.TxOut{
-		types.NewTxOut(
-			uuid.MustParse("10252f31-151b-457d-b8de-e4a6f1552b62"),
-			types.Amount{
-				Value: 100000000,
-				Unit:  100,
-			},
-			[]byte(`-----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEa/KaLpP9gikVe2ZXkp74RE+QmdDd
-hJxRIN+5upGQgZyYFOqC7uwgXk0PS7GUNTl1aECoAKa2WEIWKL2PmTNZvg==
------END PUBLIC KEY-----`)),
 	}
 }
