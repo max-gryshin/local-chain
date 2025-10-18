@@ -2,12 +2,12 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
 	"local-chain/internal/pkg/crypto"
 	"log"
 	"log/slog"
 	"net"
+	"net/netip"
 	"os"
 	"time"
 
@@ -22,7 +22,6 @@ import (
 	"local-chain/internal/types"
 
 	"github.com/google/uuid"
-	"github.com/gotidy/ptr"
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -32,26 +31,22 @@ import (
 	leveldbpkg "local-chain/internal/adapters/outbound/leveldb"
 )
 
-const (
-	dbPath = "./db"
-
-	fsmDbPath  = dbPath + "/fsm"
-	logDb      = dbPath + "/log.dat"
-	stableDb   = dbPath + "/stable.dat"
-	snapshotDb = dbPath
-)
-
 var (
-	myAddr        = flag.String("address", "127.0.0.1:8001", "TCP host+port for this node")
-	raftId        = flag.String("raft_id", "10252f31-151b-457d-b8de-e4a6f1552b62", "Node id used by Raft")
-	serverID      = raft.ServerID(ptr.ToString(raftId))
-	raftBootstrap = flag.Bool("raft_bootstrap", true, "Whether to bootstrap the Raft cluster")
+	nodeID   = os.Getenv("NODE_ID")
+	raftAddr = os.Getenv("RAFT_ADDR")
+	grpcAddr = os.Getenv("GRPC_ADDR")
+	dbDir    = os.Getenv("DATA_DIR")
+
+	logDb      = dbDir + "/log.dat"
+	stableDb   = dbDir + "/stable.dat"
+	snapshotDb = dbDir
+
+	bootstrap = os.Getenv("BOOTSTRAP") == "true"
+	serverID  = raft.ServerID(nodeID)
 )
 
 func main() {
-	flag.Parse()
-
-	fmt.Println("raftBootstrap:", *raftBootstrap)
+	fmt.Println("raftBootstrap:", bootstrap)
 	logger := slog.Default()
 	ctx := pkg.ContextWithServerID(context.Background(), serverID)
 
@@ -62,7 +57,7 @@ func main() {
 	//exPath := filepath.Dir(ex)
 	//fmt.Println(exPath)
 
-	db, err := leveldb.OpenFile(dbPath, nil)
+	db, err := leveldb.OpenFile(dbDir, nil)
 	if err != nil {
 		log.Printf("error open db file: %v", err)
 		return
@@ -92,9 +87,15 @@ func main() {
 		return
 	}
 
+	raftAddrPort, err := netip.ParseAddrPort(raftAddr)
+	if err != nil {
+		log.Printf("error parse raft addr: %v", err)
+		return
+	}
+
 	tr, err := raft.NewTCPTransport(
-		ptr.ToString(myAddr),
-		&net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: 8001},
+		raftAddr,
+		net.TCPAddrFromAddrPort(raftAddrPort),
 		3,
 		10*time.Second,
 		os.Stderr,
@@ -127,12 +128,12 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if *raftBootstrap {
+	if bootstrap {
 		configFuture := r.BootstrapCluster(raft.Configuration{
 			Servers: []raft.Server{
 				{
 					ID:      serverID,
-					Address: raft.ServerAddress(ptr.ToString(myAddr)),
+					Address: raft.ServerAddress(raftAddr),
 				},
 			},
 		})
@@ -165,7 +166,7 @@ func main() {
 	tm := mapper.NewTransactionMapper()
 	localChainManager := grpc2.NewLocalChain(serverID, r, txPool, tm, transactor)
 
-	grpcRunner := runners.New(9001, func(s *grpc.Server) {
+	grpcRunner := runners.New(grpcAddr, func(s *grpc.Server) {
 		transport2.RegisterLocalChainServer(s, localChainManager)
 	}, *logger)
 

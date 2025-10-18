@@ -20,10 +20,10 @@ type GrpcRunner struct {
 	server *grpc.Server
 	logger *slog.Logger
 
-	port int
+	address string
 }
 
-func New(port int, reg func(s *grpc.Server), logger slog.Logger) *GrpcRunner {
+func New(addr string, reg func(s *grpc.Server), logger slog.Logger) *GrpcRunner {
 	server := grpc.NewServer(
 		grpc.ChainUnaryInterceptor(
 			recovery.UnaryServerInterceptor(recovery.WithRecoveryHandler(panicRecoveryHandler(logger))),
@@ -35,15 +35,15 @@ func New(port int, reg func(s *grpc.Server), logger slog.Logger) *GrpcRunner {
 	reg(server)
 
 	return &GrpcRunner{
-		port:   port,
-		server: server,
+		address: addr,
+		server:  server,
 
 		logger: logger.With("source", "internal/runners/grpc"),
 	}
 }
 
 func (r *GrpcRunner) Run(ctx context.Context) error {
-	listener, err := net.Listen("tcp", fmt.Sprintf(":%d", r.port))
+	listener, err := net.Listen("tcp", r.address)
 	if err != nil {
 		return fmt.Errorf("err with listen grpc address: %v", err)
 	}
