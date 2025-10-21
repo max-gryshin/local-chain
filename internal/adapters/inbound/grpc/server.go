@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"time"
 
-	"local-chain/internal/pkg"
-
 	"github.com/hashicorp/raft"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
@@ -23,6 +21,7 @@ type RaftAPI interface {
 	AddVoter(id raft.ServerID, address raft.ServerAddress, prevIndex uint64, timeout time.Duration) raft.IndexFuture
 	LeaderWithID() (raft.ServerAddress, raft.ServerID)
 	Apply(cmd []byte, timeout time.Duration) raft.ApplyFuture
+	State() raft.RaftState
 }
 
 type txPool interface {
@@ -68,7 +67,7 @@ func (s *LocalChainServer) AddPeer(ctx context.Context, req *grpcPkg.AddPeerRequ
 		return &grpcPkg.AddPeerResponse{Success: false}, errors.New("peer ID and address must be provided")
 	}
 	leaderServer, leaderID := s.raftAPI.LeaderWithID()
-	if leaderID != pkg.ServerIDFromContext(ctx) {
+	if leaderID != s.serverID {
 		client, err := s.leaderClient(string(leaderServer))
 		if err != nil {
 			return &grpcPkg.AddPeerResponse{Success: false}, errors.New("failed to connect to leader")
@@ -77,6 +76,7 @@ func (s *LocalChainServer) AddPeer(ctx context.Context, req *grpcPkg.AddPeerRequ
 	}
 	future := s.raftAPI.AddNonvoter(raft.ServerID(req.GetId()), raft.ServerAddress(req.GetAddress()), 0, 0)
 	if err := future.Error(); err != nil {
+		fmt.Println("AddNonvoter error", future.Error())
 		return &grpcPkg.AddPeerResponse{Success: false}, err
 	}
 
@@ -88,7 +88,7 @@ func (s *LocalChainServer) RemovePeer(ctx context.Context, req *grpcPkg.RemovePe
 		return &grpcPkg.RemovePeerResponse{Success: false}, errors.New("peer ID and address must be provided")
 	}
 	leaderServer, leaderID := s.raftAPI.LeaderWithID()
-	if leaderID != pkg.ServerIDFromContext(ctx) {
+	if leaderID != s.serverID {
 		client, err := s.leaderClient(string(leaderServer))
 		if err != nil {
 			return &grpcPkg.RemovePeerResponse{Success: false}, errors.New("failed to connect to leader")
@@ -103,18 +103,18 @@ func (s *LocalChainServer) RemovePeer(ctx context.Context, req *grpcPkg.RemovePe
 }
 
 func (s *LocalChainServer) AddVoter(ctx context.Context, req *grpcPkg.AddVoterRequest) (*grpcPkg.AddVoterResponse, error) {
+	if req.GetId() == "" || req.GetAddress() == "" {
+		return &grpcPkg.AddVoterResponse{Success: false}, errors.New("peer ID and address must be provided")
+	}
 	leaderServer, leaderID := s.raftAPI.LeaderWithID()
-	if leaderID != pkg.ServerIDFromContext(ctx) {
+	if leaderID != s.serverID {
 		client, err := s.leaderClient(string(leaderServer))
 		if err != nil {
 			return &grpcPkg.AddVoterResponse{Success: false}, errors.New("failed to connect to leader")
 		}
 		return client.AddVoter(ctx, req)
 	}
-	if req.GetId() == "" || req.GetAddress() == "" {
-		return &grpcPkg.AddVoterResponse{Success: false}, errors.New("peer ID and address must be provided")
-	}
-	future := s.raftAPI.AddVoter(raft.ServerID(req.GetId()), raft.ServerAddress(req.GetAddress()), 0, 0)
+	future := s.raftAPI.AddVoter(raft.ServerID(req.GetId()), raft.ServerAddress(req.GetAddress()), 0, 10*time.Second)
 	if err := future.Error(); err != nil {
 		return &grpcPkg.AddVoterResponse{Success: false}, err
 	}

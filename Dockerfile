@@ -16,9 +16,4 @@ RUN apk --no-cache add ca-certificates
 COPY --from=builder /app/local-chain .
 EXPOSE 8001 9001
 
-ENV NODE_ID="" \
-    RAFT_ADDR="127.0.0.1:8001" \
-    GRPC_ADDR="127.0.0.1:9001" \
-    DATA_DIR="./db"
-
 ENTRYPOINT [ "/local-chain" ]
