@@ -25,8 +25,11 @@ func NewBlockchainStore(conn Database) *BlockchainStore {
 // Get todo: store as map, key is block hash
 func (s *BlockchainStore) Get() (types.Blocks, error) {
 	raw, err := s.db.Get([]byte(BlockchainKey), nil)
-	if err != nil {
+	if err != nil && !errors.As(err, &leveldberrors.ErrNotFound) { // nolint:govet
 		return nil, fmt.Errorf("blockchainStore.Get get blockchain error: %w", err)
+	}
+	if raw == nil {
+		return nil, nil
 	}
 
 	var blocks types.Blocks

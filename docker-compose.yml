@@ -1,0 +1,69 @@
+services:
+  node_1:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
+    image: "${APP_IMAGE}:${APP_IMAGE_TAG}"
+    container_name: node1
+    hostname: node1
+    environment:
+      - NODE_ID=00000000-0000-0000-0000-000000000001
+      - RAFT_ADDR=172.25.0.11:8001
+      - GRPC_ADDR=node1:9001
+      - DATA_DIR=./db
+      - BOOTSTRAP=true
+    ports:
+      - "8001:8001"
+      - "9001:9001"
+    tty: true
+    volumes:
+      - local-chain-db-volume_1:/db
+    networks:
+      raft-network:
+        ipv4_address: 172.25.0.11
+        aliases:
+          - node1
+  node_2:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
+    image: "${APP_IMAGE}:${APP_IMAGE_TAG}"
+    container_name: node2
+    hostname: node2
+    environment:
+      - NODE_ID=00000000-0000-0000-0000-000000000002
+      - RAFT_ADDR=172.25.0.12:8001
+      - GRPC_ADDR=node2:9001
+      - DATA_DIR=./db1
+      - BOOTSTRAP=false
+    ports:
+      - "8002:8001"
+      - "9002:9001"
+    tty: true
+    volumes:
+      - local-chain-db-volume_2:/db
+    networks:
+      raft-network:
+        ipv4_address: 172.25.0.12
+        aliases:
+          - node2
+    depends_on:
+      - node_1
+
+volumes:
+  local-chain-db-volume_1:
+    name: db-local-chain
+  local-chain-db-volume_2:
+    name: db-local-chain
+
+networks:
+  raft-network:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.25.0.0/16
+    driver_opts:
+      com.docker.network.bridge.name: br-raft
+      com.docker.network.bridge.enable_ip_masquerade: "true"
+      com.docker.network.bridge.enable_icc: "true"
+      com.docker.network.driver.mtu: "1500"

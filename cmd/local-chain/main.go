@@ -2,15 +2,7 @@ package main
 
 import (
 	"context"
-	"flag"
 	"fmt"
-	"local-chain/internal/pkg/crypto"
-	"log"
-	"log/slog"
-	"net"
-	"os"
-	"time"
-
 	grpc2 "local-chain/internal/adapters/inbound/grpc"
 	"local-chain/internal/adapters/inbound/grpc/mapper"
 	"local-chain/internal/adapters/outbound/inMem"
@@ -18,11 +10,10 @@ import (
 	"local-chain/internal/runners"
 	"local-chain/internal/service"
 	transport2 "local-chain/transport/gen/transport"
+	"log"
+	"log/slog"
+	"os"
 
-	"local-chain/internal/types"
-
-	"github.com/google/uuid"
-	"github.com/gotidy/ptr"
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb"
 	"github.com/syndtr/goleveldb/leveldb"
@@ -32,28 +23,29 @@ import (
 	leveldbpkg "local-chain/internal/adapters/outbound/leveldb"
 )
 
-const (
-	dbPath = "./db"
-
-	fsmDbPath  = dbPath + "/fsm"
-	logDb      = dbPath + "/log.dat"
-	stableDb   = dbPath + "/stable.dat"
-	snapshotDb = dbPath
-)
-
 var (
-	myAddr        = flag.String("address", "127.0.0.1:8001", "TCP host+port for this node")
-	raftId        = flag.String("raft_id", "10252f31-151b-457d-b8de-e4a6f1552b62", "Node id used by Raft")
-	serverID      = raft.ServerID(ptr.ToString(raftId))
-	raftBootstrap = flag.Bool("raft_bootstrap", true, "Whether to bootstrap the Raft cluster")
+	nodeID   = os.Getenv("NODE_ID")
+	raftAddr = os.Getenv("RAFT_ADDR")
+	grpcAddr = os.Getenv("GRPC_ADDR")
+	dbDir    = os.Getenv("DATA_DIR")
+
+	logDb      = dbDir + "/log.dat"
+	stableDb   = dbDir + "/stable.dat"
+	snapshotDb = dbDir
+
+	bootstrap = os.Getenv("BOOTSTRAP") == "true"
+	serverID  = raft.ServerID(nodeID)
 )
 
 func main() {
-	flag.Parse()
-
-	fmt.Println("raftBootstrap:", *raftBootstrap)
+	fmt.Println("raftBootstrap:", bootstrap)
 	logger := slog.Default()
-	ctx := pkg.ContextWithServerID(context.Background(), serverID)
+	ctx := pkg.ContextWithServerID(context.Background(), raft.ServerID(raftAddr))
+	cfg, err := NewConfig(serverID)
+	if err != nil {
+		log.Printf("error prepare configs: %v", err)
+		return
+	}
 
 	//ex, err := os.Executable()
 	//if err != nil {
@@ -62,7 +54,7 @@ func main() {
 	//exPath := filepath.Dir(ex)
 	//fmt.Println(exPath)
 
-	db, err := leveldb.OpenFile(dbPath, nil)
+	db, err := leveldb.OpenFile(dbDir, nil)
 	if err != nil {
 		log.Printf("error open db file: %v", err)
 		return
@@ -91,33 +83,18 @@ func main() {
 		log.Printf("error create snapshotStore: %v", err)
 		return
 	}
-
 	tr, err := raft.NewTCPTransport(
-		ptr.ToString(myAddr),
-		&net.TCPAddr{IP: net.ParseIP("127.0.0.1"), Port: 8001},
-		3,
-		10*time.Second,
-		os.Stderr,
+		raftAddr,
+		cfg.TCPTransport.Address,
+		cfg.TCPTransport.MaxPool,
+		cfg.TCPTransport.Timeout,
+		cfg.TCPTransport.LogOutput,
 	)
 	if err != nil {
 		log.Fatal(err)
 	}
-	raftConfig := &raft.Config{
-		ProtocolVersion:    raft.ProtocolVersionMax,
-		HeartbeatTimeout:   1000 * time.Millisecond,
-		ElectionTimeout:    1000 * time.Millisecond,
-		CommitTimeout:      50 * time.Millisecond,
-		MaxAppendEntries:   64,
-		ShutdownOnRemove:   true,
-		TrailingLogs:       10240,
-		SnapshotInterval:   120 * time.Second,
-		SnapshotThreshold:  8192,
-		LeaderLeaseTimeout: 500 * time.Millisecond,
-		LogLevel:           "DEBUG",
-		LocalID:            serverID,
-	}
 	r, err := raft.NewRaft(
-		raftConfig,
+		cfg.Raft,
 		fsmStore,
 		logStore,
 		stableStore,
@@ -127,45 +104,14 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
-	if *raftBootstrap {
-		configFuture := r.BootstrapCluster(raft.Configuration{
-			Servers: []raft.Server{
-				{
-					ID:      serverID,
-					Address: raft.ServerAddress(ptr.ToString(myAddr)),
-				},
-			},
-		})
-		genesisBlock := types.NewBlock(nil, []byte("genesis"))
-		if err = store.Blockchain().Put(genesisBlock); err != nil {
-			log.Fatal(err)
-		}
-		outputs := genesisOutputs()
-		tx := genesisTx(genesisBlock, outputs)
-		tx.ComputeHash()
-		if err = store.Transaction().Put(tx); err != nil {
-			log.Fatal(err)
-		}
-		for _, output := range outputs {
-			utxos := make([]*types.UTXO, 0)
-			pubKey, err := crypto.PublicKeyFromBytes(output.PubKey)
-			if err != nil {
-				log.Fatal(err)
-			}
-			utxos = append(utxos, &types.UTXO{TxHash: tx.GetHash(), Index: 0})
-			if err = store.Utxo().Put(crypto.PublicKeyToBytes(pubKey), utxos); err != nil {
-				log.Fatal(err)
-			}
-		}
-		if err = configFuture.Error(); err != nil {
-			log.Fatal(err)
-		}
+	if bootstrap {
+		configureBootstrap(r, store)
 	}
 	transactor := service.NewTransactor(store.Transaction(), store.Utxo())
 	tm := mapper.NewTransactionMapper()
 	localChainManager := grpc2.NewLocalChain(serverID, r, txPool, tm, transactor)
 
-	grpcRunner := runners.New(9001, func(s *grpc.Server) {
+	grpcRunner := runners.New(grpcAddr, func(s *grpc.Server) {
 		transport2.RegisterLocalChainServer(s, localChainManager)
 	}, *logger)
 
@@ -183,28 +129,5 @@ func main() {
 		logger.Error("runner finished with an error", slog.Any("error", firstError))
 	} else {
 		logger.Info("runner finished successfully")
-	}
-}
-
-func genesisTx(genesisBlock *types.Block, outputs []*types.TxOut) *types.Transaction {
-	return &types.Transaction{
-		BlockHash: genesisBlock.ComputeHash(),
-		Outputs:   outputs,
-		Hash:      []byte("genesis"),
-	}
-}
-
-func genesisOutputs() []*types.TxOut {
-	return []*types.TxOut{
-		types.NewTxOut(
-			uuid.MustParse("10252f31-151b-457d-b8de-e4a6f1552b62"),
-			types.Amount{
-				Value: 100000000,
-				Unit:  100,
-			},
-			[]byte(`-----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEa/KaLpP9gikVe2ZXkp74RE+QmdDd
-hJxRIN+5upGQgZyYFOqC7uwgXk0PS7GUNTl1aECoAKa2WEIWKL2PmTNZvg==
------END PUBLIC KEY-----`)),
 	}
 }

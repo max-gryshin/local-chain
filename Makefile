@@ -1,3 +1,5 @@
+include local.mk
+
 REQUIRED_BUF_VERSION := latest
 REQUIRED_GOLANG_CI_LINT_VERSION := 2.1.6
 INSTALLED_GOLANG_CI_LINT_VERSION := $(shell golangci-lint --version 2> /dev/null | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' | head -1 )
@@ -14,11 +16,20 @@ PREFIX ?= bin/
 $(APPS):
 	CGO_ENABLED=$(CGO_ENABLED) go build -mod=vendor -installsuffix cgo -o $(PREFIX)$@ ./cmd/$@
 
-.PHONY: build
-build: build-apps
+.PHONY: run
+run: clear-apps build-apps run-apps
 
 .PHONY: build-apps $(APPS)
 build-apps: $(APPS)
+
+.PHONY: clear-apps
+clear-apps:
+	rm -f bin/$(APPS) && \
+	rm -f -r db/*
+
+.PHONY: run-apps
+run-apps:
+	./bin/$(APPS)
 
 .PHONY: lint
 lint:
