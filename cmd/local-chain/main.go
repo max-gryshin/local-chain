@@ -40,7 +40,7 @@ var (
 func main() {
 	fmt.Println("raftBootstrap:", bootstrap)
 	logger := slog.Default()
-	ctx := pkg.ContextWithServerID(context.Background(), raft.ServerID(raftAddr))
+	ctx := pkg.ContextWithServerID(context.Background(), raft.ServerID(nodeID))
 	cfg, err := NewConfig(serverID)
 	if err != nil {
 		log.Printf("error prepare configs: %v", err)
