@@ -16,7 +16,7 @@ import (
 )
 
 const (
-	applyTimeout = 1 * time.Minute
+	applyTimeout = 10 * time.Second
 )
 
 type BlockchainStore interface {
