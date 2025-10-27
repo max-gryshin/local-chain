@@ -24,12 +24,14 @@ type UTXOStore interface {
 type Transactor struct {
 	txStore   TransactionStore
 	utxoStore UTXOStore
+	txPool    txPool
 }
 
-func NewTransactor(txStore TransactionStore, UTXOStore UTXOStore) *Transactor {
+func NewTransactor(txStore TransactionStore, UTXOStore UTXOStore, txPool txPool) *Transactor {
 	return &Transactor{
 		txStore:   txStore,
 		utxoStore: UTXOStore,
+		txPool:    txPool,
 	}
 }
 
@@ -45,8 +47,14 @@ func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transacti
 	if err != nil {
 		return nil, fmt.Errorf("error getting sender's utxos : %v", err)
 	}
+
+	transactionsPool := t.txPool.GetPool()
 	for id, utxo := range utxos {
 		tx, err := t.txStore.Get(utxo.TxHash)
+		txFromPool, ok := transactionsPool[string(utxo.TxHash)]
+		if ok {
+			tx = txFromPool
+		}
 		if err != nil {
 			return nil, fmt.Errorf("get utxo tx hash err: %v", err)
 		}
@@ -81,6 +89,10 @@ func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transacti
 		}
 		newTx.AddInput(input)
 		// calculate balance
+		// calculating balance we get the total amount of UTXOs from txStore
+		// but if sender creates more than 1 transaction before creating a block (where UTXOs are updated) we are facing with the
+		// problem of double spending.
+		// To solve this problem, we should also consider the pending transactions in the txPool.
 		balance.Value += output.Amount.Value
 	}
 
@@ -91,9 +103,11 @@ func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transacti
 	newTx.AddOutput(types.NewTxOut(newTx.ID, txReq.Amount, crypto.PublicKeyToBytes(txReq.Receiver)))
 	if balance.Value > txReq.Amount.Value {
 		balance.Value -= txReq.Amount.Value
+		// this output contains actual balance of the sender
 		newTx.AddOutput(types.NewTxOut(newTx.ID, balance, crypto.PublicKeyToBytes(&txReq.Sender.PublicKey)))
 	}
 	newTx.ComputeHash()
+	t.txPool.AddTx(newTx)
 
 	return newTx, nil
 }

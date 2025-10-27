@@ -27,6 +27,7 @@ type BlockchainStore interface {
 type txPool interface {
 	GetPool() inMem.TxPoolMap
 	Purge()
+	AddTx(tx *types.Transaction)
 }
 
 type RaftAPI interface {
@@ -92,7 +93,7 @@ func (bc *Blockchain) CreateBlock(ctx context.Context) error {
 		return nil
 	}
 
-	merkleTree, err := internal.NewMerkleTree(txs)
+	merkleTree, err := internal.NewMerkleTree(txs...)
 	if err != nil {
 		return fmt.Errorf("failed to create merkle tree: %w", err)
 	}

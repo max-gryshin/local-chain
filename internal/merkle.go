@@ -23,7 +23,7 @@ type MerkleTree struct {
 }
 
 // NewMerkleTree creates a new Merkle Tree from a list of transactions.
-func NewMerkleTree(txs []*types.Transaction) (*MerkleTree, error) {
+func NewMerkleTree(txs ...*types.Transaction) (*MerkleTree, error) {
 	if len(txs) == 0 {
 		return nil, errors.New("no transactions provided")
 	}
@@ -36,7 +36,7 @@ func NewMerkleTree(txs []*types.Transaction) (*MerkleTree, error) {
 		}
 	}
 
-	// Строим дерево снизу вверх
+	// build tree from the bottom to the top
 	root, err := buildTree(leaves)
 	if err != nil {
 		return nil, err
@@ -54,27 +54,27 @@ func buildTree(leaves []*Node) (*Node, error) {
 		return nil, errors.New("no leaves provided")
 	}
 
-	// Если только один лист, возвращаем его как корень
+	// If just 1 leaf then return a root
 	if len(leaves) == 1 {
 		return leaves[0], nil
 	}
 
-	// Создаем родительские узлы
+	// create parent nodes
 	var parents []*Node
 	for i := 0; i < len(leaves); i += 2 {
 		parent := &Node{}
 		if i+1 < len(leaves) {
-			// Есть пара узлов
+			// there is pair of nodes
 			parent.left = leaves[i]
 			parent.right = leaves[i+1]
 			leaves[i].parent = parent
 			leaves[i+1].parent = parent
-			// Вычисляем хэш родителя: H(left || right)
+			// computing parent's hash: H(left || right)
 			hash := sha512.New()
 			hash.Write(append(leaves[i].Hash, leaves[i+1].Hash...))
 			parent.Hash = hash.Sum(nil)
 		} else {
-			// Непарное количество листьев, дублируем последний
+			// An unpaired number of leaves, duplicating the last one
 			parent.left = leaves[i]
 			leaves[i].parent = parent
 			parent.Hash = leaves[i].Hash
@@ -82,7 +82,7 @@ func buildTree(leaves []*Node) (*Node, error) {
 		parents = append(parents, parent)
 	}
 
-	// Рекурсивно строим следующий уровень
+	// Recursively build the next level
 	root, err := buildTree(parents)
 	if err != nil {
 		return nil, err
@@ -92,7 +92,7 @@ func buildTree(leaves []*Node) (*Node, error) {
 
 // VerifyTransaction verifies if a transaction is in the Merkle Tree.
 func (m *MerkleTree) VerifyTransaction(tx *types.Transaction) (bool, error) {
-	// Ищем индекс транзакции в листьях
+	// looking tx index in leafs
 	var leafIndex int
 	var found bool
 	for i, leaf := range m.Leaves {
@@ -106,7 +106,7 @@ func (m *MerkleTree) VerifyTransaction(tx *types.Transaction) (bool, error) {
 		return false, errors.New("transaction not found in tree")
 	}
 
-	// Собираем Merkle Path
+	// build Merkle Path
 	path, err := m.getMerklePath(leafIndex)
 	if err != nil {
 		return false, err
@@ -125,14 +125,14 @@ func (m *MerkleTree) getMerklePath(index int) ([][]byte, error) {
 	var path [][]byte
 	current := m.Leaves[index]
 
-	// Идем вверх по дереву
+	// walk up the tree
 	for current.parent != nil {
 		parent := current.parent
 		if parent.left == current && parent.right != nil {
-			// Добавляем хэш правого узла в путь
+			// add hash right node in the path
 			path = append(path, parent.right.Hash)
 		} else if parent.right == current {
-			// Добавляем хэш левого узла в путь
+			// add hash left node in the path
 			path = append(path, parent.left.Hash)
 		}
 		current = parent
@@ -147,16 +147,16 @@ func (m *MerkleTree) verifyPath(txHash []byte, index int, path [][]byte) bool {
 	for _, siblingHash := range path {
 		hash := sha512.New()
 		if index%2 == 0 {
-			// Текущий узел — левый, добавляем правый хэш
+			// current node left - add right hash
 			hash.Write(append(currentHash, siblingHash...))
 		} else {
-			// Текущий узел — правый, добавляем левый хэш
+			// current node right - add left hash
 			hash.Write(append(siblingHash, currentHash...))
 		}
 		currentHash = hash.Sum(nil)
 		index /= 2
 	}
 
-	// Сравниваем вычисленный хэш с корневым
+	// compare computed hash with the root
 	return string(currentHash) == string(m.Root.Hash)
 }
