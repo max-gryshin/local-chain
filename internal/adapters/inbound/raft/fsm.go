@@ -16,7 +16,7 @@ import (
 )
 
 type txPool interface {
-	GetPool() inMem.TxPoolMap
+	GetPool() inMem.Pool
 	Purge()
 }
 
@@ -82,6 +82,7 @@ func (f *Fsm) addUTXO(tx *types.Transaction) error {
 		return fmt.Errorf("invalid number of outputs in transaction: %d", len(tx.Outputs))
 	}
 	receiver := tx.Outputs[0].PubKey
+	var receiverUtxos types.UTXOs
 	receiverUtxos, err := f.store.Utxo().Get(receiver)
 	if err != nil {
 		return fmt.Errorf("failed to get utxos for receiver: %w", err)
@@ -90,7 +91,7 @@ func (f *Fsm) addUTXO(tx *types.Transaction) error {
 	if err = f.store.Utxo().Put(receiver, receiverUtxos); err != nil {
 		return fmt.Errorf("failed to put receiver's utxo: %w", err)
 	}
-	if err = f.store.Utxo().Put(tx.Outputs[1].PubKey, []*types.UTXO{{TxHash: tx.GetHash(), Index: 1}}); err != nil {
+	if err = f.store.Utxo().Put(tx.Outputs[1].PubKey, types.UTXOs{{TxHash: tx.GetHash(), Index: 1}}); err != nil {
 		return fmt.Errorf("failed to put sender's utxo: %w", err)
 	}
 	return nil

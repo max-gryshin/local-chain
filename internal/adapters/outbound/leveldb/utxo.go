@@ -24,7 +24,7 @@ func (s *UtxoStore) Get(pubKey []byte) ([]*types.UTXO, error) {
 	value, err := s.db.Get(pubKey, nil)
 	if err != nil {
 		if errors.As(err, &leveldbErrors.ErrNotFound) { // nolint:govet
-			return []*types.UTXO{}, nil
+			return nil, nil
 		}
 		return nil, fmt.Errorf("failed to get utxos: %w", err)
 	}

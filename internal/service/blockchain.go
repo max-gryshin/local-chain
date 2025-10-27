@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"local-chain/internal/adapters/outbound/inMem"
 	"local-chain/internal/pkg"
 
 	"local-chain/internal"
@@ -24,12 +23,6 @@ type BlockchainStore interface {
 	Put(*types.Block) error
 }
 
-type txPool interface {
-	GetPool() inMem.TxPoolMap
-	Purge()
-	AddTx(tx *types.Transaction)
-}
-
 type RaftAPI interface {
 	Apply(cmd []byte, timeout time.Duration) raft.ApplyFuture
 	LeaderWithID() (raft.ServerAddress, raft.ServerID)
@@ -41,7 +34,7 @@ type Blockchain struct {
 	blockchainStore  BlockchainStore
 	transactionStore TransactionStore
 	prevBlock        *types.Block
-	txPool           txPool
+	txPool           TxPool
 }
 
 // NewBlockchain creates a new blockchain with a genesis block.
@@ -49,7 +42,7 @@ func NewBlockchain(
 	raftApi RaftAPI,
 	blockchainStore BlockchainStore,
 	txStore TransactionStore,
-	txPool txPool,
+	txPool TxPool,
 ) *Blockchain {
 	b := &Blockchain{
 		raftApi:          raftApi,

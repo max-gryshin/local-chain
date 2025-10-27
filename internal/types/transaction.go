@@ -96,6 +96,16 @@ type TxIn struct {
 	NSequence  uint32
 }
 
+func NewTxIn(utxo *UTXO, pubKey []byte, r, s *big.Int, n uint32) *TxIn {
+	return &TxIn{
+		Prev:       utxo,
+		PubKey:     pubKey,
+		SignatureR: r,
+		SignatureS: s,
+		NSequence:  n,
+	}
+}
+
 type TxOut struct {
 	TxID   uuid.UUID
 	Amount Amount
@@ -115,6 +125,8 @@ type UTXO struct {
 	// Index of the output in the transaction
 	Index uint32
 }
+
+type UTXOs []*UTXO
 
 func (u *UTXO) Sign(key *ecdsa.PrivateKey) (*big.Int, *big.Int, error) {
 	r, s, err := ecdsa.Sign(rand.Reader, key, u.TxHash)

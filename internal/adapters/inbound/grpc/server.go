@@ -24,10 +24,6 @@ type RaftAPI interface {
 	State() raft.RaftState
 }
 
-type txPool interface {
-	AddTx(tx *types.Transaction)
-}
-
 type Transactor interface {
 	CreateTx(txReq *types.TransactionRequest) (*types.Transaction, error)
 	GetBalance(pubKey []byte) (*types.Amount, error)
@@ -40,7 +36,6 @@ type transactionMapper interface {
 type LocalChainServer struct {
 	serverID raft.ServerID
 	raftAPI  RaftAPI
-	txPool   txPool
 	tm       transactionMapper
 	grpcPkg.UnimplementedLocalChainServer
 	transactor Transactor
@@ -49,14 +44,12 @@ type LocalChainServer struct {
 func NewLocalChain(
 	serverID raft.ServerID,
 	raftAPI RaftAPI,
-	txPool txPool,
 	tm transactionMapper,
 	transactor Transactor,
 ) *LocalChainServer {
 	return &LocalChainServer{
 		serverID:   serverID,
 		raftAPI:    raftAPI,
-		txPool:     txPool,
 		tm:         tm,
 		transactor: transactor,
 	}
@@ -134,11 +127,9 @@ func (s *LocalChainServer) AddTransaction(ctx context.Context, req *grpcPkg.AddT
 	if err != nil {
 		return &grpcPkg.AddTransactionResponse{Success: false}, fmt.Errorf("failed to marshal add transaction request: %w", err)
 	}
-	tx, err := s.transactor.CreateTx(txReq)
-	if err != nil {
-		return nil, fmt.Errorf("transactor.CreateTx: %w", err)
+	if _, err = s.transactor.CreateTx(txReq); err != nil {
+		return &grpcPkg.AddTransactionResponse{Success: false}, fmt.Errorf("transactor.CreateTx: %w", err)
 	}
-	s.txPool.AddTx(tx)
 	// todo: validate req transaction* can skip it to speed up the implementation
 
 	return &grpcPkg.AddTransactionResponse{Success: true}, nil

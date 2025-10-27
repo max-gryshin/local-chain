@@ -3,13 +3,13 @@ package service
 import (
 	"errors"
 	"fmt"
-
+	"local-chain/internal/adapters/outbound/inMem"
 	"local-chain/internal/pkg/crypto"
 
 	"local-chain/internal/types"
 )
 
-//go:generate mockgen -source transactor.go -destination transactor_mock_test.go -package service_test -mock_names TransactionStore=MockTransactionStore
+//go:generate mockgen -source transactor.go -destination transactor_mock_test.go -package service_test -mock_names TransactionStore=MockTransactionStore,TxPool=MockTxPool
 
 type TransactionStore interface {
 	Get(txHash []byte) (*types.Transaction, error)
@@ -21,13 +21,20 @@ type UTXOStore interface {
 	Put(pubKey []byte, utxos []*types.UTXO) error
 }
 
+type TxPool interface {
+	GetPool() inMem.Pool
+	Purge()
+	AddTx(tx *types.Transaction)
+	GetUTXOs(pubKey []byte) types.UTXOs
+}
+
 type Transactor struct {
 	txStore   TransactionStore
 	utxoStore UTXOStore
-	txPool    txPool
+	txPool    TxPool
 }
 
-func NewTransactor(txStore TransactionStore, UTXOStore UTXOStore, txPool txPool) *Transactor {
+func NewTransactor(txStore TransactionStore, UTXOStore UTXOStore, txPool TxPool) *Transactor {
 	return &Transactor{
 		txStore:   txStore,
 		utxoStore: UTXOStore,
@@ -40,21 +47,22 @@ func NewTransactor(txStore TransactionStore, UTXOStore UTXOStore, txPool txPool)
 // of the new transaction, since it is impossible to sign the inputs of the new transaction without having the
 // private key corresponding to the public key.
 func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transaction, error) {
-	newTx := types.NewTransaction()
-	balance := types.Amount{}
-	senderPubKey := crypto.PublicKeyToBytes(&txReq.Sender.PublicKey)
-	utxos, err := t.utxoStore.Get(senderPubKey)
-	if err != nil {
-		return nil, fmt.Errorf("error getting sender's utxos : %v", err)
+	var (
+		err          error
+		newTx        = types.NewTransaction()
+		balance      = types.Amount{}
+		senderPubKey = crypto.PublicKeyToBytes(&txReq.Sender.PublicKey)
+		// check is utxos exists in TxPool for sender - to prevent double spending
+		utxos = t.txPool.GetUTXOs(senderPubKey)
+	)
+	if utxos == nil {
+		utxos, err = t.utxoStore.Get(senderPubKey)
+		if err != nil {
+			return nil, fmt.Errorf("error getting sender's utxos : %v", err)
+		}
 	}
-
-	transactionsPool := t.txPool.GetPool()
 	for id, utxo := range utxos {
 		tx, err := t.txStore.Get(utxo.TxHash)
-		txFromPool, ok := transactionsPool[string(utxo.TxHash)]
-		if ok {
-			tx = txFromPool
-		}
 		if err != nil {
 			return nil, fmt.Errorf("get utxo tx hash err: %v", err)
 		}
@@ -79,20 +87,7 @@ func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transacti
 		if !utxo.Verify(txReq.Sender.PublicKey, r, s) {
 			return nil, fmt.Errorf("can not verify UTXO:%s err: not valid private key", string(utxo.TxHash))
 		}
-
-		input := &types.TxIn{
-			Prev:       utxo,
-			PubKey:     senderPubKey,
-			SignatureR: r,
-			SignatureS: s,
-			NSequence:  uint32(id),
-		}
-		newTx.AddInput(input)
-		// calculate balance
-		// calculating balance we get the total amount of UTXOs from txStore
-		// but if sender creates more than 1 transaction before creating a block (where UTXOs are updated) we are facing with the
-		// problem of double spending.
-		// To solve this problem, we should also consider the pending transactions in the txPool.
+		newTx.AddInput(types.NewTxIn(utxo, senderPubKey, r, s, uint32(id)))
 		balance.Value += output.Amount.Value
 	}
 
