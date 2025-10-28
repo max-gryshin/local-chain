@@ -78,21 +78,20 @@ func (f *Fsm) addBlock(blockBytes []byte) error {
 }
 
 func (f *Fsm) addUTXO(tx *types.Transaction) error {
-	if len(tx.Outputs) != 2 {
-		return fmt.Errorf("invalid number of outputs in transaction: %d", len(tx.Outputs))
-	}
-	receiver := tx.Outputs[0].PubKey
-	var receiverUtxos types.UTXOs
-	receiverUtxos, err := f.store.Utxo().Get(receiver)
-	if err != nil {
-		return fmt.Errorf("failed to get utxos for receiver: %w", err)
-	}
-	receiverUtxos = append(receiverUtxos, &types.UTXO{TxHash: tx.GetHash(), Index: 0})
-	if err = f.store.Utxo().Put(receiver, receiverUtxos); err != nil {
-		return fmt.Errorf("failed to put receiver's utxo: %w", err)
-	}
-	if err = f.store.Utxo().Put(tx.Outputs[1].PubKey, types.UTXOs{{TxHash: tx.GetHash(), Index: 1}}); err != nil {
-		return fmt.Errorf("failed to put sender's utxo: %w", err)
+	for index, output := range tx.Outputs {
+		var (
+			err   error
+			utxos types.UTXOs
+		)
+		if index == 0 {
+			utxos, err = f.store.Utxo().Get(output.PubKey)
+			if err != nil {
+				return fmt.Errorf("failed to get utxos: %w", err)
+			}
+		}
+		if err = f.store.Utxo().Put(output.PubKey, append(utxos, types.NewUTXO(tx.GetHash(), uint32(index)))...); err != nil {
+			return fmt.Errorf("failed to put utxo: %w", err)
+		}
 	}
 	return nil
 }

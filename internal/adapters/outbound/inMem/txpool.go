@@ -27,7 +27,8 @@ type TxPool struct {
 
 func NewTxPool() *TxPool {
 	return &TxPool{
-		pool: make(Pool),
+		pool:      make(Pool),
+		utxosPool: make(utxosPool),
 	}
 }
 
@@ -35,12 +36,13 @@ func (tp *TxPool) AddTx(tx *types.Transaction) {
 	tp.mtx.Lock()
 	defer tp.mtx.Unlock()
 	tp.pool[string(tx.GetHash())] = tx
-	if len(tx.Outputs) > 1 {
-		utxos := tp.utxosPool[string(tx.Outputs[1].PubKey)]
-		tp.utxosPool[string(tx.Outputs[1].PubKey)] = append(utxos, &types.UTXO{
-			TxHash: tx.GetHash(),
-			Index:  1,
-		})
+	for index, output := range tx.Outputs {
+		if index == 0 {
+			utxos := tp.utxosPool[string(output.PubKey)]
+			tp.utxosPool[string(output.PubKey)] = append(utxos, types.NewUTXO(tx.GetHash(), uint32(index)))
+			continue
+		}
+		tp.utxosPool[string(output.PubKey)] = types.UTXOs{types.NewUTXO(tx.GetHash(), uint32(index))}
 	}
 }
 

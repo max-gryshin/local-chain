@@ -37,7 +37,7 @@ func configureBootstrap(r *raft.Raft, store *leveldbpkg.Store) {
 			log.Fatal(err)
 		}
 		utxos = append(utxos, &types.UTXO{TxHash: tx.GetHash(), Index: 0})
-		if err = store.Utxo().Put(crypto.PublicKeyToBytes(pubKey), utxos); err != nil {
+		if err = store.Utxo().Put(crypto.PublicKeyToBytes(pubKey), utxos...); err != nil {
 			log.Fatal(err)
 		}
 	}

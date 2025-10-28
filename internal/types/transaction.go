@@ -126,6 +126,13 @@ type UTXO struct {
 	Index uint32
 }
 
+func NewUTXO(hash []byte, index uint32) *UTXO {
+	return &UTXO{
+		TxHash: hash,
+		Index:  index,
+	}
+}
+
 type UTXOs []*UTXO
 
 func (u *UTXO) Sign(key *ecdsa.PrivateKey) (*big.Int, *big.Int, error) {
