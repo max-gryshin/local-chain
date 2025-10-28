@@ -184,3 +184,6 @@ type TransactionRequest struct {
 	Receiver *ecdsa.PublicKey
 	Amount   Amount
 }
+type BalanceRequest struct {
+	Sender *ecdsa.PrivateKey
+}

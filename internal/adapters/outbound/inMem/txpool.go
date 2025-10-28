@@ -1,6 +1,7 @@
 package inMem
 
 import (
+	"slices"
 	"sync"
 
 	"local-chain/internal/types"
@@ -35,15 +36,19 @@ func NewTxPool() *TxPool {
 func (tp *TxPool) AddTx(tx *types.Transaction) {
 	tp.mtx.Lock()
 	defer tp.mtx.Unlock()
-	tp.pool[string(tx.GetHash())] = tx
 	for index, output := range tx.Outputs {
-		if index == 0 {
-			utxos := tp.utxosPool[string(output.PubKey)]
-			tp.utxosPool[string(output.PubKey)] = append(utxos, types.NewUTXO(tx.GetHash(), uint32(index)))
-			continue
+		utxos := tp.utxosPool[string(output.PubKey)]
+		if index > 0 {
+			for _, txFromPool := range tp.pool {
+				if len(txFromPool.Outputs) > 0 && string(txFromPool.Outputs[1].PubKey) == string(output.PubKey) {
+					txFromPool.Outputs[1].Amount = *types.NewAmount(0)
+				}
+			}
+			utxos = slices.DeleteFunc(utxos, func(utxo *types.UTXO) bool { return utxo.Index > 0 })
 		}
-		tp.utxosPool[string(output.PubKey)] = types.UTXOs{types.NewUTXO(tx.GetHash(), uint32(index))}
+		tp.utxosPool[string(output.PubKey)] = append(utxos, types.NewUTXO(tx.GetHash(), uint32(index)))
 	}
+	tp.pool[string(tx.GetHash())] = tx
 }
 
 func (tp *TxPool) GetPool() Pool {

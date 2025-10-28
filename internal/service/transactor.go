@@ -1,12 +1,13 @@
 package service
 
 import (
+	"crypto/ecdsa"
 	"errors"
 	"fmt"
 	"local-chain/internal/adapters/outbound/inMem"
 	"local-chain/internal/pkg/crypto"
 	"local-chain/internal/types"
-	"slices"
+	"math/big"
 )
 
 //go:generate mockgen -source transactor.go -destination transactor_mock_test.go -package service_test -mock_names TransactionStore=MockTransactionStore,TxPool=MockTxPool
@@ -47,45 +48,15 @@ func NewTransactor(txStore TransactionStore, UTXOStore UTXOStore, txPool TxPool)
 // of the new transaction, since it is impossible to sign the inputs of the new transaction without having the
 // private key corresponding to the public key.
 func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transaction, error) {
-	var (
-		err          error
-		newTx        = types.NewTransaction()
-		tx           *types.Transaction
-		balance      = types.Amount{}
-		senderPubKey = crypto.PublicKeyToBytes(&txReq.Sender.PublicKey)
+	newTx := types.NewTransaction()
+	balance, err := t.getBalance(
+		txReq.Sender,
+		func(utxo *types.UTXO, senderPubKey []byte, r, s *big.Int, id uint32) {
+			newTx.AddInput(types.NewTxIn(utxo, senderPubKey, r, s, id))
+		},
 	)
-	utxos, err := t.getUTXOs(senderPubKey)
 	if err != nil {
-		return nil, fmt.Errorf("error getting utxos : %v", err)
-	}
-	for id, utxo := range utxos {
-		tx, err = t.getTx(utxo.TxHash)
-		if err != nil {
-			return nil, fmt.Errorf("get utxo tx hash err: %v", err)
-		}
-		if int(utxo.Index) >= len(tx.Outputs) {
-			return nil, fmt.Errorf("UTXO index %d is out of bounds for transaction %s", utxo.Index, string(utxo.TxHash))
-		}
-		output := tx.Outputs[utxo.Index]
-		// Check if the output belongs to the sender
-		outputPubKey, err := crypto.PublicKeyFromBytes(output.PubKey)
-		if err != nil {
-			return nil, fmt.Errorf("get output public key err: %v", err)
-		}
-		if !outputPubKey.Equal(&txReq.Sender.PublicKey) {
-			return nil, fmt.Errorf("sender do not own transaction's output: tx: %s", string(utxo.TxHash))
-		}
-
-		r, s, err := utxo.Sign(txReq.Sender)
-		if err != nil {
-			return nil, fmt.Errorf("sign UTXO:%s err: %s", string(utxo.TxHash), err.Error())
-		}
-
-		if !utxo.Verify(txReq.Sender.PublicKey, r, s) {
-			return nil, fmt.Errorf("can not verify UTXO:%s err: not valid private key", string(utxo.TxHash))
-		}
-		newTx.AddInput(types.NewTxIn(utxo, senderPubKey, r, s, uint32(id)))
-		balance.Value += output.Amount.Value
+		return nil, fmt.Errorf("error getting balance : %v", err)
 	}
 
 	if balance.Value < txReq.Amount.Value {
@@ -95,8 +66,8 @@ func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transacti
 	newTx.AddOutput(types.NewTxOut(newTx.ID, txReq.Amount, crypto.PublicKeyToBytes(txReq.Receiver)))
 	if balance.Value > txReq.Amount.Value {
 		balance.Value -= txReq.Amount.Value
-		// this output contains actual balance of the sender
-		newTx.AddOutput(types.NewTxOut(newTx.ID, balance, crypto.PublicKeyToBytes(&txReq.Sender.PublicKey)))
+		// this output contains actual sender balance
+		newTx.AddOutput(types.NewTxOut(newTx.ID, *balance, crypto.PublicKeyToBytes(&txReq.Sender.PublicKey)))
 	}
 	newTx.ComputeHash()
 	t.txPool.AddTx(newTx)
@@ -104,18 +75,22 @@ func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transacti
 	return newTx, nil
 }
 
-func (t *Transactor) GetBalance(pubKeyBytes []byte) (*types.Amount, error) {
-	pubKeyEcdsa, err := crypto.PublicKeyFromBytes(pubKeyBytes)
+func (t *Transactor) GetBalance(req *types.BalanceRequest) (*types.Amount, error) {
+	balance, err := t.getBalance(req.Sender, nil)
 	if err != nil {
-		return nil, fmt.Errorf("public key is not ECDSA")
+		return nil, fmt.Errorf("error getting balance : %v", err)
 	}
-	pubKey := crypto.PublicKeyToBytes(pubKeyEcdsa)
+	return balance, nil
+}
+
+func (t *Transactor) getBalance(key *ecdsa.PrivateKey, f func(utxo *types.UTXO, senderPubKey []byte, r, s *big.Int, id uint32)) (*types.Amount, error) {
+	pubKey := crypto.PublicKeyToBytes(&key.PublicKey)
 	utxos, err := t.getUTXOs(pubKey)
 	if err != nil {
 		return nil, fmt.Errorf("error getting utxos : %v", err)
 	}
-	balance := &types.Amount{}
-	for _, utxo := range utxos {
+	balance := types.NewAmount(0)
+	for id, utxo := range utxos {
 		tx, err := t.getTx(utxo.TxHash)
 		if err != nil {
 			return nil, fmt.Errorf("get utxo tx hash err: %v", err)
@@ -124,6 +99,26 @@ func (t *Transactor) GetBalance(pubKeyBytes []byte) (*types.Amount, error) {
 			return nil, fmt.Errorf("UTXO index %d is out of bounds for transaction %s", utxo.Index, string(utxo.TxHash))
 		}
 		output := tx.Outputs[utxo.Index]
+		// Check if the output belongs to the key owner
+		outputPubKey, err := crypto.PublicKeyFromBytes(output.PubKey)
+		if err != nil {
+			return nil, fmt.Errorf("get output public key err: %v", err)
+		}
+		if !outputPubKey.Equal(&key.PublicKey) {
+			return nil, fmt.Errorf("sender do not own transaction's output: tx: %s", string(utxo.TxHash))
+		}
+
+		r, s, err := utxo.Sign(key)
+		if err != nil {
+			return nil, fmt.Errorf("sign UTXO:%s err: %s", string(utxo.TxHash), err.Error())
+		}
+
+		if !utxo.Verify(key.PublicKey, r, s) {
+			return nil, fmt.Errorf("can not verify UTXO:%s err: not valid private key", string(utxo.TxHash))
+		}
+		if f != nil {
+			f(utxo, pubKey, r, s, uint32(id))
+		}
 		balance.Value += output.Amount.Value
 		// assume all outputs have the same unit
 		balance.Unit = output.Amount.Unit
@@ -132,29 +127,26 @@ func (t *Transactor) GetBalance(pubKeyBytes []byte) (*types.Amount, error) {
 }
 
 // GetUTXOs gets unspent transaction outputs for public key
-func (t *Transactor) getUTXOs(pubKeyBytes []byte) (types.UTXOs, error) {
-	utxos, err := t.utxoStore.Get(pubKeyBytes)
+func (t *Transactor) getUTXOs(pubKey []byte) (types.UTXOs, error) {
+	utxos, err := t.utxoStore.Get(pubKey)
 	if err != nil {
 		return nil, fmt.Errorf("error getting utxos : %v", err)
 	}
-	// todo: add timestamp for utxos in pool to guaranty we get the oldest one utxo with index > 0
-	utxosPool := t.txPool.GetUTXOs(pubKeyBytes)
+	// we need to get utxos from the pool as well to avoid double spending
+	// also we need to get the utxo with index > 0 only once (the rest are change utxos)
+	utxosPool := t.txPool.GetUTXOs(pubKey)
 	var rest *types.UTXO
 	for _, utxo := range utxosPool {
 		if utxo.Index == 0 {
 			utxos = append(utxos, utxo)
+			continue
 		}
 		if utxo.Index > 0 {
-			if rest == nil {
-				utxos = slices.DeleteFunc(utxos, func(u *types.UTXO) bool {
-					return u.Index > 0
-				})
-			}
 			rest = utxo
 		}
 	}
 	if rest != nil {
-		utxos = append(utxos, rest)
+		return types.UTXOs{rest}, nil
 	}
 	return utxos, nil
 }
