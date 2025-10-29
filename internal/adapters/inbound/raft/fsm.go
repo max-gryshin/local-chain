@@ -17,7 +17,6 @@ import (
 
 type txPool interface {
 	GetPool() inMem.Pool
-	Purge()
 }
 
 type Fsm struct {
@@ -73,7 +72,6 @@ func (f *Fsm) addBlock(blockBytes []byte) error {
 		}
 	}
 	fmt.Printf("\nblock added - timestamp: %s\n", time.Unix(0, int64(blockTxsEnvelope.Block.Timestamp)))
-	f.txPool.Purge()
 	return nil
 }
 

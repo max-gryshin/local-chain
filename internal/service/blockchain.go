@@ -112,6 +112,7 @@ func (bc *Blockchain) CreateBlock(ctx context.Context) error {
 	}
 
 	bc.prevBlock = block
+	bc.txPool.Purge()
 
 	return nil
 }

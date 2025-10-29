@@ -1,10 +1,8 @@
 package inMem
 
 import (
-	"slices"
-	"sync"
-
 	"local-chain/internal/types"
+	"sync"
 )
 
 type Pool map[string]*types.Transaction
@@ -33,49 +31,50 @@ func NewTxPool() *TxPool {
 	}
 }
 
-func (tp *TxPool) AddTx(tx *types.Transaction) {
-	tp.mtx.Lock()
-	defer tp.mtx.Unlock()
+func (txp *TxPool) AddTx(tx *types.Transaction) {
+	txp.mtx.Lock()
+	defer txp.mtx.Unlock()
+
 	for index, output := range tx.Outputs {
-		utxos := tp.utxosPool[string(output.PubKey)]
+		utxos := txp.utxosPool[string(output.PubKey)]
 		if index > 0 {
-			for _, txFromPool := range tp.pool {
-				if len(txFromPool.Outputs) > 0 && string(txFromPool.Outputs[1].PubKey) == string(output.PubKey) {
+			for _, txFromPool := range txp.pool {
+				if len(txFromPool.Outputs) > 0 &&
+					string(txFromPool.Outputs[1].PubKey) == string(output.PubKey) {
 					txFromPool.Outputs[1].Amount = *types.NewAmount(0)
 				}
 			}
-			utxos = slices.DeleteFunc(utxos, func(utxo *types.UTXO) bool { return utxo.Index > 0 })
 		}
-		tp.utxosPool[string(output.PubKey)] = append(utxos, types.NewUTXO(tx.GetHash(), uint32(index)))
+		txp.utxosPool[string(output.PubKey)] = append(utxos, types.NewUTXO(tx.GetHash(), uint32(index)))
 	}
-	tp.pool[string(tx.GetHash())] = tx
+	txp.pool[string(tx.GetHash())] = tx
 }
 
-func (tp *TxPool) GetPool() Pool {
-	tp.mtx.Lock()
-	defer tp.mtx.Unlock()
-	return tp.pool
+func (txp *TxPool) GetPool() Pool {
+	txp.mtx.Lock()
+	defer txp.mtx.Unlock()
+	return txp.pool
 }
 
-func (tp *TxPool) GetUTXOs(pubKey []byte) types.UTXOs {
-	tp.mtx.Lock()
-	defer tp.mtx.Unlock()
-	utxos, ok := tp.utxosPool[string(pubKey)]
+func (txp *TxPool) GetUTXOs(pubKey []byte) types.UTXOs {
+	txp.mtx.Lock()
+	defer txp.mtx.Unlock()
+	utxos, ok := txp.utxosPool[string(pubKey)]
 	if !ok {
 		return nil
 	}
 	return utxos
 }
 
-func (tp *TxPool) GetUnspentTx() Pool {
-	tp.mtx.Lock()
-	defer tp.mtx.Unlock()
-	return tp.pool
+func (txp *TxPool) GetUnspentTx() Pool {
+	txp.mtx.Lock()
+	defer txp.mtx.Unlock()
+	return txp.pool
 }
 
-func (tp *TxPool) Purge() {
-	tp.mtx.Lock()
-	defer tp.mtx.Unlock()
-	tp.pool = make(Pool)
-	tp.utxosPool = make(utxosPool)
+func (txp *TxPool) Purge() {
+	txp.mtx.Lock()
+	defer txp.mtx.Unlock()
+	txp.pool = make(Pool)
+	txp.utxosPool = make(utxosPool)
 }
