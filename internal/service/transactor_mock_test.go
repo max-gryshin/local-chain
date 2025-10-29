@@ -5,6 +5,7 @@
 package service_test
 
 import (
+	inMem "local-chain/internal/adapters/outbound/inMem"
 	types "local-chain/internal/types"
 	reflect "reflect"
 
@@ -61,4 +62,131 @@ func (m *MockTransactionStore) Put(arg0 *types.Transaction) error {
 func (mr *MockTransactionStoreMockRecorder) Put(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Put", reflect.TypeOf((*MockTransactionStore)(nil).Put), arg0)
+}
+
+// MockUTXOStore is a mock of UTXOStore interface.
+type MockUTXOStore struct {
+	ctrl     *gomock.Controller
+	recorder *MockUTXOStoreMockRecorder
+}
+
+// MockUTXOStoreMockRecorder is the mock recorder for MockUTXOStore.
+type MockUTXOStoreMockRecorder struct {
+	mock *MockUTXOStore
+}
+
+// NewMockUTXOStore creates a new mock instance.
+func NewMockUTXOStore(ctrl *gomock.Controller) *MockUTXOStore {
+	mock := &MockUTXOStore{ctrl: ctrl}
+	mock.recorder = &MockUTXOStoreMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockUTXOStore) EXPECT() *MockUTXOStoreMockRecorder {
+	return m.recorder
+}
+
+// Get mocks base method.
+func (m *MockUTXOStore) Get(pubKey []byte) ([]*types.UTXO, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Get", pubKey)
+	ret0, _ := ret[0].([]*types.UTXO)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// Get indicates an expected call of Get.
+func (mr *MockUTXOStoreMockRecorder) Get(pubKey interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockUTXOStore)(nil).Get), pubKey)
+}
+
+// Put mocks base method.
+func (m *MockUTXOStore) Put(pubKey []byte, utxos []*types.UTXO) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Put", pubKey, utxos)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Put indicates an expected call of Put.
+func (mr *MockUTXOStoreMockRecorder) Put(pubKey, utxos interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Put", reflect.TypeOf((*MockUTXOStore)(nil).Put), pubKey, utxos)
+}
+
+// MockTxPool is a mock of TxPool interface.
+type MockTxPool struct {
+	ctrl     *gomock.Controller
+	recorder *MockTxPoolMockRecorder
+}
+
+// MockTxPoolMockRecorder is the mock recorder for MockTxPool.
+type MockTxPoolMockRecorder struct {
+	mock *MockTxPool
+}
+
+// NewMockTxPool creates a new mock instance.
+func NewMockTxPool(ctrl *gomock.Controller) *MockTxPool {
+	mock := &MockTxPool{ctrl: ctrl}
+	mock.recorder = &MockTxPoolMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockTxPool) EXPECT() *MockTxPoolMockRecorder {
+	return m.recorder
+}
+
+// AddTx mocks base method.
+func (m *MockTxPool) AddTx(tx *types.Transaction) {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "AddTx", tx)
+}
+
+// AddTx indicates an expected call of AddTx.
+func (mr *MockTxPoolMockRecorder) AddTx(tx interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddTx", reflect.TypeOf((*MockTxPool)(nil).AddTx), tx)
+}
+
+// GetPool mocks base method.
+func (m *MockTxPool) GetPool() inMem.Pool {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetPool")
+	ret0, _ := ret[0].(inMem.Pool)
+	return ret0
+}
+
+// GetPool indicates an expected call of GetPool.
+func (mr *MockTxPoolMockRecorder) GetPool() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetPool", reflect.TypeOf((*MockTxPool)(nil).GetPool))
+}
+
+// GetUTXOs mocks base method.
+func (m *MockTxPool) GetUTXOs(pubKey []byte) types.UTXOs {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetUTXOs", pubKey)
+	ret0, _ := ret[0].(types.UTXOs)
+	return ret0
+}
+
+// GetUTXOs indicates an expected call of GetUTXOs.
+func (mr *MockTxPoolMockRecorder) GetUTXOs(pubKey interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetUTXOs", reflect.TypeOf((*MockTxPool)(nil).GetUTXOs), pubKey)
+}
+
+// Purge mocks base method.
+func (m *MockTxPool) Purge() {
+	m.ctrl.T.Helper()
+	m.ctrl.Call(m, "Purge")
+}
+
+// Purge indicates an expected call of Purge.
+func (mr *MockTxPoolMockRecorder) Purge() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Purge", reflect.TypeOf((*MockTxPool)(nil).Purge))
 }

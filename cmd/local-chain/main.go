@@ -107,9 +107,9 @@ func main() {
 	if bootstrap {
 		configureBootstrap(r, store)
 	}
-	transactor := service.NewTransactor(store.Transaction(), store.Utxo())
+	transactor := service.NewTransactor(store.Transaction(), store.Utxo(), txPool)
 	tm := mapper.NewTransactionMapper()
-	localChainManager := grpc2.NewLocalChain(serverID, r, txPool, tm, transactor)
+	localChainManager := grpc2.NewLocalChain(serverID, r, tm, transactor)
 
 	grpcRunner := runners.New(grpcAddr, func(s *grpc.Server) {
 		transport2.RegisterLocalChainServer(s, localChainManager)

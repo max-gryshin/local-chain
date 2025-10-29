@@ -32,3 +32,14 @@ func (tp *TransactionMapper) RpcToTransaction(req *grpcPkg.AddTransactionRequest
 		Amount:   types.Amount{Value: req.GetAmount().GetValue(), Unit: req.GetAmount().GetUnit()},
 	}, nil
 }
+
+func (tp *TransactionMapper) RpcToBalanceRequest(req *grpcPkg.GetBalanceRequest) (*types.BalanceRequest, error) {
+	sender, err := crypto.PrivateKeyFromBytes(req.Sender)
+	if err != nil {
+		return nil, fmt.Errorf("failed to parse private key: %v", err)
+	}
+
+	return &types.BalanceRequest{
+		Sender: sender,
+	}, nil
+}

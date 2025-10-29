@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"local-chain/internal/adapters/outbound/inMem"
 	"local-chain/internal/pkg"
 
 	"local-chain/internal"
@@ -24,11 +23,6 @@ type BlockchainStore interface {
 	Put(*types.Block) error
 }
 
-type txPool interface {
-	GetPool() inMem.TxPoolMap
-	Purge()
-}
-
 type RaftAPI interface {
 	Apply(cmd []byte, timeout time.Duration) raft.ApplyFuture
 	LeaderWithID() (raft.ServerAddress, raft.ServerID)
@@ -40,7 +34,7 @@ type Blockchain struct {
 	blockchainStore  BlockchainStore
 	transactionStore TransactionStore
 	prevBlock        *types.Block
-	txPool           txPool
+	txPool           TxPool
 }
 
 // NewBlockchain creates a new blockchain with a genesis block.
@@ -48,7 +42,7 @@ func NewBlockchain(
 	raftApi RaftAPI,
 	blockchainStore BlockchainStore,
 	txStore TransactionStore,
-	txPool txPool,
+	txPool TxPool,
 ) *Blockchain {
 	b := &Blockchain{
 		raftApi:          raftApi,
@@ -92,7 +86,7 @@ func (bc *Blockchain) CreateBlock(ctx context.Context) error {
 		return nil
 	}
 
-	merkleTree, err := internal.NewMerkleTree(txs)
+	merkleTree, err := internal.NewMerkleTree(txs...)
 	if err != nil {
 		return fmt.Errorf("failed to create merkle tree: %w", err)
 	}
@@ -118,6 +112,7 @@ func (bc *Blockchain) CreateBlock(ctx context.Context) error {
 	}
 
 	bc.prevBlock = block
+	bc.txPool.Purge()
 
 	return nil
 }

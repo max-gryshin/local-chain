@@ -18,7 +18,7 @@ func TestMerkleTree_VerifyTransaction(t *testing.T) {
 		types.NewTransaction(),
 		types.NewTransaction(),
 	}
-	tree, err := NewMerkleTree(txs)
+	tree, err := NewMerkleTree(txs...)
 	if err != nil {
 		t.Error(err)
 	}
