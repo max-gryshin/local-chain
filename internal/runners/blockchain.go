@@ -10,7 +10,7 @@ import (
 )
 
 const (
-	blockInterval = 10 * time.Second
+	blockInterval = 1 * time.Second
 )
 
 type blockchain interface {

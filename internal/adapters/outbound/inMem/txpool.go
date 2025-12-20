@@ -34,20 +34,13 @@ func NewTxPool() *TxPool {
 func (txp *TxPool) AddTx(tx *types.Transaction) {
 	txp.mtx.Lock()
 	defer txp.mtx.Unlock()
-
-	for index, output := range tx.Outputs {
-		utxos := txp.utxosPool[string(output.PubKey)]
-		if index > 0 {
-			for _, txFromPool := range txp.pool {
-				if len(txFromPool.Outputs) > 0 &&
-					string(txFromPool.Outputs[1].PubKey) == string(output.PubKey) {
-					txFromPool.Outputs[1].Amount = *types.NewAmount(0)
-				}
-			}
-		}
-		txp.utxosPool[string(output.PubKey)] = append(utxos, types.NewUTXO(tx.GetHash(), uint32(index)))
-	}
 	txp.pool[string(tx.GetHash())] = tx
+}
+
+func (txp *TxPool) AddUtxos(pubKey []byte, utxos ...*types.UTXO) {
+	txp.mtx.Lock()
+	defer txp.mtx.Unlock()
+	txp.utxosPool[string(pubKey)] = utxos
 }
 
 func (txp *TxPool) GetPool() Pool {

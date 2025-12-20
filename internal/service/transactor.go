@@ -27,6 +27,7 @@ type TxPool interface {
 	Purge()
 	AddTx(tx *types.Transaction)
 	GetUTXOs(pubKey []byte) types.UTXOs
+	AddUtxos(pubKey []byte, utxos ...*types.UTXO)
 }
 
 type Transactor struct {
@@ -70,6 +71,9 @@ func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transacti
 		newTx.AddOutput(types.NewTxOut(newTx.ID, *balance, crypto.PublicKeyToBytes(&txReq.Sender.PublicKey)))
 	}
 	newTx.ComputeHash()
+
+	t.txPool.AddUtxos(crypto.PublicKeyToBytes(&txReq.Sender.PublicKey), types.NewUTXO(newTx.GetHash(), 1))
+	t.txPool.AddUtxos(crypto.PublicKeyToBytes(txReq.Receiver), types.NewUTXO(newTx.GetHash(), 0))
 	t.txPool.AddTx(newTx)
 
 	return newTx, nil
@@ -128,13 +132,14 @@ func (t *Transactor) getBalance(key *ecdsa.PrivateKey, f func(utxo *types.UTXO, 
 
 // GetUTXOs gets unspent transaction outputs for public key
 func (t *Transactor) getUTXOs(pubKey []byte) (types.UTXOs, error) {
+	// we need to get utxos from the pool as well to avoid double spending
+	// also we need to get the utxo with index > 0 only once (the rest are change utxos)
+	utxosPool := t.txPool.GetUTXOs(pubKey)
+
 	utxos, err := t.utxoStore.Get(pubKey)
 	if err != nil {
 		return nil, fmt.Errorf("error getting utxos : %v", err)
 	}
-	// we need to get utxos from the pool as well to avoid double spending
-	// also we need to get the utxo with index > 0 only once (the rest are change utxos)
-	utxosPool := t.txPool.GetUTXOs(pubKey)
 	var rest *types.UTXO
 	for _, utxo := range utxosPool {
 		if utxo.Index == 0 {
