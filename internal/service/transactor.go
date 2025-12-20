@@ -25,7 +25,7 @@ type UTXOStore interface {
 type TxPool interface {
 	GetPool() inMem.Pool
 	Purge()
-	AddTx(tx *types.Transaction)
+	AddTx(tx *types.Transaction) error
 	GetUTXOs(pubKey []byte) types.UTXOs
 	AddUtxos(pubKey []byte, utxos ...*types.UTXO)
 }
@@ -74,7 +74,9 @@ func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transacti
 
 	t.txPool.AddUtxos(crypto.PublicKeyToBytes(&txReq.Sender.PublicKey), types.NewUTXO(newTx.GetHash(), 1))
 	t.txPool.AddUtxos(crypto.PublicKeyToBytes(txReq.Receiver), types.NewUTXO(newTx.GetHash(), 0))
-	t.txPool.AddTx(newTx)
+	if err = t.txPool.AddTx(newTx); err != nil {
+		return nil, fmt.Errorf("error adding tx to pool : %v", err)
+	}
 
 	return newTx, nil
 }

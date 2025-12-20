@@ -44,8 +44,7 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 
 				txPool := NewMockTxPool(ctrl)
 				txPool.EXPECT().GetUTXOs(fromPubKey).Return(nil).Times(1)
-				//todo: fix
-				txPool.EXPECT().AddTx(gomock.Any()).Times(1)
+				txPool.EXPECT().AddTx(gomock.Any()).Return(nil).Times(1)
 				utxoStore := NewMockUTXOStore(ctrl)
 				utxoStore.EXPECT().Get(fromPubKey).Return([]*types.UTXO{
 					{

@@ -103,17 +103,22 @@ func (mr *MockUTXOStoreMockRecorder) Get(pubKey interface{}) *gomock.Call {
 }
 
 // Put mocks base method.
-func (m *MockUTXOStore) Put(pubKey []byte, utxos []*types.UTXO) error {
+func (m *MockUTXOStore) Put(pubKey []byte, utxos ...*types.UTXO) error {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Put", pubKey, utxos)
+	varargs := []interface{}{pubKey}
+	for _, a := range utxos {
+		varargs = append(varargs, a)
+	}
+	ret := m.ctrl.Call(m, "Put", varargs...)
 	ret0, _ := ret[0].(error)
 	return ret0
 }
 
 // Put indicates an expected call of Put.
-func (mr *MockUTXOStoreMockRecorder) Put(pubKey, utxos interface{}) *gomock.Call {
+func (mr *MockUTXOStoreMockRecorder) Put(pubKey interface{}, utxos ...interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Put", reflect.TypeOf((*MockUTXOStore)(nil).Put), pubKey, utxos)
+	varargs := append([]interface{}{pubKey}, utxos...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Put", reflect.TypeOf((*MockUTXOStore)(nil).Put), varargs...)
 }
 
 // MockTxPool is a mock of TxPool interface.
@@ -140,15 +145,34 @@ func (m *MockTxPool) EXPECT() *MockTxPoolMockRecorder {
 }
 
 // AddTx mocks base method.
-func (m *MockTxPool) AddTx(tx *types.Transaction) {
+func (m *MockTxPool) AddTx(tx *types.Transaction) error {
 	m.ctrl.T.Helper()
-	m.ctrl.Call(m, "AddTx", tx)
+	ret := m.ctrl.Call(m, "AddTx", tx)
+	ret0, _ := ret[0].(error)
+	return ret0
 }
 
 // AddTx indicates an expected call of AddTx.
 func (mr *MockTxPoolMockRecorder) AddTx(tx interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddTx", reflect.TypeOf((*MockTxPool)(nil).AddTx), tx)
+}
+
+// AddUtxos mocks base method.
+func (m *MockTxPool) AddUtxos(pubKey []byte, utxos ...*types.UTXO) {
+	m.ctrl.T.Helper()
+	varargs := []interface{}{pubKey}
+	for _, a := range utxos {
+		varargs = append(varargs, a)
+	}
+	m.ctrl.Call(m, "AddUtxos", varargs...)
+}
+
+// AddUtxos indicates an expected call of AddUtxos.
+func (mr *MockTxPoolMockRecorder) AddUtxos(pubKey interface{}, utxos ...interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	varargs := append([]interface{}{pubKey}, utxos...)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "AddUtxos", reflect.TypeOf((*MockTxPool)(nil).AddUtxos), varargs...)
 }
 
 // GetPool mocks base method.
