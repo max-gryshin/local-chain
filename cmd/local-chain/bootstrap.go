@@ -1,9 +1,11 @@
 package main
 
 import (
-	"local-chain/internal/pkg/crypto"
-	"local-chain/internal/types"
 	"log"
+
+	"local-chain/internal/pkg/crypto"
+
+	"local-chain/internal/types"
 
 	leveldbpkg "local-chain/internal/adapters/outbound/leveldb"
 
@@ -31,13 +33,8 @@ func configureBootstrap(r *raft.Raft, store *leveldbpkg.Store) {
 		log.Fatal(err)
 	}
 	for _, output := range outputs {
-		utxos := make([]*types.UTXO, 0)
-		pubKey, err := crypto.PublicKeyFromBytes(output.PubKey)
-		if err != nil {
-			log.Fatal(err)
-		}
-		utxos = append(utxos, &types.UTXO{TxHash: tx.GetHash(), Index: 0})
-		if err = store.Utxo().Put(crypto.PublicKeyToBytes(pubKey), utxos); err != nil {
+		pubKey, _ := crypto.PublicKeyFromBytes(output.PubKey)
+		if err := store.Utxo().Put(crypto.PublicKeyToBytes(pubKey), types.NewUTXO(tx.GetHash(), 0)); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -59,7 +56,7 @@ func genesisOutputs() []*types.TxOut {
 		types.NewTxOut(
 			uuid.MustParse("10252f31-151b-457d-b8de-e4a6f1552b62"),
 			types.Amount{
-				Value: 100000000,
+				Value: 100_000,
 				Unit:  100,
 			},
 			[]byte(`-----BEGIN PUBLIC KEY-----

@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"time"
 
-	"local-chain/internal/adapters/outbound/inMem"
 	"local-chain/internal/pkg"
 
 	"local-chain/internal"
@@ -16,17 +15,12 @@ import (
 )
 
 const (
-	applyTimeout = 10 * time.Second
+	applyTimeout = 1 * time.Second
 )
 
 type BlockchainStore interface {
 	Get() (types.Blocks, error)
 	Put(*types.Block) error
-}
-
-type txPool interface {
-	GetPool() inMem.TxPoolMap
-	Purge()
 }
 
 type RaftAPI interface {
@@ -40,7 +34,7 @@ type Blockchain struct {
 	blockchainStore  BlockchainStore
 	transactionStore TransactionStore
 	prevBlock        *types.Block
-	txPool           txPool
+	txPool           TxPool
 }
 
 // NewBlockchain creates a new blockchain with a genesis block.
@@ -48,7 +42,7 @@ func NewBlockchain(
 	raftApi RaftAPI,
 	blockchainStore BlockchainStore,
 	txStore TransactionStore,
-	txPool txPool,
+	txPool TxPool,
 ) *Blockchain {
 	b := &Blockchain{
 		raftApi:          raftApi,
@@ -92,12 +86,12 @@ func (bc *Blockchain) CreateBlock(ctx context.Context) error {
 		return nil
 	}
 
-	merkleTree, err := internal.NewMerkleTree(txs)
+	merkleTree, err := internal.NewMerkleTree(txs...)
 	if err != nil {
 		return fmt.Errorf("failed to create merkle tree: %w", err)
 	}
 
-	block := types.NewBlock(bc.prevBlock.ComputeHash(), merkleTree.Root.Hash)
+	block := types.NewBlock(bc.getCurrentBlock().ComputeHash(), merkleTree.Root.Hash)
 	blockTxsEnvelope := types.NewBlockTxsEnvelope(block, txs)
 	bytes, err := blockTxsEnvelope.ToBytes()
 	if err != nil {
@@ -118,6 +112,26 @@ func (bc *Blockchain) CreateBlock(ctx context.Context) error {
 	}
 
 	bc.prevBlock = block
+	bc.txPool.Purge()
 
 	return nil
+}
+
+func (bc *Blockchain) getCurrentBlock() *types.Block {
+	if bc.prevBlock != nil {
+		return bc.prevBlock
+	}
+	blocks, err := bc.blockchainStore.Get()
+	if err != nil {
+		panic(err)
+	}
+	var latestBlock *types.Block
+	for _, block := range blocks {
+		if latestBlock == nil || latestBlock.Timestamp < block.Timestamp {
+			latestBlock = block
+		}
+	}
+	bc.prevBlock = latestBlock
+
+	return latestBlock
 }

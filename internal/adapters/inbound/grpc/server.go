@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"time"
 
 	"github.com/hashicorp/raft"
@@ -24,23 +25,19 @@ type RaftAPI interface {
 	State() raft.RaftState
 }
 
-type txPool interface {
-	AddTx(tx *types.Transaction)
-}
-
 type Transactor interface {
 	CreateTx(txReq *types.TransactionRequest) (*types.Transaction, error)
-	GetBalance(pubKey []byte) (*types.Amount, error)
+	GetBalance(req *types.BalanceRequest) (*types.Amount, error)
 }
 
 type transactionMapper interface {
 	RpcToTransaction(req *grpcPkg.AddTransactionRequest) (*types.TransactionRequest, error)
+	RpcToBalanceRequest(req *grpcPkg.GetBalanceRequest) (*types.BalanceRequest, error)
 }
 
 type LocalChainServer struct {
 	serverID raft.ServerID
 	raftAPI  RaftAPI
-	txPool   txPool
 	tm       transactionMapper
 	grpcPkg.UnimplementedLocalChainServer
 	transactor Transactor
@@ -49,14 +46,12 @@ type LocalChainServer struct {
 func NewLocalChain(
 	serverID raft.ServerID,
 	raftAPI RaftAPI,
-	txPool txPool,
 	tm transactionMapper,
 	transactor Transactor,
 ) *LocalChainServer {
 	return &LocalChainServer{
 		serverID:   serverID,
 		raftAPI:    raftAPI,
-		txPool:     txPool,
 		tm:         tm,
 		transactor: transactor,
 	}
@@ -134,11 +129,9 @@ func (s *LocalChainServer) AddTransaction(ctx context.Context, req *grpcPkg.AddT
 	if err != nil {
 		return &grpcPkg.AddTransactionResponse{Success: false}, fmt.Errorf("failed to marshal add transaction request: %w", err)
 	}
-	tx, err := s.transactor.CreateTx(txReq)
-	if err != nil {
-		return nil, fmt.Errorf("transactor.CreateTx: %w", err)
+	if _, err = s.transactor.CreateTx(txReq); err != nil {
+		return &grpcPkg.AddTransactionResponse{Success: false}, fmt.Errorf("transactor.CreateTx: %w", err)
 	}
-	s.txPool.AddTx(tx)
 	// todo: validate req transaction* can skip it to speed up the implementation
 
 	return &grpcPkg.AddTransactionResponse{Success: true}, nil
@@ -154,7 +147,11 @@ func (s *LocalChainServer) GetBalance(ctx context.Context, req *grpcPkg.GetBalan
 		}
 		return client.GetBalance(ctx, req)
 	}
-	amount, err := s.transactor.GetBalance(req.Sender)
+	balanceReq, err := s.tm.RpcToBalanceRequest(req)
+	if err != nil {
+		return &grpcPkg.GetBalanceResponse{}, fmt.Errorf("failed to marshal get balance request: %w", err)
+	}
+	amount, err := s.transactor.GetBalance(balanceReq)
 	if err != nil {
 		return resp, fmt.Errorf("transactor.GetBalance: %w", err)
 	}
@@ -163,17 +160,17 @@ func (s *LocalChainServer) GetBalance(ctx context.Context, req *grpcPkg.GetBalan
 	return resp, err
 }
 
+// leaderClient creates a gRPC client connected to the current leader.
+// todo: keep the connection open instead of creating a new one each time? if yes - move to main func to correctly close the connection on shutdown
 func (s *LocalChainServer) leaderClient(leaderAddr string) (grpcPkg.LocalChainClient, error) {
-	conn, err := grpc.NewClient(leaderAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	host, _, err := net.SplitHostPort(leaderAddr)
 	if err != nil {
 		return nil, err
 	}
-	defer func(conn *grpc.ClientConn) {
-		err = conn.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(conn)
+	conn, err := grpc.NewClient(net.JoinHostPort(host, "9001"), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
 
 	return grpcPkg.NewLocalChainClient(conn), nil
 }

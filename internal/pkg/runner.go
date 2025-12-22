@@ -2,7 +2,9 @@ package pkg
 
 import (
 	"context"
+	"fmt"
 	"log/slog"
+	"runtime/debug"
 	"sync"
 )
 
@@ -30,6 +32,15 @@ func Run(parentCtx context.Context, logger *slog.Logger, runners ...Runner) erro
 		wg.Add(1)
 
 		go func() {
+			defer wg.Done()
+			defer func() {
+				if r := recover(); r != nil {
+					logger.Error("panic recovered", slog.Any("panic", r), slog.String("stack", string(debug.Stack())))
+					errC <- fmt.Errorf("panic: %v", r)
+					cancel()
+				}
+			}()
+
 			err := entry.Run(ctx)
 
 			cancel()
@@ -38,8 +49,6 @@ func Run(parentCtx context.Context, logger *slog.Logger, runners ...Runner) erro
 				logger.Error(err.Error())
 				errC <- err
 			}
-
-			wg.Done()
 		}()
 	}
 

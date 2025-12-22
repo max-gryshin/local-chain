@@ -1,6 +1,9 @@
 package pkg
 
-import "fmt"
+import (
+	"fmt"
+	"runtime/debug"
+)
 
 // GoWithRecoverAndSemaphore is a function that executes the provided function in a goroutine
 // sem is a semaphore channel that limits the number of concurrent executions
@@ -12,9 +15,9 @@ func GoWithRecoverAndSemaphore(fn func(), handlePanic func(err error), sem chan 
 				<-sem
 				if r := recover(); r != nil {
 					if err, ok := r.(error); ok {
-						handlePanic(err)
+						handlePanic(fmt.Errorf("panic occurred: %w\nstack: %s", err, string(debug.Stack())))
 					} else {
-						handlePanic(fmt.Errorf("panic occurred: %v", r))
+						handlePanic(fmt.Errorf("panic occurred: %v\nstack: %s", r, string(debug.Stack())))
 					}
 				}
 			}()

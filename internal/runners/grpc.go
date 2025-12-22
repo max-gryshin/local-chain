@@ -69,7 +69,7 @@ func (r *GrpcRunner) Run(ctx context.Context) error {
 
 func panicRecoveryHandler(l slog.Logger) func(any) error {
 	return func(p any) error {
-		l.Error("panic", p, string(debug.Stack()))
+		l.Error("panic recovered in grpc handler", slog.Any("panic", p), slog.String("stack", string(debug.Stack())))
 		return status.Errorf(codes.Internal, "%s", p)
 	}
 }
