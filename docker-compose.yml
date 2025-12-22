@@ -49,11 +49,39 @@ services:
           - node2
     depends_on:
       - node_1
+  node_3:
+    build:
+      dockerfile: ./Dockerfile
+      context: ./
+    image: "${APP_IMAGE}:${APP_IMAGE_TAG}"
+    container_name: node3
+    hostname: node3
+    environment:
+      - NODE_ID=00000000-0000-0000-0000-000000000003
+      - RAFT_ADDR=172.25.0.13:8001
+      - GRPC_ADDR=node3:9001
+      - DATA_DIR=./db3
+      - BOOTSTRAP=false
+    ports:
+      - "8003:8001"
+      - "9003:9001"
+    tty: true
+    volumes:
+      - local-chain-db-volume_3:/db
+    networks:
+      raft-network:
+        ipv4_address: 172.25.0.13
+        aliases:
+          - node3
+    depends_on:
+      - node_1
 
 volumes:
   local-chain-db-volume_1:
     name: db-local-chain
   local-chain-db-volume_2:
+    name: db-local-chain
+  local-chain-db-volume_3:
     name: db-local-chain
 
 networks:

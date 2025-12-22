@@ -3,12 +3,15 @@ package inMem
 import (
 	"bytes"
 	"errors"
-	"local-chain/internal/types"
 	"sync"
+
+	"local-chain/internal/types"
 )
 
-type Pool map[string]*types.Transaction
-type utxosPool map[string]types.UTXOs
+type (
+	Pool      map[string]*types.Transaction
+	utxosPool map[string]types.UTXOs
+)
 
 func (pool Pool) AsSlice() types.Transactions {
 	txs := make(types.Transactions, 0, len(pool))

@@ -1,9 +1,11 @@
 package main
 
 import (
-	"local-chain/internal/pkg/crypto"
-	"local-chain/internal/types"
 	"log"
+
+	"local-chain/internal/pkg/crypto"
+
+	"local-chain/internal/types"
 
 	leveldbpkg "local-chain/internal/adapters/outbound/leveldb"
 

@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"net"
 	"time"
 
 	"github.com/hashicorp/raft"
@@ -159,17 +160,17 @@ func (s *LocalChainServer) GetBalance(ctx context.Context, req *grpcPkg.GetBalan
 	return resp, err
 }
 
+// leaderClient creates a gRPC client connected to the current leader.
+// todo: keep the connection open instead of creating a new one each time? if yes - move to main func to correctly close the connection on shutdown
 func (s *LocalChainServer) leaderClient(leaderAddr string) (grpcPkg.LocalChainClient, error) {
-	conn, err := grpc.NewClient(leaderAddr, grpc.WithTransportCredentials(insecure.NewCredentials()))
+	host, _, err := net.SplitHostPort(leaderAddr)
 	if err != nil {
 		return nil, err
 	}
-	defer func(conn *grpc.ClientConn) {
-		err = conn.Close()
-		if err != nil {
-			panic(err)
-		}
-	}(conn)
+	conn, err := grpc.NewClient(net.JoinHostPort(host, "9001"), grpc.WithTransportCredentials(insecure.NewCredentials()))
+	if err != nil {
+		return nil, err
+	}
 
 	return grpcPkg.NewLocalChainClient(conn), nil
 }

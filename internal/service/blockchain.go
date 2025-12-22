@@ -91,7 +91,7 @@ func (bc *Blockchain) CreateBlock(ctx context.Context) error {
 		return fmt.Errorf("failed to create merkle tree: %w", err)
 	}
 
-	block := types.NewBlock(bc.prevBlock.ComputeHash(), merkleTree.Root.Hash)
+	block := types.NewBlock(bc.getCurrentBlock().ComputeHash(), merkleTree.Root.Hash)
 	blockTxsEnvelope := types.NewBlockTxsEnvelope(block, txs)
 	bytes, err := blockTxsEnvelope.ToBytes()
 	if err != nil {
@@ -115,4 +115,23 @@ func (bc *Blockchain) CreateBlock(ctx context.Context) error {
 	bc.txPool.Purge()
 
 	return nil
+}
+
+func (bc *Blockchain) getCurrentBlock() *types.Block {
+	if bc.prevBlock != nil {
+		return bc.prevBlock
+	}
+	blocks, err := bc.blockchainStore.Get()
+	if err != nil {
+		panic(err)
+	}
+	var latestBlock *types.Block
+	for _, block := range blocks {
+		if latestBlock == nil || latestBlock.Timestamp < block.Timestamp {
+			latestBlock = block
+		}
+	}
+	bc.prevBlock = latestBlock
+
+	return latestBlock
 }

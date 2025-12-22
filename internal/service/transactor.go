@@ -4,10 +4,12 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
+	"math/big"
+
 	"local-chain/internal/adapters/outbound/inMem"
 	"local-chain/internal/pkg/crypto"
+
 	"local-chain/internal/types"
-	"math/big"
 )
 
 //go:generate mockgen -source transactor.go -destination transactor_mock_test.go -package service_test -mock_names TransactionStore=MockTransactionStore,TxPool=MockTxPool

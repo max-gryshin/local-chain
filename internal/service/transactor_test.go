@@ -1,8 +1,9 @@
 package service_test
 
 import (
-	"local-chain/internal/pkg/crypto"
 	"testing"
+
+	"local-chain/internal/pkg/crypto"
 
 	"local-chain/internal/service"
 
@@ -85,7 +86,7 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 			name: "err sender is not owner of the output",
 			args: func(ctrl *gomock.Controller) args {
 				from := crypto.GenerateKeyEllipticP256()
-				//fromPubKey := crypto.PublicKeyToBytes(&from.PublicKey)
+				// fromPubKey := crypto.PublicKeyToBytes(&from.PublicKey)
 				fakeFrom := crypto.GenerateKeyEllipticP256()
 				// make fakeFrom have the same public key as "from"
 				fakeFrom.PublicKey = from.PublicKey

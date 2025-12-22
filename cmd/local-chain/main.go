@@ -3,6 +3,11 @@ package main
 import (
 	"context"
 	"fmt"
+	"log"
+	"log/slog"
+	"os"
+	"runtime/debug"
+
 	grpc2 "local-chain/internal/adapters/inbound/grpc"
 	"local-chain/internal/adapters/inbound/grpc/mapper"
 	"local-chain/internal/adapters/outbound/inMem"
@@ -10,9 +15,6 @@ import (
 	"local-chain/internal/runners"
 	"local-chain/internal/service"
 	transport2 "local-chain/transport/gen/transport"
-	"log"
-	"log/slog"
-	"os"
 
 	"github.com/hashicorp/raft"
 	raftboltdb "github.com/hashicorp/raft-boltdb"
@@ -38,6 +40,11 @@ var (
 )
 
 func main() {
+	defer func() {
+		if r := recover(); r != nil {
+			log.Printf("panic recovered in main: %v\nstack: %s", r, string(debug.Stack()))
+		}
+	}()
 	fmt.Println("raftBootstrap:", bootstrap)
 	logger := slog.Default()
 	ctx := pkg.ContextWithServerID(context.Background(), raft.ServerID(nodeID))
