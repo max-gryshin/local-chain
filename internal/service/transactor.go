@@ -51,11 +51,13 @@ func NewTransactor(txStore TransactionStore, UTXOStore UTXOStore, txPool TxPool)
 // of the new transaction, since it is impossible to sign the inputs of the new transaction without having the
 // private key corresponding to the public key.
 func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transaction, error) {
+	receiverPub := crypto.PublicKeyToBytes(txReq.Receiver)
+	senderPub := crypto.PublicKeyToBytes(&txReq.Sender.PublicKey)
 	newTx := types.NewTransaction()
 	balance, err := t.getBalance(
 		txReq.Sender,
-		func(utxo *types.UTXO, senderPubKey []byte, r, s *big.Int, id uint32) {
-			newTx.AddInput(types.NewTxIn(utxo, senderPubKey, r, s, id))
+		func(utxo *types.UTXO, pubKey []byte, r, s *big.Int, id uint32) {
+			newTx.AddInput(types.NewTxIn(utxo, pubKey, r, s, id))
 		},
 	)
 	if err != nil {
@@ -66,16 +68,16 @@ func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transacti
 		return nil, errors.New("insufficient balance")
 	}
 
-	newTx.AddOutput(types.NewTxOut(newTx.ID, txReq.Amount, crypto.PublicKeyToBytes(txReq.Receiver)))
+	newTx.AddOutput(types.NewTxOut(newTx.ID, txReq.Amount, receiverPub))
 	if balance.Value > txReq.Amount.Value {
 		balance.Value -= txReq.Amount.Value
 		// this output contains actual sender balance
-		newTx.AddOutput(types.NewTxOut(newTx.ID, *balance, crypto.PublicKeyToBytes(&txReq.Sender.PublicKey)))
+		newTx.AddOutput(types.NewTxOut(newTx.ID, *balance, senderPub))
 	}
 	newTx.ComputeHash()
 
-	t.txPool.AddUtxos(crypto.PublicKeyToBytes(&txReq.Sender.PublicKey), types.NewUTXO(newTx.GetHash(), 1))
-	t.txPool.AddUtxos(crypto.PublicKeyToBytes(txReq.Receiver), types.NewUTXO(newTx.GetHash(), 0))
+	t.txPool.AddUtxos(senderPub, types.NewUTXO(newTx.GetHash(), 1))
+	t.txPool.AddUtxos(receiverPub, types.NewUTXO(newTx.GetHash(), 0))
 	if err = t.txPool.AddTx(newTx); err != nil {
 		return nil, fmt.Errorf("error adding tx to pool : %v", err)
 	}
@@ -91,7 +93,7 @@ func (t *Transactor) GetBalance(req *types.BalanceRequest) (*types.Amount, error
 	return balance, nil
 }
 
-func (t *Transactor) getBalance(key *ecdsa.PrivateKey, f func(utxo *types.UTXO, senderPubKey []byte, r, s *big.Int, id uint32)) (*types.Amount, error) {
+func (t *Transactor) getBalance(key *ecdsa.PrivateKey, fillInputFunc func(utxo *types.UTXO, senderPubKey []byte, r, s *big.Int, id uint32)) (*types.Amount, error) {
 	pubKey := crypto.PublicKeyToBytes(&key.PublicKey)
 	utxos, err := t.getUTXOs(pubKey)
 	if err != nil {
@@ -124,8 +126,8 @@ func (t *Transactor) getBalance(key *ecdsa.PrivateKey, f func(utxo *types.UTXO, 
 		if !utxo.Verify(key.PublicKey, r, s) {
 			return nil, fmt.Errorf("can not verify UTXO:%s err: not valid private key", string(utxo.TxHash))
 		}
-		if f != nil {
-			f(utxo, pubKey, r, s, uint32(id))
+		if fillInputFunc != nil {
+			fillInputFunc(utxo, pubKey, r, s, uint32(id))
 		}
 		balance.Value += output.Amount.Value
 		// assume all outputs have the same unit
@@ -139,23 +141,18 @@ func (t *Transactor) getUTXOs(pubKey []byte) (types.UTXOs, error) {
 	// we need to get utxos from the pool as well to avoid double spending
 	// also we need to get the utxo with index > 0 only once (the rest are change utxos)
 	utxosPool := t.txPool.GetUTXOs(pubKey)
-
 	utxos, err := t.utxoStore.Get(pubKey)
 	if err != nil {
 		return nil, fmt.Errorf("error getting utxos : %v", err)
 	}
-	var rest *types.UTXO
 	for _, utxo := range utxosPool {
 		if utxo.Index == 0 {
 			utxos = append(utxos, utxo)
 			continue
 		}
 		if utxo.Index > 0 {
-			rest = utxo
+			return types.UTXOs{utxo}, nil
 		}
-	}
-	if rest != nil {
-		return types.UTXOs{rest}, nil
 	}
 	return utxos, nil
 }

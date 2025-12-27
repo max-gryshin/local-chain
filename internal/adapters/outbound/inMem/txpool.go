@@ -1,8 +1,6 @@
 package inMem
 
 import (
-	"bytes"
-	"errors"
 	"sync"
 
 	"local-chain/internal/types"
@@ -39,17 +37,6 @@ func NewTxPool() *TxPool {
 func (txp *TxPool) AddTx(tx *types.Transaction) error {
 	txp.mtx.Lock()
 	defer txp.mtx.Unlock()
-
-	// Check for double spends in the pool
-	for _, input := range tx.Inputs {
-		for _, existingTx := range txp.pool {
-			for _, existingInput := range existingTx.Inputs {
-				if bytes.Equal(existingInput.PubKey, input.PubKey) {
-					return errors.New("double spend detected in txPool")
-				}
-			}
-		}
-	}
 
 	txp.pool[string(tx.GetHash())] = tx
 	return nil

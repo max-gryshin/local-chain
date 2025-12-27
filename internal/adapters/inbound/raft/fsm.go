@@ -4,7 +4,6 @@ import (
 	"encoding/binary"
 	"fmt"
 	"io"
-	"time"
 
 	"local-chain/internal/adapters/outbound/inMem"
 
@@ -62,7 +61,8 @@ func (f *Fsm) addBlock(blockBytes []byte) error {
 		return fmt.Errorf("failed to save block: %w", err)
 	}
 	blockHash := blockTxsEnvelope.Block.ComputeHash()
-	for _, tx := range blockTxsEnvelope.Txs {
+
+	for _, tx := range blockTxsEnvelope.Txs.SortByTimestamp() {
 		tx.BlockHash = blockHash
 		if err := f.store.Transaction().Put(tx); err != nil {
 			return fmt.Errorf("failed to put transaction: %w", err)
@@ -71,7 +71,6 @@ func (f *Fsm) addBlock(blockBytes []byte) error {
 			return fmt.Errorf("failed to add UTXOs: %w", err)
 		}
 	}
-	fmt.Printf("\nblock added - timestamp: %s\n", time.Unix(0, int64(blockTxsEnvelope.Block.Timestamp)))
 	return nil
 }
 

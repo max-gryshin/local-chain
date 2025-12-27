@@ -7,6 +7,7 @@ import (
 	"encoding/binary"
 	"fmt"
 	"math/big"
+	"sort"
 	"time"
 
 	"local-chain/internal/pkg/crypto"
@@ -177,6 +178,13 @@ func (t Transactions) ToBytes() ([]byte, error) {
 
 func (t Transactions) FromBytes(data []byte) error {
 	return rlp.DecodeBytes(data, t)
+}
+
+func (t Transactions) SortByTimestamp() Transactions {
+	sort.Slice(t, func(i, j int) bool {
+		return t[i].Timestamp < t[j].Timestamp
+	})
+	return t
 }
 
 type TransactionRequest struct {
