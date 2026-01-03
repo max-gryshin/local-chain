@@ -56,7 +56,7 @@ func genesisOutputs() []*types.TxOut {
 		types.NewTxOut(
 			uuid.MustParse("10252f31-151b-457d-b8de-e4a6f1552b62"),
 			types.Amount{
-				Value: 100_000,
+				Value: 1_000_000_000_000,
 				Unit:  100,
 			},
 			[]byte(`-----BEGIN PUBLIC KEY-----

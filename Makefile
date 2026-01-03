@@ -12,6 +12,7 @@ PKGS := $(shell go list ./...)
 CGO_ENABLED ?= 0
 APPS = local-chain
 PREFIX ?= bin/
+KEYS_DIR = cmd/tools/debug/keys/
 
 $(APPS):
 	CGO_ENABLED=$(CGO_ENABLED) go build -mod=vendor -installsuffix cgo -o $(PREFIX)$@ ./cmd/$@
@@ -125,3 +126,30 @@ down: docker-compose down
 
 .PHONY: build
 build: go build -v
+
+.PHONY: gen-k
+gen-k:
+	openssl ecparam -name prime256v1 -genkey -noout -out $(KEYS_DIR)$(NAME)-priv.pem
+	openssl ec -in $(KEYS_DIR)$(NAME)-priv.pem -pubout -out $(KEYS_DIR)$(NAME)-pub.pem
+
+# List of names to generate keys for (100 total)
+NAMES := \
+	alice bob charlie dave eve frank grace hank irene jack \
+	karen leo mia nick olivia paul quinn rachel steve tina \
+	uma victor wendy xavier yvonne zack abby brad chris \
+	diana elena felix gina harry isabel jim kevin lara \
+	mike nora oscar peter queen ron sara tom ursula \
+	vince will xena yasmin zane aaron beth cody dana \
+	edgar fiona gary holly ivan jill kyle liam maggie \
+	neil opal priya quincy rose sean troy una vera \
+	walter xia yang zoe albert bella carl denise \
+	eric faith gabriel heidi ian jen ken luis mandy \
+	nate owen paula qadir rita sam tyler ugo val \
+	wayne xiao yara ziad
+
+.PHONY: gen-keys
+gen-keys:
+	@echo Generating keys into $(KEYS_DIR) for $$(echo $(NAMES) | wc -w) names...
+	@for name in $(NAMES); do \
+		$(MAKE) --no-print-directory gen-k NAME=$$name; \
+	done
