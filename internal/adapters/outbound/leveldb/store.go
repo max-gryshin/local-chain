@@ -14,6 +14,7 @@ type Store struct {
 	transaction *TransactionStore
 	blockchain  *BlockchainStore
 	utxo        *UtxoStore
+	user        *UserStore
 }
 
 func New(db Database) *Store {
@@ -21,6 +22,7 @@ func New(db Database) *Store {
 		transaction: NewTransactionStore(db),
 		blockchain:  NewBlockchainStore(db),
 		utxo:        NewUtxoStore(db),
+		user:        NewUserStore(db),
 	}
 }
 
@@ -34,4 +36,8 @@ func (s *Store) Blockchain() *BlockchainStore {
 
 func (s *Store) Utxo() *UtxoStore {
 	return s.utxo
+}
+
+func (s *Store) User() *UserStore {
+	return s.user
 }

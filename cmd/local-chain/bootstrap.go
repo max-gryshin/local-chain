@@ -13,7 +13,7 @@ import (
 	"github.com/hashicorp/raft"
 )
 
-func configureBootstrap(r *raft.Raft, store *leveldbpkg.Store) {
+func configureBootstrap(r *raft.Raft, store *leveldbpkg.Store, superUser *types.User) {
 	configFuture := r.BootstrapCluster(raft.Configuration{
 		Servers: []raft.Server{
 			{
@@ -26,7 +26,7 @@ func configureBootstrap(r *raft.Raft, store *leveldbpkg.Store) {
 	if err := store.Blockchain().Put(genesisBlock); err != nil {
 		log.Fatal(err)
 	}
-	outputs := genesisOutputs()
+	outputs := genesisOutputs(superUser)
 	tx := genesisTx(genesisBlock, outputs)
 	tx.ComputeHash()
 	if err := store.Transaction().Put(tx); err != nil {
@@ -51,7 +51,7 @@ func genesisTx(genesisBlock *types.Block, outputs []*types.TxOut) *types.Transac
 	}
 }
 
-func genesisOutputs() []*types.TxOut {
+func genesisOutputs(superUser *types.User) []*types.TxOut {
 	return []*types.TxOut{
 		types.NewTxOut(
 			uuid.MustParse("10252f31-151b-457d-b8de-e4a6f1552b62"),
@@ -59,9 +59,6 @@ func genesisOutputs() []*types.TxOut {
 				Value: 1_000_000_000_000,
 				Unit:  100,
 			},
-			[]byte(`-----BEGIN PUBLIC KEY-----
-MFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEa/KaLpP9gikVe2ZXkp74RE+QmdDd
-hJxRIN+5upGQgZyYFOqC7uwgXk0PS7GUNTl1aECoAKa2WEIWKL2PmTNZvg==
------END PUBLIC KEY-----`)),
+			superUser.PublicKey),
 	}
 }

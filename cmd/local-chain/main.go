@@ -111,12 +111,18 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	user := service.NewUserService(store.User())
+	um := mapper.NewUserMapper()
+	superUser := initSuperUser(store.User())
+
 	if bootstrap {
-		configureBootstrap(r, store)
+		configureBootstrap(r, store, superUser)
 	}
 	transactor := service.NewTransactor(store.Transaction(), store.Utxo(), txPool)
 	tm := mapper.NewTransactionMapper()
-	localChainManager := grpc2.NewLocalChain(serverID, r, tm, transactor)
+
+	localChainManager := grpc2.NewLocalChain(serverID, r, tm, transactor, user, um)
 
 	grpcRunner := runners.New(grpcAddr, func(s *grpc.Server) {
 		transport2.RegisterLocalChainServer(s, localChainManager)

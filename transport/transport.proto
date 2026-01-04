@@ -6,6 +6,10 @@ service LocalChain {
   rpc AddVoter(AddVoterRequest) returns (AddVoterResponse) {}
   rpc AddTransaction(AddTransactionRequest) returns (AddTransactionResponse) {}
   rpc GetBalance(GetBalanceRequest) returns (GetBalanceResponse) {}
+
+  rpc AddUser(AddUserRequest) returns (AddUserResponse) {}
+  rpc GetUser(GetUserRequest) returns (GetUserResponse) {}
+  rpc ListUsers(ListUsersRequest) returns (ListUsersResponse) {}
 }
 
 message AddPeerRequest {
@@ -61,4 +65,32 @@ message Amount {
 message Utxo {
   bytes txHash = 1;
   uint32 index = 2;
+}
+
+message AddUserRequest {
+  User user = 1;
+}
+
+message GetUserRequest {
+  string username = 1;
+}
+
+message ListUsersRequest {}
+
+message AddUserResponse {
+  bool success = 1;
+}
+
+message GetUserResponse {
+  User user = 1;
+}
+
+message ListUsersResponse {
+  repeated User users = 1;
+}
+
+message User {
+  bytes publicKey = 1;
+  bytes privateKey = 2;
+  string username = 3;
 }

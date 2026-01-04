@@ -127,8 +127,8 @@ down: docker-compose down
 .PHONY: build
 build: go build -v
 
-.PHONY: gen-k
-gen-k:
+.PHONY: gen-public-private-key-pair
+gen-public-private-key-pair:
 	openssl ecparam -name prime256v1 -genkey -noout -out $(KEYS_DIR)$(NAME)-priv.pem
 	openssl ec -in $(KEYS_DIR)$(NAME)-priv.pem -pubout -out $(KEYS_DIR)$(NAME)-pub.pem
 
@@ -147,9 +147,16 @@ NAMES := \
 	nate owen paula qadir rita sam tyler ugo val \
 	wayne xiao yara ziad
 
-.PHONY: gen-keys
-gen-keys:
-	@echo Generating keys into $(KEYS_DIR) for $$(echo $(NAMES) | wc -w) names...
+.PHONY: gen-users
+gen-users:
+	@echo Generating users for $$(echo $(NAMES) | wc -w) names...
 	@for name in $(NAMES); do \
-		$(MAKE) --no-print-directory gen-k NAME=$$name; \
+  		bin/debug add-user --name $$name; \
+	done
+
+.PHONY: give-money
+give-money:
+	@echo Give money to users for $$(echo $(NAMES) | wc -w) names...
+	@for name in $(NAMES); do \
+  		bin/debug send -s admin -r $$name -a 1000; \
 	done

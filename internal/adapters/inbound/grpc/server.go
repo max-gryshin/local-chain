@@ -35,12 +35,25 @@ type transactionMapper interface {
 	RpcToBalanceRequest(req *grpcPkg.GetBalanceRequest) (*types.BalanceRequest, error)
 }
 
+type User interface {
+	GetAllUsers() ([]*types.User, error)
+	GetUser(username string) (*types.User, error)
+	AddUser(user *types.User) error
+}
+
+type UserMapper interface {
+	RpcToUser(req *grpcPkg.AddUserRequest) *types.User
+	UserToRpc(user *types.User) *grpcPkg.User
+}
+
 type LocalChainServer struct {
 	serverID raft.ServerID
 	raftAPI  RaftAPI
 	tm       transactionMapper
 	grpcPkg.UnimplementedLocalChainServer
 	transactor Transactor
+	user       User
+	userMapper UserMapper
 }
 
 func NewLocalChain(
@@ -48,12 +61,16 @@ func NewLocalChain(
 	raftAPI RaftAPI,
 	tm transactionMapper,
 	transactor Transactor,
+	user User,
+	userMapper UserMapper,
 ) *LocalChainServer {
 	return &LocalChainServer{
 		serverID:   serverID,
 		raftAPI:    raftAPI,
 		tm:         tm,
 		transactor: transactor,
+		user:       user,
+		userMapper: userMapper,
 	}
 }
 
@@ -158,6 +175,65 @@ func (s *LocalChainServer) GetBalance(ctx context.Context, req *grpcPkg.GetBalan
 	resp.Amount = &grpcPkg.Amount{Value: amount.Value, Unit: amount.Unit}
 
 	return resp, err
+}
+
+func (s *LocalChainServer) AddUser(ctx context.Context, req *grpcPkg.AddUserRequest) (*grpcPkg.AddUserResponse, error) {
+	if req.GetUser().GetUsername() == "" || len(req.GetUser().GetPrivateKey()) == 0 || len(req.GetUser().GetPublicKey()) == 0 {
+		return &grpcPkg.AddUserResponse{Success: false}, errors.New("username, private key and public key must be provided")
+	}
+	leaderServer, leaderID := s.raftAPI.LeaderWithID()
+	if leaderID != s.serverID {
+		client, err := s.leaderClient(string(leaderServer))
+		if err != nil {
+			return &grpcPkg.AddUserResponse{Success: false}, errors.New("failed to connect to leader")
+		}
+		return client.AddUser(ctx, req)
+	}
+	if err := s.user.AddUser(s.userMapper.RpcToUser(req)); err != nil {
+		return &grpcPkg.AddUserResponse{Success: false}, fmt.Errorf("user.AddUser: %w", err)
+	}
+	return &grpcPkg.AddUserResponse{Success: true}, nil
+}
+
+func (s *LocalChainServer) GetUser(ctx context.Context, req *grpcPkg.GetUserRequest) (*grpcPkg.GetUserResponse, error) {
+	if req.GetUsername() == "" {
+		return nil, errors.New("username must be provided")
+	}
+	leaderServer, leaderID := s.raftAPI.LeaderWithID()
+	if leaderID != s.serverID {
+		client, err := s.leaderClient(string(leaderServer))
+		if err != nil {
+			return nil, errors.New("failed to connect to leader")
+		}
+		return client.GetUser(ctx, req)
+	}
+	user, err := s.user.GetUser(req.GetUsername())
+	if err != nil {
+		return nil, fmt.Errorf("user.GetUser: %w", err)
+	}
+	return &grpcPkg.GetUserResponse{
+		User: s.userMapper.UserToRpc(user),
+	}, nil
+}
+
+func (s *LocalChainServer) ListUsers(ctx context.Context, req *grpcPkg.ListUsersRequest) (*grpcPkg.ListUsersResponse, error) {
+	leaderServer, leaderID := s.raftAPI.LeaderWithID()
+	if leaderID != s.serverID {
+		client, err := s.leaderClient(string(leaderServer))
+		if err != nil {
+			return nil, errors.New("failed to connect to leader")
+		}
+		return client.ListUsers(ctx, req)
+	}
+	users, err := s.user.GetAllUsers()
+	if err != nil {
+		return nil, fmt.Errorf("user.GetAllUsers: %w", err)
+	}
+	rpcUsers := make([]*grpcPkg.User, 0, len(users))
+	for _, user := range users {
+		rpcUsers = append(rpcUsers, s.userMapper.UserToRpc(user))
+	}
+	return &grpcPkg.ListUsersResponse{Users: rpcUsers}, nil
 }
 
 // leaderClient creates a gRPC client connected to the current leader.

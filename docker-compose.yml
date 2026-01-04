@@ -18,6 +18,7 @@ services:
     tty: true
     volumes:
       - local-chain-db-volume_1:/db
+      - ./cmd/local-chain/keys:/app/keys
     networks:
       raft-network:
         ipv4_address: 172.25.0.11
@@ -42,6 +43,7 @@ services:
     tty: true
     volumes:
       - local-chain-db-volume_2:/db
+      - ./cmd/local-chain/keys:/app/keys
     networks:
       raft-network:
         ipv4_address: 172.25.0.12
@@ -68,6 +70,7 @@ services:
     tty: true
     volumes:
       - local-chain-db-volume_3:/db
+      - ./cmd/local-chain/keys:/app/keys
     networks:
       raft-network:
         ipv4_address: 172.25.0.13
