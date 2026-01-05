@@ -344,8 +344,8 @@ func addPeer() *cobra.Command {
 // addVoter creates the add voter command
 func addVoter() *cobra.Command {
 	var (
-		voterName string
-		publicKey string
+		voterID   string
+		voterAddr string
 	)
 
 	cmd := &cobra.Command{
@@ -363,26 +363,26 @@ func addVoter() *cobra.Command {
 			defer cancel()
 
 			resp, err := client.AddVoter(ctx, &transport.AddVoterRequest{
-				Id:      voterName,
-				Address: publicKey,
+				Id:      voterID,
+				Address: voterAddr,
 			})
 			if err != nil {
 				return fmt.Errorf("failed to add voter: %w", err)
 			}
 
-			fmt.Printf("✅ Voter '%s' added successfully!\n", voterName)
+			fmt.Printf("✅ Voter '%s' added successfully!\n", voterID)
 			fmt.Printf("Response: %v\n", resp)
 			return nil
 		},
 	}
 
-	cmd.Flags().StringVarP(&voterName, "name", "n", "", "Voter name (required)")
-	cmd.Flags().StringVarP(&publicKey, "pubkey", "p", "", "Voter public key (required)")
+	cmd.Flags().StringVarP(&voterID, "id", "", "", "Voter id (required)")
+	cmd.Flags().StringVarP(&voterAddr, "address", "", "", "Voter address (required)")
 
-	if err := cmd.MarkFlagRequired("name"); err != nil {
+	if err := cmd.MarkFlagRequired("id"); err != nil {
 		panic(err)
 	}
-	if err := cmd.MarkFlagRequired("pubkey"); err != nil {
+	if err := cmd.MarkFlagRequired("address"); err != nil {
 		panic(err)
 	}
 

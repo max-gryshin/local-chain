@@ -2,15 +2,19 @@ package main
 
 import (
 	"fmt"
-	"local-chain/internal/adapters/outbound/leveldb"
-	"local-chain/internal/types"
 	"log"
 	"os"
 	"path/filepath"
+
+	"local-chain/internal/adapters/outbound/leveldb"
+
+	"local-chain/internal/types"
 )
 
-const keysDir = "/app/keys"
-const superUserName = "admin"
+const (
+	keysDir       = "/app/keys"
+	superUserName = "admin"
+)
 
 func initSuperUser(us *leveldb.UserStore) *types.User {
 	privPath := filepath.Join(keysDir, fmt.Sprintf("%s-priv.pem", superUserName))

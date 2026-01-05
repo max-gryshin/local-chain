@@ -20,7 +20,7 @@ todo.md
 ./bin/*
 ./db/
 
-./cmd/tools/debug/keys/*
+./cmd/local-chain/keys/*
 
 *unit-cover.log
 *unit-test.log
