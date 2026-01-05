@@ -8,6 +8,8 @@ import (
 	"os"
 	"runtime/debug"
 
+	"local-chain/internal/pkg/grpc/interceptors"
+
 	grpc2 "local-chain/internal/adapters/inbound/grpc"
 	"local-chain/internal/adapters/inbound/grpc/mapper"
 	"local-chain/internal/adapters/outbound/inMem"
@@ -111,16 +113,27 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	user := service.NewUserService(store.User())
+	um := mapper.NewUserMapper()
+	superUser := initSuperUser(store.User())
+
 	if bootstrap {
-		configureBootstrap(r, store)
+		configureBootstrap(r, store, superUser)
 	}
 	transactor := service.NewTransactor(store.Transaction(), store.Utxo(), txPool)
 	tm := mapper.NewTransactionMapper()
-	localChainManager := grpc2.NewLocalChain(serverID, r, tm, transactor)
 
-	grpcRunner := runners.New(grpcAddr, func(s *grpc.Server) {
-		transport2.RegisterLocalChainServer(s, localChainManager)
-	}, *logger)
+	localChainManager := grpc2.NewLocalChain(serverID, r, tm, transactor, user, um)
+
+	leaderRedirectInterceptor := interceptors.NewLeaderRedirectInterceptor(serverID, r)
+	grpcRunner := runners.New(
+		grpcAddr, func(s *grpc.Server) {
+			transport2.RegisterLocalChainServer(s, localChainManager)
+		},
+		*logger,
+		leaderRedirectInterceptor.UnaryInterceptor(),
+	)
 
 	blockchain := service.NewBlockchain(r, store.Blockchain(), store.Transaction(), txPool)
 	blockchainScheduler := runners.NewBlockchainScheduler(blockchain)

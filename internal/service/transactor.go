@@ -69,11 +69,9 @@ func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transacti
 	}
 
 	newTx.AddOutput(types.NewTxOut(newTx.ID, txReq.Amount, receiverPub))
-	if balance.Value > txReq.Amount.Value {
-		balance.Value -= txReq.Amount.Value
-		// this output contains actual sender balance
-		newTx.AddOutput(types.NewTxOut(newTx.ID, *balance, senderPub))
-	}
+	balance.Value -= txReq.Amount.Value
+	// output contains actual sender balance
+	newTx.AddOutput(types.NewTxOut(newTx.ID, *balance, senderPub))
 	newTx.ComputeHash()
 
 	t.txPool.AddUtxos(senderPub, types.NewUTXO(newTx.GetHash(), 1))

@@ -23,8 +23,9 @@ type GrpcRunner struct {
 	address string
 }
 
-func New(addr string, reg func(s *grpc.Server), logger slog.Logger) *GrpcRunner {
+func New(addr string, reg func(s *grpc.Server), logger slog.Logger, interceptors ...grpc.UnaryServerInterceptor) *GrpcRunner {
 	server := grpc.NewServer(
+		grpc.ChainUnaryInterceptor(interceptors...),
 		grpc.ChainUnaryInterceptor(
 			recovery.UnaryServerInterceptor(recovery.WithRecoveryHandler(panicRecoveryHandler(logger))),
 		),

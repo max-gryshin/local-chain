@@ -20,6 +20,8 @@ todo.md
 ./bin/*
 ./db/
 
+./cmd/local-chain/keys/*
+
 *unit-cover.log
 *unit-test.log
 *junit-report.xml

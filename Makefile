@@ -12,6 +12,7 @@ PKGS := $(shell go list ./...)
 CGO_ENABLED ?= 0
 APPS = local-chain
 PREFIX ?= bin/
+KEYS_DIR = cmd/tools/debug/keys/
 
 $(APPS):
 	CGO_ENABLED=$(CGO_ENABLED) go build -mod=vendor -installsuffix cgo -o $(PREFIX)$@ ./cmd/$@
@@ -125,3 +126,8 @@ down: docker-compose down
 
 .PHONY: build
 build: go build -v
+
+.PHONY: gen-public-private-key-pair
+gen-public-private-key-pair:
+	openssl ecparam -name prime256v1 -genkey -noout -out $(KEYS_DIR)$(NAME)-priv.pem
+	openssl ec -in $(KEYS_DIR)$(NAME)-priv.pem -pubout -out $(KEYS_DIR)$(NAME)-pub.pem
