@@ -66,7 +66,7 @@ Core service handling transaction creation and validation.
 - Manage transaction pool (mempool)
 - Prevent double-spending
 
-### 5. Blockchain
+### 2. Blockchain
 
 Manages the blockchain state and block creation.
 
@@ -76,7 +76,7 @@ Manages the blockchain state and block creation.
 - Interact with Raft for consensus
 - Compute Merkle roots for blocks
 
-### 6. Merkle Tree
+### 3. Merkle Tree
 
 Data structure for efficient transaction verification.
 
