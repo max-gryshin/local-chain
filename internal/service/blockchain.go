@@ -19,7 +19,7 @@ const (
 )
 
 type BlockchainStore interface {
-	Get() (types.Blocks, error)
+	GetAll() (types.Blocks, error)
 	Put(*types.Block) error
 }
 
@@ -50,7 +50,7 @@ func NewBlockchain(
 		transactionStore: txStore,
 		txPool:           txPool,
 	}
-	blocks, err := b.blockchainStore.Get()
+	blocks, err := b.blockchainStore.GetAll()
 	if err != nil {
 		panic(err)
 	}
@@ -121,7 +121,7 @@ func (bc *Blockchain) getCurrentBlock() *types.Block {
 	if bc.prevBlock != nil {
 		return bc.prevBlock
 	}
-	blocks, err := bc.blockchainStore.Get()
+	blocks, err := bc.blockchainStore.GetAll()
 	if err != nil {
 		panic(err)
 	}

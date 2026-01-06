@@ -56,21 +56,21 @@ func main() {
 		return
 	}
 
-	//ex, err := os.Executable()
-	//if err != nil {
-	//	panic(err)
-	//}
-	//exPath := filepath.Dir(ex)
-	//fmt.Println(exPath)
-
-	db, err := leveldb.OpenFile(dbDir, nil)
-	if err != nil {
-		log.Printf("error open db file: %v", err)
-		return
+	dbFunc := func(subPath string) leveldbpkg.Database {
+		path := fmt.Sprintf("%s/%s", dbDir, subPath)
+		db, err := leveldb.OpenFile(path, nil)
+		if err != nil {
+			log.Printf("error open db file: %v", err)
+			panic(err)
+		}
+		return db
 	}
-	defer db.Close() // nolint:errcheck
-
-	store := leveldbpkg.New(db)
+	store := leveldbpkg.New(dbFunc)
+	defer func() {
+		if err := store.Close(); err != nil {
+			log.Printf("error closing store: %v", err)
+		}
+	}()
 	txPool := inMem.NewTxPool()
 	fsmStore := fsm.New(store, txPool)
 
@@ -79,13 +79,21 @@ func main() {
 		log.Printf("error create logStore: %v", err)
 		return
 	}
-	defer logStore.Close() // nolint:errcheck
+	defer func() {
+		if err := logStore.Close(); err != nil {
+			log.Printf("error closing logStore: %v", err)
+		}
+	}()
 	stableStore, err := raftboltdb.NewBoltStore(stableDb)
 	if err != nil {
 		log.Printf("error create stableStore: %v", err)
 		return
 	}
-	defer stableStore.Close() // nolint:errcheck
+	defer func() {
+		if err := stableStore.Close(); err != nil {
+			log.Printf("error closing stableStore: %v", err)
+		}
+	}()
 
 	snapshotStore, err := raft.NewFileSnapshotStore(snapshotDb, 3, os.Stderr)
 	if err != nil {

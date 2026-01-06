@@ -32,10 +32,7 @@ func addUser() *cobra.Command {
 			defer cancel()
 
 			// Check if user already exists
-			user, err := client.GetUser(ctx, &transport.GetUserRequest{Username: name})
-			if err == nil {
-				return fmt.Errorf("failed to get user: %v", err)
-			}
+			user, err := client.GetUser(ctx, &transport.GetUserRequest{Username: name}) // nolint:ineffassign,staticcheck
 			if user.GetUser() != nil {
 				return fmt.Errorf("user already exists: %s", name)
 			}

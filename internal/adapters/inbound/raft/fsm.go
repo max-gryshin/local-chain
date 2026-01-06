@@ -94,7 +94,7 @@ func (f *Fsm) addUTXO(tx *types.Transaction) error {
 }
 
 func (f *Fsm) Snapshot() (raft.FSMSnapshot, error) {
-	blocks, err := f.store.Blockchain().Get()
+	blocks, err := f.store.Blockchain().GetAll()
 	if err != nil {
 		return nil, err
 	}

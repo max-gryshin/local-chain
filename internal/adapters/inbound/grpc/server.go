@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"local-chain/internal/adapters/outbound/leveldb"
 	"time"
 
 	grpcPkg "local-chain/transport/gen/transport"
@@ -149,8 +150,11 @@ func (s *LocalChainServer) GetUser(ctx context.Context, req *grpcPkg.GetUserRequ
 		return nil, errors.New("username must be provided")
 	}
 	user, err := s.user.GetUser(req.GetUsername())
-	if err != nil {
+	if err != nil && !errors.Is(err, leveldb.ErrNotFound) {
 		return nil, fmt.Errorf("user.GetUser: %w", err)
+	}
+	if user == nil {
+		return nil, nil
 	}
 	return &grpcPkg.GetUserResponse{
 		User: s.userMapper.UserToRpc(user),

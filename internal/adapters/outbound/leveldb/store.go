@@ -1,13 +1,19 @@
 package leveldb
 
 import (
+	"fmt"
+
+	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"github.com/syndtr/goleveldb/leveldb/opt"
+	"github.com/syndtr/goleveldb/leveldb/util"
 )
 
 type Database interface {
 	Get(key []byte, ro *opt.ReadOptions) (value []byte, err error)
 	Put(key, value []byte, wo *opt.WriteOptions) error
 	Delete(key []byte, wo *opt.WriteOptions) error
+	NewIterator(slice *util.Range, ro *opt.ReadOptions) iterator.Iterator
+	Close() error
 }
 
 type Store struct {
@@ -17,12 +23,14 @@ type Store struct {
 	user        *UserStore
 }
 
-func New(db Database) *Store {
+type dbF func(subPath string) Database
+
+func New(newDB dbF) *Store {
 	return &Store{
-		transaction: NewTransactionStore(db),
-		blockchain:  NewBlockchainStore(db),
-		utxo:        NewUtxoStore(db),
-		user:        NewUserStore(db),
+		transaction: NewTransactionStore(newDB("transaction")),
+		blockchain:  NewBlockchainStore(newDB("blockchain")),
+		utxo:        NewUtxoStore(newDB("utxo")),
+		user:        NewUserStore(newDB("user")),
 	}
 }
 
@@ -40,4 +48,24 @@ func (s *Store) Utxo() *UtxoStore {
 
 func (s *Store) User() *UserStore {
 	return s.user
+}
+
+func (s *Store) Close() error {
+	if err := s.blockchain.db.Close(); err != nil {
+		return fmt.Errorf("error closing blockchain store: %w", err)
+	}
+
+	if err := s.transaction.db.Close(); err != nil {
+		return fmt.Errorf("error closing transaction store: %w", err)
+	}
+
+	if err := s.utxo.db.Close(); err != nil {
+		return fmt.Errorf("error closing utxo store: %w", err)
+	}
+
+	if err := s.user.db.Close(); err != nil {
+		return fmt.Errorf("error closing user store: %w", err)
+	}
+
+	return nil
 }
