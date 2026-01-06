@@ -3,13 +3,16 @@ package leveldb
 import (
 	"fmt"
 
+	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"github.com/syndtr/goleveldb/leveldb/opt"
+	"github.com/syndtr/goleveldb/leveldb/util"
 )
 
 type Database interface {
 	Get(key []byte, ro *opt.ReadOptions) (value []byte, err error)
 	Put(key, value []byte, wo *opt.WriteOptions) error
 	Delete(key []byte, wo *opt.WriteOptions) error
+	NewIterator(slice *util.Range, ro *opt.ReadOptions) iterator.Iterator
 	Close() error
 }
 

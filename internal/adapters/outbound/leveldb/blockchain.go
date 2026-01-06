@@ -3,6 +3,7 @@ package leveldb
 import (
 	"errors"
 	"fmt"
+	"strconv"
 
 	"local-chain/internal/types"
 
@@ -22,44 +23,95 @@ func NewBlockchainStore(conn Database) *BlockchainStore {
 	}
 }
 
-// Get todo: store as map, key is block hash
-func (s *BlockchainStore) Get() (types.Blocks, error) {
-	raw, err := s.db.Get([]byte(BlockchainKey), nil)
-	if err != nil && !errors.As(err, &leveldberrors.ErrNotFound) { // nolint:govet
-		return nil, fmt.Errorf("blockchainStore.Get get blockchain error: %w", err)
+func (s *BlockchainStore) GetAll() (types.Blocks, error) {
+	keys, err := s.getKeys()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get keys: %w", err)
 	}
-	if raw == nil {
-		return nil, nil
-	}
+	blocks := make(types.Blocks, 0, len(keys))
+	for _, key := range keys {
+		raw, err := s.db.Get(key, nil)
+		if err != nil && !errors.As(err, &leveldberrors.ErrNotFound) { // nolint:govet
+			return nil, fmt.Errorf("blockchainStore.GetAll get block error: %w", err)
+		}
+		if raw == nil {
+			return nil, nil
+		}
 
-	var blocks types.Blocks
-	if err = rlp.DecodeBytes(raw, &blocks); err != nil {
-		return nil, fmt.Errorf("failed to decode blockchain: %w", err)
+		var block *types.Block
+		if err = rlp.DecodeBytes(raw, &block); err != nil {
+			return nil, fmt.Errorf("failed to decode block: %w", err)
+		}
+		blocks = append(blocks, block)
 	}
 
 	return blocks, nil
 }
 
-func (s *BlockchainStore) Put(block *types.Block) error {
-	blockchain, err := s.Get()
-	if err != nil && !errors.Is(err, leveldberrors.ErrNotFound) {
-		return fmt.Errorf("blockchainStore.Put get blockchain error: %w", err)
+func (s *BlockchainStore) GetByTimestamp(t uint64) (*types.Block, error) {
+	raw, err := s.db.Get([]byte(strconv.Itoa(int(t))), nil)
+	if err != nil && !errors.As(err, &leveldberrors.ErrNotFound) { // nolint:govet
+		return nil, fmt.Errorf("blockchainStore.GetByTimestamp get block error: %w", err)
+	}
+	if raw == nil {
+		return nil, nil
 	}
 
-	blockchain = append(blockchain, block)
-	encoded, err := rlp.EncodeToBytes(blockchain)
-	if err != nil {
-		return fmt.Errorf("failed to encode blockchain: %w", err)
+	var block *types.Block
+	if err = rlp.DecodeBytes(raw, &block); err != nil {
+		return nil, fmt.Errorf("failed to decode block: %w", err)
 	}
-	if err = s.db.Put([]byte(BlockchainKey), encoded, nil); err != nil {
+
+	return block, nil
+}
+
+func (s *BlockchainStore) Put(block *types.Block) error {
+	existingBlock, err := s.GetByTimestamp(block.Timestamp)
+	if err != nil {
+		return fmt.Errorf("blockchainStore.Put get existing block error: %w", err)
+	}
+	if existingBlock != nil {
+		return fmt.Errorf("blockchainStore.Put blockchain with timestamp %d already exists", block.Timestamp)
+	}
+	encoded, err := rlp.EncodeToBytes(block)
+	if err != nil {
+		return fmt.Errorf("failed to encode block: %w", err)
+	}
+	if err = s.db.Put([]byte(strconv.Itoa(int(block.Timestamp))), encoded, nil); err != nil {
 		return fmt.Errorf("failed to put new block: %w", err)
 	}
 	return nil
 }
 
 func (s *BlockchainStore) Delete() error {
-	if err := s.db.Delete([]byte(BlockchainKey), nil); err != nil {
-		return fmt.Errorf("failed to clear blockchain: %w", err)
+	keys, err := s.getKeys()
+	if err != nil {
+		return fmt.Errorf("failed to get keys for deletion: %w", err)
 	}
+
+	for _, key := range keys {
+		if err := s.db.Delete(key, nil); err != nil {
+			return fmt.Errorf("failed to delete key %s: %w", string(key), err)
+		}
+	}
+
 	return nil
+}
+
+func (s *BlockchainStore) getKeys() ([][]byte, error) {
+	iterator := s.db.NewIterator(nil, nil)
+	defer iterator.Release()
+
+	var keys [][]byte
+	for iterator.Next() {
+		// Make a copy of the key since the iterator reuses the buffer
+		key := make([]byte, len(iterator.Key()))
+		copy(key, iterator.Key())
+		keys = append(keys, key)
+	}
+
+	if err := iterator.Error(); err != nil {
+		return nil, fmt.Errorf("failed to iterate over keys: %w", err)
+	}
+	return keys, nil
 }
