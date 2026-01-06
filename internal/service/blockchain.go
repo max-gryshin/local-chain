@@ -5,9 +5,9 @@ import (
 	"fmt"
 	"time"
 
-	"local-chain/internal/pkg"
+	"local-chain/internal/pkg/merkle"
 
-	"local-chain/internal"
+	"local-chain/internal/pkg"
 
 	"local-chain/internal/types"
 
@@ -86,7 +86,7 @@ func (bc *Blockchain) CreateBlock(ctx context.Context) error {
 		return nil
 	}
 
-	merkleTree, err := internal.NewMerkleTree(txs...)
+	merkleTree, err := merkle.NewMerkleTree(txs...)
 	if err != nil {
 		return fmt.Errorf("failed to create merkle tree: %w", err)
 	}

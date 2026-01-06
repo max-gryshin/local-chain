@@ -6,6 +6,7 @@ import (
 	"local-chain/internal/types"
 
 	"github.com/ethereum/go-ethereum/rlp"
+	"github.com/google/uuid"
 )
 
 type TransactionStore struct {
@@ -18,8 +19,8 @@ func NewTransactionStore(conn Database) *TransactionStore {
 	}
 }
 
-func (s *TransactionStore) Get(txHash []byte) (*types.Transaction, error) {
-	value, err := s.db.Get(txHash, nil)
+func (s *TransactionStore) Get(id uuid.UUID) (*types.Transaction, error) {
+	value, err := s.db.Get([]byte(id.String()), nil)
 	if err != nil {
 		return nil, err
 	}
@@ -36,7 +37,7 @@ func (s *TransactionStore) Put(tx *types.Transaction) error {
 	if err != nil {
 		return fmt.Errorf("failed to encode transaction: %w", err)
 	}
-	if err = s.db.Put(tx.GetHash(), encoded, nil); err != nil {
+	if err = s.db.Put([]byte(tx.ID.String()), encoded, nil); err != nil {
 		return fmt.Errorf("failed to put transaction: %w", err)
 	}
 

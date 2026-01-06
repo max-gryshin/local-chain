@@ -9,6 +9,7 @@ import (
 	"github.com/hashicorp/raft"
 	"google.golang.org/grpc"
 	"google.golang.org/grpc/credentials/insecure"
+	"google.golang.org/protobuf/types/known/emptypb"
 
 	grpcPkg "local-chain/transport/gen/transport"
 )
@@ -111,7 +112,7 @@ func (i *LeaderRedirectInterceptor) forwardToLeader(
 	case grpcMethodGetUser:
 		return client.GetUser(ctx, req.(*grpcPkg.GetUserRequest))
 	case grpcMethodListUsers:
-		return client.ListUsers(ctx, req.(*grpcPkg.ListUsersRequest))
+		return client.ListUsers(ctx, req.(*emptypb.Empty))
 	default:
 		// If method is not recognized, return an error (shouldn't happen in practice)
 		return nil, grpc.ErrServerStopped

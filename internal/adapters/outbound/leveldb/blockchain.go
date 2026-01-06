@@ -96,6 +96,24 @@ func (s *BlockchainStore) Delete() error {
 	return nil
 }
 
+func (s *BlockchainStore) GetKeys() ([]uint64, error) {
+	keys, err := s.getKeys()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get keys: %w", err)
+	}
+
+	var timestamps []uint64
+	for _, key := range keys {
+		timestamp, err := strconv.ParseUint(string(key), 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse key %s to uint64: %w", string(key), err)
+		}
+		timestamps = append(timestamps, timestamp)
+	}
+
+	return timestamps, nil
+}
+
 func (s *BlockchainStore) getKeys() ([][]byte, error) {
 	iterator := s.db.NewIterator(nil, nil)
 	defer iterator.Release()

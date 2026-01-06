@@ -10,12 +10,14 @@ import (
 	"local-chain/internal/pkg/crypto"
 
 	"local-chain/internal/types"
+
+	"github.com/google/uuid"
 )
 
 //go:generate mockgen -source transactor.go -destination transactor_mock_test.go -package service_test -mock_names TransactionStore=MockTransactionStore,TxPool=MockTxPool
 
 type TransactionStore interface {
-	Get(txHash []byte) (*types.Transaction, error)
+	Get(id uuid.UUID) (*types.Transaction, error)
 	Put(*types.Transaction) error
 }
 
@@ -74,8 +76,8 @@ func (t *Transactor) CreateTx(txReq *types.TransactionRequest) (*types.Transacti
 	newTx.AddOutput(types.NewTxOut(newTx.ID, *balance, senderPub))
 	newTx.ComputeHash()
 
-	t.txPool.AddUtxos(senderPub, types.NewUTXO(newTx.GetHash(), 1))
-	t.txPool.AddUtxos(receiverPub, types.NewUTXO(newTx.GetHash(), 0))
+	t.txPool.AddUtxos(senderPub, types.NewUTXO(newTx.ID, newTx.GetHash(), 1))
+	t.txPool.AddUtxos(receiverPub, types.NewUTXO(newTx.ID, newTx.GetHash(), 0))
 	if err = t.txPool.AddTx(newTx); err != nil {
 		return nil, fmt.Errorf("error adding tx to pool : %v", err)
 	}
@@ -99,7 +101,7 @@ func (t *Transactor) getBalance(key *ecdsa.PrivateKey, fillInputFunc func(utxo *
 	}
 	balance := types.NewAmount(0)
 	for id, utxo := range utxos {
-		tx, err := t.getTx(utxo.TxHash)
+		tx, err := t.getTx(utxo.TxID)
 		if err != nil {
 			return nil, fmt.Errorf("get utxo tx hash err: %v", err)
 		}
@@ -155,11 +157,11 @@ func (t *Transactor) getUTXOs(pubKey []byte) (types.UTXOs, error) {
 	return utxos, nil
 }
 
-func (t *Transactor) getTx(hash []byte) (*types.Transaction, error) {
+func (t *Transactor) getTx(txID uuid.UUID) (*types.Transaction, error) {
 	var err error
-	tx, ok := t.txPool.GetPool()[string(hash)]
+	tx, ok := t.txPool.GetPool()[txID]
 	if !ok {
-		tx, err = t.txStore.Get(hash)
+		tx, err = t.txStore.Get(txID)
 		if err != nil {
 			return nil, fmt.Errorf("error getting transaction : %v", err)
 		}

@@ -60,10 +60,8 @@ func (f *Fsm) addBlock(blockBytes []byte) error {
 	if err := f.store.Blockchain().Put(blockTxsEnvelope.Block); err != nil {
 		return fmt.Errorf("failed to save block: %w", err)
 	}
-	blockHash := blockTxsEnvelope.Block.ComputeHash()
-
 	for _, tx := range blockTxsEnvelope.Txs.SortByTimestamp() {
-		tx.BlockHash = blockHash
+		tx.BlockTimestamp = blockTxsEnvelope.Block.Timestamp
 		if err := f.store.Transaction().Put(tx); err != nil {
 			return fmt.Errorf("failed to put transaction: %w", err)
 		}
@@ -86,7 +84,7 @@ func (f *Fsm) addUTXO(tx *types.Transaction) error {
 				return fmt.Errorf("failed to get utxos: %w", err)
 			}
 		}
-		if err = f.store.Utxo().Put(output.PubKey, append(utxos, types.NewUTXO(tx.GetHash(), uint32(index)))...); err != nil {
+		if err = f.store.Utxo().Put(output.PubKey, append(utxos, types.NewUTXO(tx.ID, tx.GetHash(), uint32(index)))...); err != nil {
 			return fmt.Errorf("failed to put utxo: %w", err)
 		}
 	}

@@ -19,10 +19,10 @@ import (
 const CurrencyUnit = 100000000
 
 type Transaction struct {
-	ID        uuid.UUID
-	Timestamp uint64
-	nLockTime uint32
-	BlockHash []byte
+	ID             uuid.UUID
+	Timestamp      uint64
+	nLockTime      uint32
+	BlockTimestamp uint64
 
 	Salt [16]byte
 	Hash []byte
@@ -123,14 +123,15 @@ func NewTxOut(id uuid.UUID, amount Amount, pubKey []byte) *TxOut {
 
 type UTXO struct {
 	TxHash []byte
+	TxID   uuid.UUID
 	// Index of the output in the transaction
 	Index uint32
 }
 
-func NewUTXO(hash []byte, index uint32) *UTXO {
+func NewUTXO(id uuid.UUID, hash []byte, index uint32) *UTXO {
 	return &UTXO{
-		TxHash: hash,
-		Index:  index,
+		TxID:  id,
+		Index: index,
 	}
 }
 

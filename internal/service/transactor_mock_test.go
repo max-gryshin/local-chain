@@ -10,6 +10,7 @@ import (
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
+	uuid "github.com/google/uuid"
 )
 
 // MockTransactionStore is a mock of TransactionStore interface.
@@ -36,18 +37,18 @@ func (m *MockTransactionStore) EXPECT() *MockTransactionStoreMockRecorder {
 }
 
 // Get mocks base method.
-func (m *MockTransactionStore) Get(txHash []byte) (*types.Transaction, error) {
+func (m *MockTransactionStore) Get(id uuid.UUID) (*types.Transaction, error) {
 	m.ctrl.T.Helper()
-	ret := m.ctrl.Call(m, "Get", txHash)
+	ret := m.ctrl.Call(m, "Get", id)
 	ret0, _ := ret[0].(*types.Transaction)
 	ret1, _ := ret[1].(error)
 	return ret0, ret1
 }
 
 // Get indicates an expected call of Get.
-func (mr *MockTransactionStoreMockRecorder) Get(txHash interface{}) *gomock.Call {
+func (mr *MockTransactionStoreMockRecorder) Get(id interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
-	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockTransactionStore)(nil).Get), txHash)
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Get", reflect.TypeOf((*MockTransactionStore)(nil).Get), id)
 }
 
 // Put mocks base method.

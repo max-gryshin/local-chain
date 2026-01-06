@@ -1,4 +1,4 @@
-package internal
+package merkle
 
 import (
 	"crypto/sha512"
@@ -112,7 +112,6 @@ func (m *MerkleTree) VerifyTransaction(tx *types.Transaction) (bool, error) {
 		return false, err
 	}
 
-	// Проверяем путь
 	return m.verifyPath(tx.Hash[:], leafIndex, path), nil
 }
 
