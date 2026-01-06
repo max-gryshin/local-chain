@@ -11,8 +11,6 @@ import (
 	leveldberrors "github.com/syndtr/goleveldb/leveldb/errors"
 )
 
-const BlockchainKey = "blockchain"
-
 type BlockchainStore struct {
 	db Database
 }
