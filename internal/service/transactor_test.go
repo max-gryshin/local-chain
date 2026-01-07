@@ -1,6 +1,7 @@
 package service_test
 
 import (
+	"local-chain/internal/adapters/outbound/leveldb"
 	"testing"
 
 	"local-chain/internal/pkg/crypto"
@@ -13,12 +14,19 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
+type Store interface {
+	Transaction() *leveldb.TransactionStore
+	Blockchain() *leveldb.BlockchainStore
+	Utxo() *leveldb.UtxoStore
+	User() *leveldb.UserStore
+	BlockTransactions() *leveldb.BlockTransactionsStore
+}
+
 func TestTransactor_CreateTx(t1 *testing.T) {
 	type args struct {
-		txReq     *types.TransactionRequest
-		txStore   service.TransactionStore
-		utxoStore service.UTXOStore
-		txPool    service.TxPool
+		txReq  *types.TransactionRequest
+		store  Store
+		txPool service.TxPool
 	}
 	tests := []struct {
 		name       string
@@ -64,19 +72,22 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 						Index:  0,
 					},
 				}, nil).Times(1)
+
+				store := NewMockStore(ctrl)
+				store.EXPECT().Transaction().Return(txStore).AnyTimes()
+				store.EXPECT().Utxo().Return(utxoStore).AnyTimes()
 				return args{
 					txReq: &types.TransactionRequest{
 						Sender:   from,
 						Receiver: &to.PublicKey,
 						Amount:   *types.NewAmount(100),
 					},
-					txStore:   txStore,
-					txPool:    txPool,
-					utxoStore: utxoStore,
+					txPool: txPool,
+					store:  store,
 				}
 			},
 			transactor: func(args args) *service.Transactor {
-				t := service.NewTransactor(args.txStore, args.utxoStore, args.txPool)
+				t := service.NewTransactor(args.store, args.txPool)
 
 				return t
 			},
@@ -121,6 +132,9 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 						Index:  0,
 					},
 				}, nil).Times(1)
+				store := NewMockStore(ctrl)
+				store.EXPECT().Transaction().Return(txStore).AnyTimes()
+				store.EXPECT().Utxo().Return(utxoStore).AnyTimes()
 
 				return args{
 					txReq: &types.TransactionRequest{
@@ -128,13 +142,12 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 						Receiver: &to.PublicKey,
 						Amount:   *types.NewAmount(100),
 					},
-					txStore:   txStore,
-					txPool:    txPool,
-					utxoStore: utxoStore,
+					txPool: txPool,
+					store:  store,
 				}
 			},
 			transactor: func(args args) *service.Transactor {
-				t := service.NewTransactor(args.txStore, args.utxoStore, args.txPool)
+				t := service.NewTransactor(args.store, args.txPool)
 
 				return t
 			},

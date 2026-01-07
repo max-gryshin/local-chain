@@ -4,6 +4,8 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
+	"local-chain/internal/adapters/outbound/leveldb"
+	"local-chain/internal/pkg/merkle"
 	"math/big"
 
 	"local-chain/internal/adapters/outbound/inMem"
@@ -14,11 +16,24 @@ import (
 	"github.com/google/uuid"
 )
 
-//go:generate mockgen -source transactor.go -destination transactor_mock_test.go -package service_test -mock_names TransactionStore=MockTransactionStore,TxPool=MockTxPool
+//go:generate mockgen -source transactor.go -destination transactor_mock_test.go -package service_test -mock_names TransactionStore=MockTransactionStore,TxPool=MockTxPool,Store=MockStore
+
+type Store interface {
+	Transaction() *leveldb.TransactionStore
+	Blockchain() *leveldb.BlockchainStore
+	Utxo() *leveldb.UtxoStore
+	User() *leveldb.UserStore
+	BlockTransactions() *leveldb.BlockTransactionsStore
+}
 
 type TransactionStore interface {
 	Get(id uuid.UUID) (*types.Transaction, error)
 	Put(*types.Transaction) error
+}
+
+type BlockTxStore interface {
+	Put(envelope *types.BlockTxsEnvelope) error
+	GetByBlockTimestamp(t uint64) (types.Transactions, error)
 }
 
 type UTXOStore interface {
@@ -35,16 +50,14 @@ type TxPool interface {
 }
 
 type Transactor struct {
-	txStore   TransactionStore
-	utxoStore UTXOStore
-	txPool    TxPool
+	store  Store
+	txPool TxPool
 }
 
-func NewTransactor(txStore TransactionStore, UTXOStore UTXOStore, txPool TxPool) *Transactor {
+func NewTransactor(store Store, txPool TxPool) *Transactor {
 	return &Transactor{
-		txStore:   txStore,
-		utxoStore: UTXOStore,
-		txPool:    txPool,
+		store:  store,
+		txPool: txPool,
 	}
 }
 
@@ -91,6 +104,36 @@ func (t *Transactor) GetBalance(req *types.BalanceRequest) (*types.Amount, error
 		return nil, fmt.Errorf("error getting balance : %v", err)
 	}
 	return balance, nil
+}
+
+func (t *Transactor) VerifyTx(txID uuid.UUID) (*types.Transaction, error) {
+	tx, err := t.store.Transaction().Get(txID)
+	if err != nil {
+		return nil, fmt.Errorf("error getting transaction : %v", err)
+	}
+	block, err := t.store.Blockchain().GetByTimestamp(tx.BlockTimestamp)
+	if err != nil {
+		return nil, fmt.Errorf("error getting block : %v", err)
+	}
+	if block == nil {
+		return nil, fmt.Errorf("transaction's block not found: txID %s, timestamp %d", txID.String(), tx.BlockTimestamp)
+	}
+	blockTxs, err := t.store.BlockTransactions().GetByBlockTimestamp(block.Timestamp)
+	if err != nil {
+		return nil, fmt.Errorf("error getting block transactions : %v", err)
+	}
+	merkleTree, err := merkle.NewMerkleTree(blockTxs...)
+	if err != nil {
+		return nil, fmt.Errorf("error creating merkle tree : %v", err)
+	}
+	ok, err := merkleTree.VerifyTransaction(tx)
+	if err != nil {
+		return nil, fmt.Errorf("error verifying transaction in merkle tree : %v", err)
+	}
+	if !ok {
+		return nil, fmt.Errorf("transaction %s not found in block %d", txID.String(), block.Timestamp)
+	}
+	return tx, nil
 }
 
 func (t *Transactor) getBalance(key *ecdsa.PrivateKey, fillInputFunc func(utxo *types.UTXO, senderPubKey []byte, r, s *big.Int, id uint32)) (*types.Amount, error) {
@@ -141,7 +184,7 @@ func (t *Transactor) getUTXOs(pubKey []byte) (types.UTXOs, error) {
 	// we need to get utxos from the pool as well to avoid double spending
 	// also we need to get the utxo with index > 0 only once (the rest are change utxos)
 	utxosPool := t.txPool.GetUTXOs(pubKey)
-	utxos, err := t.utxoStore.Get(pubKey)
+	utxos, err := t.store.Utxo().Get(pubKey)
 	if err != nil {
 		return nil, fmt.Errorf("error getting utxos : %v", err)
 	}
@@ -161,7 +204,7 @@ func (t *Transactor) getTx(txID uuid.UUID) (*types.Transaction, error) {
 	var err error
 	tx, ok := t.txPool.GetPool()[txID]
 	if !ok {
-		tx, err = t.txStore.Get(txID)
+		tx, err = t.store.Transaction().Get(txID)
 		if err != nil {
 			return nil, fmt.Errorf("error getting transaction : %v", err)
 		}

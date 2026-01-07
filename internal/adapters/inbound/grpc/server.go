@@ -29,6 +29,7 @@ type RaftAPI interface {
 type Transactor interface {
 	CreateTx(txReq *types.TransactionRequest) (*types.Transaction, error)
 	GetBalance(req *types.BalanceRequest) (*types.Amount, error)
+	VerifyTx(txID uuid.UUID) (*types.Transaction, error)
 }
 
 type transactionMapper interface {
@@ -241,6 +242,20 @@ func (s *LocalChainServer) GetTransaction(ctx context.Context, req *grpcPkg.GetT
 	return &grpcPkg.GetTransactionResponse{Transaction: s.tm.TransactionToRpc(tx)}, nil
 }
 
-func (s *LocalChainServer) VerifyTransaction(ctx context.Context, req *grpcPkg.VerifyTransactionRequest) (*grpcPkg.VerifyTransactionResponse, error) {
-	return &grpcPkg.VerifyTransactionResponse{}, nil
+func (s *LocalChainServer) VerifyTransaction(
+	ctx context.Context,
+	req *grpcPkg.VerifyTransactionRequest,
+) (*grpcPkg.VerifyTransactionResponse, error) {
+	txID, err := uuid.ParseBytes(req.GetId())
+	if err != nil {
+		return nil, fmt.Errorf("invalid transaction id format: %w", err)
+	}
+	tx, err := s.transactor.VerifyTx(txID)
+	if err != nil {
+		return &grpcPkg.VerifyTransactionResponse{
+			IsValid:     false,
+			Transaction: s.tm.TransactionToRpc(tx),
+		}, fmt.Errorf("transactor.VerifyTx: %w", err)
+	}
+	return &grpcPkg.VerifyTransactionResponse{IsValid: true, Transaction: s.tm.TransactionToRpc(tx)}, nil
 }

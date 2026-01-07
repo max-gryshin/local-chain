@@ -60,6 +60,9 @@ func (f *Fsm) addBlock(blockBytes []byte) error {
 	if err := f.store.Blockchain().Put(blockTxsEnvelope.Block); err != nil {
 		return fmt.Errorf("failed to save block: %w", err)
 	}
+	if err := f.store.BlockTransactions().Put(blockTxsEnvelope); err != nil {
+		return fmt.Errorf("failed to save block transactions: %w", err)
+	}
 	for _, tx := range blockTxsEnvelope.Txs.SortByTimestamp() {
 		tx.BlockTimestamp = blockTxsEnvelope.Block.Timestamp
 		if err := f.store.Transaction().Put(tx); err != nil {

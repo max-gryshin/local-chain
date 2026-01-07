@@ -17,20 +17,22 @@ type Database interface {
 }
 
 type Store struct {
-	transaction *TransactionStore
-	blockchain  *BlockchainStore
-	utxo        *UtxoStore
-	user        *UserStore
+	transaction       *TransactionStore
+	blockchain        *BlockchainStore
+	utxo              *UtxoStore
+	user              *UserStore
+	blockTransactions *BlockTransactionsStore
 }
 
 type dbF func(subPath string) Database
 
 func New(newDB dbF) *Store {
 	return &Store{
-		transaction: NewTransactionStore(newDB("transaction")),
-		blockchain:  NewBlockchainStore(newDB("blockchain")),
-		utxo:        NewUtxoStore(newDB("utxo")),
-		user:        NewUserStore(newDB("user")),
+		transaction:       NewTransactionStore(newDB("transaction")),
+		blockchain:        NewBlockchainStore(newDB("blockchain")),
+		utxo:              NewUtxoStore(newDB("utxo")),
+		user:              NewUserStore(newDB("user")),
+		blockTransactions: NewBlockTransactionsStore(newDB("block_transactions")),
 	}
 }
 
@@ -48,6 +50,10 @@ func (s *Store) Utxo() *UtxoStore {
 
 func (s *Store) User() *UserStore {
 	return s.user
+}
+
+func (s *Store) BlockTransactions() *BlockTransactionsStore {
+	return s.blockTransactions
 }
 
 func (s *Store) Close() error {

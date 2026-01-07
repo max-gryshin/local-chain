@@ -129,7 +129,7 @@ func main() {
 	if bootstrap {
 		configureBootstrap(r, store, superUser)
 	}
-	transactor := service.NewTransactor(store.Transaction(), store.Utxo(), txPool)
+	transactor := service.NewTransactor(store, txPool)
 	tm := mapper.NewTransactionMapper()
 	bm := mapper.NewBlockMapper()
 

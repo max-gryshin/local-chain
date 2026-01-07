@@ -1,0 +1,49 @@
+package leveldb
+
+import (
+	"errors"
+	"fmt"
+	"local-chain/internal/types"
+	"strconv"
+
+	"github.com/ethereum/go-ethereum/rlp"
+	leveldberrors "github.com/syndtr/goleveldb/leveldb/errors"
+)
+
+type BlockTransactionsStore struct {
+	db Database
+}
+
+func NewBlockTransactionsStore(conn Database) *BlockTransactionsStore {
+	return &BlockTransactionsStore{
+		db: conn,
+	}
+}
+
+func (s *BlockTransactionsStore) Put(envelope *types.BlockTxsEnvelope) error {
+	txs, err := rlp.EncodeToBytes(envelope.Txs)
+	if err != nil {
+		return fmt.Errorf("failed to encode rlp: %w", err)
+	}
+	if err = s.db.Put([]byte(strconv.Itoa(int(envelope.Block.Timestamp))), txs, nil); err != nil {
+		return fmt.Errorf("failed to put block transactions: %w", err)
+	}
+	return nil
+}
+
+func (s *BlockTransactionsStore) GetByBlockTimestamp(t uint64) (types.Transactions, error) {
+	raw, err := s.db.Get([]byte(strconv.Itoa(int(t))), nil)
+	if err != nil && !errors.As(err, &leveldberrors.ErrNotFound) { // nolint:govet
+		return nil, fmt.Errorf("blockTransactionsStore.GetByBlockTimestamp get block transactions error: %w", err)
+	}
+	if raw == nil {
+		return nil, ErrNotFound
+	}
+
+	var txs types.Transactions
+	if err = rlp.DecodeBytes(raw, &txs); err != nil {
+		return nil, fmt.Errorf("failed to decode block transactions: %w", err)
+	}
+
+	return txs, nil
+}

@@ -6,12 +6,106 @@ package service_test
 
 import (
 	inMem "local-chain/internal/adapters/outbound/inMem"
+	leveldb "local-chain/internal/adapters/outbound/leveldb"
 	types "local-chain/internal/types"
 	reflect "reflect"
 
 	gomock "github.com/golang/mock/gomock"
 	uuid "github.com/google/uuid"
 )
+
+// MockStore is a mock of Store interface.
+type MockStore struct {
+	ctrl     *gomock.Controller
+	recorder *MockStoreMockRecorder
+}
+
+// MockStoreMockRecorder is the mock recorder for MockStore.
+type MockStoreMockRecorder struct {
+	mock *MockStore
+}
+
+// NewMockStore creates a new mock instance.
+func NewMockStore(ctrl *gomock.Controller) *MockStore {
+	mock := &MockStore{ctrl: ctrl}
+	mock.recorder = &MockStoreMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockStore) EXPECT() *MockStoreMockRecorder {
+	return m.recorder
+}
+
+// BlockTransactions mocks base method.
+func (m *MockStore) BlockTransactions() *leveldb.BlockTransactionsStore {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "BlockTransactions")
+	ret0, _ := ret[0].(*leveldb.BlockTransactionsStore)
+	return ret0
+}
+
+// BlockTransactions indicates an expected call of BlockTransactions.
+func (mr *MockStoreMockRecorder) BlockTransactions() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "BlockTransactions", reflect.TypeOf((*MockStore)(nil).BlockTransactions))
+}
+
+// Blockchain mocks base method.
+func (m *MockStore) Blockchain() *leveldb.BlockchainStore {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Blockchain")
+	ret0, _ := ret[0].(*leveldb.BlockchainStore)
+	return ret0
+}
+
+// Blockchain indicates an expected call of Blockchain.
+func (mr *MockStoreMockRecorder) Blockchain() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Blockchain", reflect.TypeOf((*MockStore)(nil).Blockchain))
+}
+
+// Transaction mocks base method.
+func (m *MockStore) Transaction() *leveldb.TransactionStore {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Transaction")
+	ret0, _ := ret[0].(*leveldb.TransactionStore)
+	return ret0
+}
+
+// Transaction indicates an expected call of Transaction.
+func (mr *MockStoreMockRecorder) Transaction() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Transaction", reflect.TypeOf((*MockStore)(nil).Transaction))
+}
+
+// User mocks base method.
+func (m *MockStore) User() *leveldb.UserStore {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "User")
+	ret0, _ := ret[0].(*leveldb.UserStore)
+	return ret0
+}
+
+// User indicates an expected call of User.
+func (mr *MockStoreMockRecorder) User() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "User", reflect.TypeOf((*MockStore)(nil).User))
+}
+
+// Utxo mocks base method.
+func (m *MockStore) Utxo() *leveldb.UtxoStore {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Utxo")
+	ret0, _ := ret[0].(*leveldb.UtxoStore)
+	return ret0
+}
+
+// Utxo indicates an expected call of Utxo.
+func (mr *MockStoreMockRecorder) Utxo() *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Utxo", reflect.TypeOf((*MockStore)(nil).Utxo))
+}
 
 // MockTransactionStore is a mock of TransactionStore interface.
 type MockTransactionStore struct {
@@ -63,6 +157,58 @@ func (m *MockTransactionStore) Put(arg0 *types.Transaction) error {
 func (mr *MockTransactionStoreMockRecorder) Put(arg0 interface{}) *gomock.Call {
 	mr.mock.ctrl.T.Helper()
 	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Put", reflect.TypeOf((*MockTransactionStore)(nil).Put), arg0)
+}
+
+// MockBlockTxStore is a mock of BlockTxStore interface.
+type MockBlockTxStore struct {
+	ctrl     *gomock.Controller
+	recorder *MockBlockTxStoreMockRecorder
+}
+
+// MockBlockTxStoreMockRecorder is the mock recorder for MockBlockTxStore.
+type MockBlockTxStoreMockRecorder struct {
+	mock *MockBlockTxStore
+}
+
+// NewMockBlockTxStore creates a new mock instance.
+func NewMockBlockTxStore(ctrl *gomock.Controller) *MockBlockTxStore {
+	mock := &MockBlockTxStore{ctrl: ctrl}
+	mock.recorder = &MockBlockTxStoreMockRecorder{mock}
+	return mock
+}
+
+// EXPECT returns an object that allows the caller to indicate expected use.
+func (m *MockBlockTxStore) EXPECT() *MockBlockTxStoreMockRecorder {
+	return m.recorder
+}
+
+// GetByBlockTimestamp mocks base method.
+func (m *MockBlockTxStore) GetByBlockTimestamp(t uint64) (types.Transactions, error) {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "GetByBlockTimestamp", t)
+	ret0, _ := ret[0].(types.Transactions)
+	ret1, _ := ret[1].(error)
+	return ret0, ret1
+}
+
+// GetByBlockTimestamp indicates an expected call of GetByBlockTimestamp.
+func (mr *MockBlockTxStoreMockRecorder) GetByBlockTimestamp(t interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "GetByBlockTimestamp", reflect.TypeOf((*MockBlockTxStore)(nil).GetByBlockTimestamp), t)
+}
+
+// Put mocks base method.
+func (m *MockBlockTxStore) Put(envelope *types.BlockTxsEnvelope) error {
+	m.ctrl.T.Helper()
+	ret := m.ctrl.Call(m, "Put", envelope)
+	ret0, _ := ret[0].(error)
+	return ret0
+}
+
+// Put indicates an expected call of Put.
+func (mr *MockBlockTxStoreMockRecorder) Put(envelope interface{}) *gomock.Call {
+	mr.mock.ctrl.T.Helper()
+	return mr.mock.ctrl.RecordCallWithMethodType(mr.mock, "Put", reflect.TypeOf((*MockBlockTxStore)(nil).Put), envelope)
 }
 
 // MockUTXOStore is a mock of UTXOStore interface.
