@@ -96,14 +96,14 @@ func (m *MerkleTree) VerifyTransaction(tx *types.Transaction) (bool, error) {
 	var leafIndex int
 	var found bool
 	for i, leaf := range m.Leaves {
-		if leaf.tx == tx {
+		if leaf.tx.ID == tx.ID {
 			leafIndex = i
 			found = true
 			break
 		}
 	}
 	if !found {
-		return false, errors.New("transaction not found in tree")
+		return false, errors.New("transaction not found in a tree")
 	}
 
 	// build Merkle Path

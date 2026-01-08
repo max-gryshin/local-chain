@@ -38,6 +38,7 @@ func NewDebug() *Debug {
 	rootCmd.AddCommand(addPeer())
 	rootCmd.AddCommand(addVoter())
 	rootCmd.AddCommand(removePeer())
+	rootCmd.AddCommand(verifyTransaction())
 
 	return &Debug{
 		CMD: rootCmd,

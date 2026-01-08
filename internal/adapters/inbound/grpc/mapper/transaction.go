@@ -45,6 +45,9 @@ func (tp *TransactionMapper) RpcToBalanceRequest(req *grpcPkg.GetBalanceRequest)
 }
 
 func (tp *TransactionMapper) TransactionToRpc(tx *types.Transaction) *grpcPkg.Transaction {
+	if tx == nil {
+		return nil
+	}
 	inputs := make([]*grpcPkg.Input, len(tx.Inputs))
 	for i, in := range tx.Inputs {
 		inputs[i] = &grpcPkg.Input{

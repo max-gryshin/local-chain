@@ -21,15 +21,16 @@ const (
 	skipLeaderRedirectKey contextKey = "skipLeaderRedirect"
 	leaderPort            string     = "9001"
 
-	grpcSrvPrefix            string = "/LocalChain/"
-	grpcMethodAddPeer               = grpcSrvPrefix + "AddPeer"
-	grpcMethodRemovePeer            = grpcSrvPrefix + "RemovePeer"
-	grpcMethodAddVoter              = grpcSrvPrefix + "AddVoter"
-	grpcMethodAddTransaction        = grpcSrvPrefix + "AddTransaction"
-	grpcMethodGetBalance            = grpcSrvPrefix + "GetBalance"
-	grpcMethodAddUser               = grpcSrvPrefix + "AddUser"
-	grpcMethodGetUser               = grpcSrvPrefix + "GetUser"
-	grpcMethodListUsers             = grpcSrvPrefix + "ListUsers"
+	grpcSrvPrefix               string = "/LocalChain/"
+	grpcMethodAddPeer                  = grpcSrvPrefix + "AddPeer"
+	grpcMethodRemovePeer               = grpcSrvPrefix + "RemovePeer"
+	grpcMethodAddVoter                 = grpcSrvPrefix + "AddVoter"
+	grpcMethodAddTransaction           = grpcSrvPrefix + "AddTransaction"
+	grpcMethodGetBalance               = grpcSrvPrefix + "GetBalance"
+	grpcMethodAddUser                  = grpcSrvPrefix + "AddUser"
+	grpcMethodGetUser                  = grpcSrvPrefix + "GetUser"
+	grpcMethodListUsers                = grpcSrvPrefix + "ListUsers"
+	grpcMethodVerifyTransaction        = grpcSrvPrefix + "VerifyTransaction"
 )
 
 // LeaderRedirectInterceptor redirects requests to the leader node if the current node is not the leader.
@@ -113,6 +114,8 @@ func (i *LeaderRedirectInterceptor) forwardToLeader(
 		return client.GetUser(ctx, req.(*grpcPkg.GetUserRequest))
 	case grpcMethodListUsers:
 		return client.ListUsers(ctx, req.(*emptypb.Empty))
+	case grpcMethodVerifyTransaction:
+		return client.VerifyTransaction(ctx, req.(*grpcPkg.VerifyTransactionRequest))
 	default:
 		// If method is not recognized, return an error (shouldn't happen in practice)
 		return nil, grpc.ErrServerStopped
