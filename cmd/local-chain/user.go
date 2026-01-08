@@ -6,7 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"local-chain/internal/adapters/outbound/leveldb"
+	"local-chain/internal/service"
 
 	"local-chain/internal/types"
 )
@@ -16,7 +16,7 @@ const (
 	superUserName = "admin"
 )
 
-func initSuperUser(us *leveldb.UserStore) *types.User {
+func initSuperUser(us service.UserStore) *types.User {
 	privPath := filepath.Join(keysDir, fmt.Sprintf("%s-priv.pem", superUserName))
 	pubPath := filepath.Join(keysDir, fmt.Sprintf("%s-pub.pem", superUserName))
 

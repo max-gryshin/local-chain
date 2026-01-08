@@ -10,17 +10,17 @@ import (
 	leveldberrors "github.com/syndtr/goleveldb/leveldb/errors"
 )
 
-type BlockTransactionsStore struct {
+type blockTransactionsS struct {
 	db Database
 }
 
-func NewBlockTransactionsStore(conn Database) *BlockTransactionsStore {
-	return &BlockTransactionsStore{
+func newBlockTransactionsStore(conn Database) *blockTransactionsS {
+	return &blockTransactionsS{
 		db: conn,
 	}
 }
 
-func (s *BlockTransactionsStore) Put(envelope *types.BlockTxsEnvelope) error {
+func (s *blockTransactionsS) Put(envelope *types.BlockTxsEnvelope) error {
 	txs, err := rlp.EncodeToBytes(envelope.Txs)
 	if err != nil {
 		return fmt.Errorf("failed to encode rlp: %w", err)
@@ -31,7 +31,7 @@ func (s *BlockTransactionsStore) Put(envelope *types.BlockTxsEnvelope) error {
 	return nil
 }
 
-func (s *BlockTransactionsStore) GetByBlockTimestamp(t uint64) (types.Transactions, error) {
+func (s *blockTransactionsS) GetByBlockTimestamp(t uint64) (types.Transactions, error) {
 	raw, err := s.db.Get([]byte(strconv.Itoa(int(t))), nil)
 	if err != nil && !errors.As(err, &leveldberrors.ErrNotFound) { // nolint:govet
 		return nil, fmt.Errorf("blockTransactionsStore.GetByBlockTimestamp get block transactions error: %w", err)

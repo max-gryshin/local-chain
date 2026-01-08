@@ -40,6 +40,7 @@ type BStore interface {
 	GetByTimestamp(t uint64) (*types.Block, error)
 	Put(block *types.Block) error
 	GetKeys() ([]uint64, error)
+	Delete() error
 }
 
 type UTXOStore interface {
