@@ -1,4 +1,4 @@
-package internal
+package merkle
 
 import (
 	"crypto/sha512"
@@ -96,14 +96,14 @@ func (m *MerkleTree) VerifyTransaction(tx *types.Transaction) (bool, error) {
 	var leafIndex int
 	var found bool
 	for i, leaf := range m.Leaves {
-		if leaf.tx == tx {
+		if leaf.tx.ID == tx.ID {
 			leafIndex = i
 			found = true
 			break
 		}
 	}
 	if !found {
-		return false, errors.New("transaction not found in tree")
+		return false, errors.New("transaction not found in a tree")
 	}
 
 	// build Merkle Path
@@ -112,7 +112,6 @@ func (m *MerkleTree) VerifyTransaction(tx *types.Transaction) (bool, error) {
 		return false, err
 	}
 
-	// Проверяем путь
 	return m.verifyPath(tx.Hash[:], leafIndex, path), nil
 }
 

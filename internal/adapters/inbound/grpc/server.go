@@ -4,14 +4,17 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"local-chain/internal/adapters/outbound/leveldb"
 	"time"
+
+	"local-chain/internal/adapters/outbound/leveldb"
 
 	grpcPkg "local-chain/transport/gen/transport"
 
 	"local-chain/internal/types"
 
+	"github.com/google/uuid"
 	"github.com/hashicorp/raft"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 type RaftAPI interface {
@@ -26,11 +29,13 @@ type RaftAPI interface {
 type Transactor interface {
 	CreateTx(txReq *types.TransactionRequest) (*types.Transaction, error)
 	GetBalance(req *types.BalanceRequest) (*types.Amount, error)
+	VerifyTx(txID uuid.UUID) (*types.Transaction, error)
 }
 
 type transactionMapper interface {
 	RpcToTransaction(req *grpcPkg.AddTransactionRequest) (*types.TransactionRequest, error)
 	RpcToBalanceRequest(req *grpcPkg.GetBalanceRequest) (*types.BalanceRequest, error)
+	TransactionToRpc(tx *types.Transaction) *grpcPkg.Transaction
 }
 
 type User interface {
@@ -44,14 +49,31 @@ type UserMapper interface {
 	UserToRpc(user *types.User) *grpcPkg.User
 }
 
+type BlockchainStore interface {
+	GetKeys() ([]uint64, error)
+	GetByTimestamp(t uint64) (*types.Block, error)
+}
+
+type TransactionStore interface {
+	Get(id uuid.UUID) (*types.Transaction, error)
+}
+
+type BlockMapper interface {
+	BlockToRpc(block *types.Block) *grpcPkg.Block
+	BlocksToRpc(blocks types.Blocks) []*grpcPkg.Block
+}
+
 type LocalChainServer struct {
 	serverID raft.ServerID
 	raftAPI  RaftAPI
 	tm       transactionMapper
 	grpcPkg.UnimplementedLocalChainServer
-	transactor Transactor
-	user       User
-	userMapper UserMapper
+	transactor       Transactor
+	user             User
+	userMapper       UserMapper
+	blockchainStore  BlockchainStore
+	transactionStore TransactionStore
+	blockMapper      BlockMapper
 }
 
 func NewLocalChain(
@@ -61,14 +83,20 @@ func NewLocalChain(
 	transactor Transactor,
 	user User,
 	userMapper UserMapper,
+	blockchainStore BlockchainStore,
+	transactionStore TransactionStore,
+	blockMapper BlockMapper,
 ) *LocalChainServer {
 	return &LocalChainServer{
-		serverID:   serverID,
-		raftAPI:    raftAPI,
-		tm:         tm,
-		transactor: transactor,
-		user:       user,
-		userMapper: userMapper,
+		serverID:         serverID,
+		raftAPI:          raftAPI,
+		tm:               tm,
+		transactor:       transactor,
+		user:             user,
+		userMapper:       userMapper,
+		blockchainStore:  blockchainStore,
+		transactionStore: transactionStore,
+		blockMapper:      blockMapper,
 	}
 }
 
@@ -110,14 +138,15 @@ func (s *LocalChainServer) AddVoter(ctx context.Context, req *grpcPkg.AddVoterRe
 func (s *LocalChainServer) AddTransaction(ctx context.Context, req *grpcPkg.AddTransactionRequest) (*grpcPkg.AddTransactionResponse, error) {
 	txReq, err := s.tm.RpcToTransaction(req)
 	if err != nil {
-		return &grpcPkg.AddTransactionResponse{Success: false}, fmt.Errorf("failed to marshal add transaction request: %w", err)
+		return nil, fmt.Errorf("failed to marshal add transaction request: %w", err)
 	}
-	if _, err = s.transactor.CreateTx(txReq); err != nil {
-		return &grpcPkg.AddTransactionResponse{Success: false}, fmt.Errorf("transactor.CreateTx: %w", err)
+	tx, err := s.transactor.CreateTx(txReq)
+	if err != nil {
+		return nil, fmt.Errorf("transactor.CreateTx: %w", err)
 	}
 	// todo: validate req transaction* can skip it to speed up the implementation
 
-	return &grpcPkg.AddTransactionResponse{Success: true}, nil
+	return &grpcPkg.AddTransactionResponse{Transaction: s.tm.TransactionToRpc(tx)}, nil
 }
 
 func (s *LocalChainServer) GetBalance(ctx context.Context, req *grpcPkg.GetBalanceRequest) (*grpcPkg.GetBalanceResponse, error) {
@@ -161,7 +190,7 @@ func (s *LocalChainServer) GetUser(ctx context.Context, req *grpcPkg.GetUserRequ
 	}, nil
 }
 
-func (s *LocalChainServer) ListUsers(ctx context.Context, req *grpcPkg.ListUsersRequest) (*grpcPkg.ListUsersResponse, error) {
+func (s *LocalChainServer) ListUsers(ctx context.Context, req *emptypb.Empty) (*grpcPkg.ListUsersResponse, error) {
 	users, err := s.user.GetAllUsers()
 	if err != nil {
 		return nil, fmt.Errorf("user.GetAllUsers: %w", err)
@@ -171,4 +200,62 @@ func (s *LocalChainServer) ListUsers(ctx context.Context, req *grpcPkg.ListUsers
 		rpcUsers = append(rpcUsers, s.userMapper.UserToRpc(user))
 	}
 	return &grpcPkg.ListUsersResponse{Users: rpcUsers}, nil
+}
+
+func (s *LocalChainServer) GetBlockKeys(ctx context.Context, req *emptypb.Empty) (*grpcPkg.GetBlockKeysResponse, error) {
+	keys, err := s.blockchainStore.GetKeys()
+	if err != nil {
+		return nil, fmt.Errorf("blockchainStore.GetKeys: %w", err)
+	}
+	return &grpcPkg.GetBlockKeysResponse{Timestamp: keys}, nil
+}
+
+func (s *LocalChainServer) GetBlock(ctx context.Context, req *grpcPkg.GetBlockRequest) (*grpcPkg.GetBlockResponse, error) {
+	if req.GetTimestamp() == 0 {
+		return nil, errors.New("timestamp must be provided")
+	}
+	block, err := s.blockchainStore.GetByTimestamp(req.GetTimestamp())
+	if err != nil {
+		return nil, fmt.Errorf("blockchainStore.GetByTimestamp: %w", err)
+	}
+	if block == nil {
+		return &grpcPkg.GetBlockResponse{Blocks: []*grpcPkg.Block{}}, nil
+	}
+	return &grpcPkg.GetBlockResponse{Blocks: []*grpcPkg.Block{s.blockMapper.BlockToRpc(block)}}, nil
+}
+
+func (s *LocalChainServer) GetTransaction(ctx context.Context, req *grpcPkg.GetTransactionRequest) (*grpcPkg.GetTransactionResponse, error) {
+	if len(req.GetId()) == 0 {
+		return nil, errors.New("transaction id must be provided")
+	}
+	txID, err := uuid.ParseBytes(req.GetId())
+	if err != nil {
+		return nil, fmt.Errorf("invalid transaction id format: %w", err)
+	}
+	tx, err := s.transactionStore.Get(txID)
+	if err != nil {
+		return nil, fmt.Errorf("transactionStore.Get: %w", err)
+	}
+	if tx == nil {
+		return nil, fmt.Errorf("transaction in not found or not added to store yet")
+	}
+	return &grpcPkg.GetTransactionResponse{Transaction: s.tm.TransactionToRpc(tx)}, nil
+}
+
+func (s *LocalChainServer) VerifyTransaction(
+	ctx context.Context,
+	req *grpcPkg.VerifyTransactionRequest,
+) (*grpcPkg.VerifyTransactionResponse, error) {
+	txID, err := uuid.ParseBytes(req.GetId())
+	if err != nil {
+		return nil, fmt.Errorf("invalid transaction id format: %w", err)
+	}
+	tx, err := s.transactor.VerifyTx(txID)
+	if err != nil {
+		return &grpcPkg.VerifyTransactionResponse{
+			IsValid:     false,
+			Transaction: s.tm.TransactionToRpc(tx),
+		}, fmt.Errorf("transactor.VerifyTx: %w", err)
+	}
+	return &grpcPkg.VerifyTransactionResponse{IsValid: true, Transaction: s.tm.TransactionToRpc(tx)}, nil
 }

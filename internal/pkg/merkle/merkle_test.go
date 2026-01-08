@@ -1,4 +1,4 @@
-package internal
+package merkle
 
 import (
 	"testing"

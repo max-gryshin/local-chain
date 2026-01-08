@@ -34,7 +34,7 @@ func configureBootstrap(r *raft.Raft, store *leveldbpkg.Store, superUser *types.
 	}
 	for _, output := range outputs {
 		pubKey, _ := crypto.PublicKeyFromBytes(output.PubKey)
-		if err := store.Utxo().Put(crypto.PublicKeyToBytes(pubKey), types.NewUTXO(tx.GetHash(), 0)); err != nil {
+		if err := store.Utxo().Put(crypto.PublicKeyToBytes(pubKey), types.NewUTXO(tx.ID, tx.GetHash(), 0)); err != nil {
 			log.Fatal(err)
 		}
 	}
@@ -45,9 +45,9 @@ func configureBootstrap(r *raft.Raft, store *leveldbpkg.Store, superUser *types.
 
 func genesisTx(genesisBlock *types.Block, outputs []*types.TxOut) *types.Transaction {
 	return &types.Transaction{
-		BlockHash: genesisBlock.ComputeHash(),
-		Outputs:   outputs,
-		Hash:      []byte("genesis"),
+		BlockTimestamp: genesisBlock.Timestamp,
+		Outputs:        outputs,
+		Hash:           []byte("genesis"),
 	}
 }
 

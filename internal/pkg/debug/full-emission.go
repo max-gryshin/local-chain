@@ -3,10 +3,12 @@ package debug
 import (
 	"context"
 	"fmt"
-	"local-chain/transport/gen/transport"
 	"log"
 
+	"local-chain/transport/gen/transport"
+
 	"github.com/spf13/cobra"
+	"google.golang.org/protobuf/types/known/emptypb"
 )
 
 // fullEmission creates the full emission command
@@ -24,7 +26,7 @@ func fullEmission() *cobra.Command {
 			ctx, cancel := context.WithTimeout(context.Background(), timeout)
 			defer cancel()
 			// Get all users
-			usersResp, err := client.ListUsers(ctx, &transport.ListUsersRequest{})
+			usersResp, err := client.ListUsers(ctx, &emptypb.Empty{})
 			if err != nil {
 				return fmt.Errorf("failed to list users: %w", err)
 			}

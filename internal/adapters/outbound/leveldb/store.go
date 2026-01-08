@@ -3,6 +3,8 @@ package leveldb
 import (
 	"fmt"
 
+	"local-chain/internal/service"
+
 	"github.com/syndtr/goleveldb/leveldb/iterator"
 	"github.com/syndtr/goleveldb/leveldb/opt"
 	"github.com/syndtr/goleveldb/leveldb/util"
@@ -17,37 +19,43 @@ type Database interface {
 }
 
 type Store struct {
-	transaction *TransactionStore
-	blockchain  *BlockchainStore
-	utxo        *UtxoStore
-	user        *UserStore
+	transaction       *transactionS
+	blockchain        *blockchainS
+	utxo              *utxoS
+	user              *userS
+	blockTransactions *blockTransactionsS
 }
 
 type dbF func(subPath string) Database
 
 func New(newDB dbF) *Store {
 	return &Store{
-		transaction: NewTransactionStore(newDB("transaction")),
-		blockchain:  NewBlockchainStore(newDB("blockchain")),
-		utxo:        NewUtxoStore(newDB("utxo")),
-		user:        NewUserStore(newDB("user")),
+		transaction:       newTransactionStore(newDB("transaction")),
+		blockchain:        newBlockchainStore(newDB("blockchain")),
+		utxo:              newUtxoStore(newDB("utxo")),
+		user:              newUserStore(newDB("user")),
+		blockTransactions: newBlockTransactionsStore(newDB("block_transactions")),
 	}
 }
 
-func (s *Store) Transaction() *TransactionStore {
+func (s *Store) Transaction() service.TransactionStore {
 	return s.transaction
 }
 
-func (s *Store) Blockchain() *BlockchainStore {
+func (s *Store) Blockchain() service.BStore {
 	return s.blockchain
 }
 
-func (s *Store) Utxo() *UtxoStore {
+func (s *Store) Utxo() service.UTXOStore {
 	return s.utxo
 }
 
-func (s *Store) User() *UserStore {
+func (s *Store) User() service.UserStore {
 	return s.user
+}
+
+func (s *Store) BlockTransactions() service.BlockTxStore {
+	return s.blockTransactions
 }
 
 func (s *Store) Close() error {

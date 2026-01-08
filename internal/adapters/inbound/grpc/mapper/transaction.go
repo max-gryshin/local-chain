@@ -43,3 +43,35 @@ func (tp *TransactionMapper) RpcToBalanceRequest(req *grpcPkg.GetBalanceRequest)
 		Sender: sender,
 	}, nil
 }
+
+func (tp *TransactionMapper) TransactionToRpc(tx *types.Transaction) *grpcPkg.Transaction {
+	if tx == nil {
+		return nil
+	}
+	inputs := make([]*grpcPkg.Input, len(tx.Inputs))
+	for i, in := range tx.Inputs {
+		inputs[i] = &grpcPkg.Input{
+			PubKey:     in.PubKey,
+			SignatureR: in.SignatureR.Bytes(),
+			SignatureS: in.SignatureS.Bytes(),
+		}
+	}
+	outputs := make([]*grpcPkg.Output, len(tx.Outputs))
+	for i, out := range tx.Outputs {
+		outputs[i] = &grpcPkg.Output{
+			Amount: &grpcPkg.Amount{
+				Value: out.Amount.Value,
+				Unit:  out.Amount.Unit,
+			},
+			PubKey: out.PubKey,
+		}
+	}
+
+	return &grpcPkg.Transaction{
+		Id:             tx.ID.String(),
+		Hash:           tx.GetHash(),
+		BlockTimestamp: tx.BlockTimestamp,
+		Inputs:         inputs,
+		Outputs:        outputs,
+	}
+}

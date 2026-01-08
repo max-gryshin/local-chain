@@ -10,21 +10,21 @@ import (
 	leveldbErrors "github.com/syndtr/goleveldb/leveldb/errors"
 )
 
-type UtxoStore struct {
+type utxoS struct {
 	db Database
 }
 
-func NewUtxoStore(conn Database) *UtxoStore {
-	return &UtxoStore{
+func newUtxoStore(conn Database) *utxoS {
+	return &utxoS{
 		db: conn,
 	}
 }
 
-func (s *UtxoStore) Get(pubKey []byte) ([]*types.UTXO, error) {
+func (s *utxoS) Get(pubKey []byte) ([]*types.UTXO, error) {
 	utxos := make([]*types.UTXO, 0)
 	value, err := s.db.Get(pubKey, nil)
 	if err != nil {
-		if errors.As(err, &leveldbErrors.ErrNotFound) { // nolint:govet
+		if errors.Is(err, leveldbErrors.ErrNotFound) {
 			return nil, nil
 		}
 		return utxos, fmt.Errorf("failed to get utxos: %w", err)
@@ -36,7 +36,7 @@ func (s *UtxoStore) Get(pubKey []byte) ([]*types.UTXO, error) {
 	return utxos, nil
 }
 
-func (s *UtxoStore) Put(pubKey []byte, utxos ...*types.UTXO) error {
+func (s *utxoS) Put(pubKey []byte, utxos ...*types.UTXO) error {
 	encoded, err := rlp.EncodeToBytes(utxos)
 	if err != nil {
 		return fmt.Errorf("failed to encode utxos: %w", err)

@@ -129,10 +129,11 @@ func main() {
 	if bootstrap {
 		configureBootstrap(r, store, superUser)
 	}
-	transactor := service.NewTransactor(store.Transaction(), store.Utxo(), txPool)
+	transactor := service.NewTransactor(store, txPool)
 	tm := mapper.NewTransactionMapper()
+	bm := mapper.NewBlockMapper()
 
-	localChainManager := grpc2.NewLocalChain(serverID, r, tm, transactor, user, um)
+	localChainManager := grpc2.NewLocalChain(serverID, r, tm, transactor, user, um, store.Blockchain(), store.Transaction(), bm)
 
 	leaderRedirectInterceptor := interceptors.NewLeaderRedirectInterceptor(serverID, r)
 	grpcRunner := runners.New(

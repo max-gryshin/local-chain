@@ -3,6 +3,7 @@ package debug
 import (
 	"context"
 	"fmt"
+
 	"local-chain/transport/gen/transport"
 
 	"github.com/spf13/cobra"
@@ -51,8 +52,32 @@ func send() *cobra.Command {
 				return fmt.Errorf("failed to add transaction: %w", err)
 			}
 
-			fmt.Printf("✅ Transaction added successfully!\n")
-			fmt.Printf("Response: %v\n", resp)
+			tx := resp.GetTransaction()
+			fmt.Printf("\n✅ Transaction added successfully!\n\n")
+			fmt.Printf("═══════════════════════════════════════════════════════\n")
+			fmt.Printf("  TRANSACTION DETAILS\n")
+			fmt.Printf("═══════════════════════════════════════════════════════\n\n")
+			fmt.Printf("  ID:               %s\n", tx.GetId())
+			fmt.Printf("  Timestamp:        %d\n", tx.GetTimestamp())
+			fmt.Printf("  Hash:             %x\n", tx.GetHash())
+			if tx.GetBlockTimestamp() > 0 {
+				fmt.Printf("  Block Timestamp:  %x\n", tx.GetBlockTimestamp())
+			}
+
+			fmt.Printf("\n  INPUTS (%d):\n", len(tx.GetInputs()))
+			for i, input := range tx.GetInputs() {
+				fmt.Printf("    [%d] Public Key:  %x\n", i+1, input.GetPubKey())
+				fmt.Printf("        SignatureS:   %x\n", input.GetSignatureS())
+				fmt.Printf("        SignatureR:   %x\n", input.GetSignatureR())
+			}
+
+			fmt.Printf("\n  OUTPUTS (%d):\n", len(tx.GetOutputs()))
+			for i, output := range tx.GetOutputs() {
+				fmt.Printf("    [%d] Public Key:  %x\n", i+1, output.GetPubKey())
+				fmt.Printf("        Amount:      %d (unit: %d)\n", output.GetAmount().GetValue(), output.GetAmount().GetUnit())
+			}
+
+			fmt.Printf("\n═══════════════════════════════════════════════════════\n\n")
 			return nil
 		},
 	}

@@ -15,10 +15,9 @@ import (
 
 func TestTransactor_CreateTx(t1 *testing.T) {
 	type args struct {
-		txReq     *types.TransactionRequest
-		txStore   service.TransactionStore
-		utxoStore service.UTXOStore
-		txPool    service.TxPool
+		txReq  *types.TransactionRequest
+		store  service.Store
+		txPool service.TxPool
 	}
 	tests := []struct {
 		name       string
@@ -38,10 +37,10 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 				tx2 := types.NewTransaction().WithOutput(types.NewAmount(50), &from.PublicKey)
 				tx3 := types.NewTransaction().WithOutput(types.NewAmount(20), &from.PublicKey)
 
-				txStore := NewMockTransactionStore(ctrl)
-				txStore.EXPECT().Get(tx1.GetHash()).Return(tx1, nil).Times(1)
-				txStore.EXPECT().Get(tx2.GetHash()).Return(tx2, nil).Times(1)
-				txStore.EXPECT().Get(tx3.GetHash()).Return(tx3, nil).Times(1)
+				store := NewMockCustomStore(ctrl)
+				store.TransactionStore.EXPECT().Get(tx1.ID).Return(tx1, nil).Times(1)
+				store.TransactionStore.EXPECT().Get(tx2.ID).Return(tx2, nil).Times(1)
+				store.TransactionStore.EXPECT().Get(tx3.ID).Return(tx3, nil).Times(1)
 
 				txPool := NewMockTxPool(ctrl)
 				txPool.EXPECT().GetUTXOs(fromPubKey).Return(nil).Times(1)
@@ -49,34 +48,36 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 				txPool.EXPECT().AddUtxos(gomock.Any(), gomock.Any()).Times(1)
 				txPool.EXPECT().AddUtxos(gomock.Any(), gomock.Any()).Times(1)
 				txPool.EXPECT().AddTx(gomock.Any()).Return(nil).Times(1)
-				utxoStore := NewMockUTXOStore(ctrl)
-				utxoStore.EXPECT().Get(fromPubKey).Return([]*types.UTXO{
+				store.UTXOStore.EXPECT().Get(fromPubKey).Return([]*types.UTXO{
 					{
 						TxHash: tx1.GetHash(),
 						Index:  0,
+						TxID:   tx1.ID,
 					},
 					{
 						TxHash: tx2.GetHash(),
 						Index:  0,
+						TxID:   tx2.ID,
 					},
 					{
 						TxHash: tx3.GetHash(),
 						Index:  0,
+						TxID:   tx3.ID,
 					},
 				}, nil).Times(1)
+
 				return args{
 					txReq: &types.TransactionRequest{
 						Sender:   from,
 						Receiver: &to.PublicKey,
 						Amount:   *types.NewAmount(100),
 					},
-					txStore:   txStore,
-					txPool:    txPool,
-					utxoStore: utxoStore,
+					txPool: txPool,
+					store:  store,
 				}
 			},
 			transactor: func(args args) *service.Transactor {
-				t := service.NewTransactor(args.txStore, args.utxoStore, args.txPool)
+				t := service.NewTransactor(args.store, args.txPool)
 
 				return t
 			},
@@ -100,25 +101,27 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 				tx2 := types.NewTransaction().WithOutput(types.NewAmount(50), &from.PublicKey)
 				tx3 := types.NewTransaction().WithOutput(types.NewAmount(20), &from.PublicKey)
 
-				txStore := NewMockTransactionStore(ctrl)
-				txStore.EXPECT().Get(tx1.GetHash()).Return(tx1, nil).Times(1)
+				store := NewMockCustomStore(ctrl)
+				store.TransactionStore.EXPECT().Get(tx1.ID).Return(tx1, nil).Times(1)
 
 				txPool := NewMockTxPool(ctrl)
 				txPool.EXPECT().GetUTXOs(fakeFromPubKey).Return(nil).Times(1)
 				txPool.EXPECT().GetPool().Return(nil).Times(1)
-				utxoStore := NewMockUTXOStore(ctrl)
-				utxoStore.EXPECT().Get(fakeFromPubKey).Return([]*types.UTXO{
+				store.UTXOStore.EXPECT().Get(fakeFromPubKey).Return([]*types.UTXO{
 					{
 						TxHash: tx1.GetHash(),
 						Index:  0,
+						TxID:   tx1.ID,
 					},
 					{
 						TxHash: tx2.GetHash(),
 						Index:  0,
+						TxID:   tx2.ID,
 					},
 					{
 						TxHash: tx3.GetHash(),
 						Index:  0,
+						TxID:   tx3.ID,
 					},
 				}, nil).Times(1)
 
@@ -128,13 +131,12 @@ func TestTransactor_CreateTx(t1 *testing.T) {
 						Receiver: &to.PublicKey,
 						Amount:   *types.NewAmount(100),
 					},
-					txStore:   txStore,
-					txPool:    txPool,
-					utxoStore: utxoStore,
+					txPool: txPool,
+					store:  store,
 				}
 			},
 			transactor: func(args args) *service.Transactor {
-				t := service.NewTransactor(args.txStore, args.utxoStore, args.txPool)
+				t := service.NewTransactor(args.store, args.txPool)
 
 				return t
 			},

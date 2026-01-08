@@ -4,10 +4,12 @@ import (
 	"sync"
 
 	"local-chain/internal/types"
+
+	"github.com/google/uuid"
 )
 
 type (
-	Pool      map[string]*types.Transaction
+	Pool      map[uuid.UUID]*types.Transaction
 	utxosPool map[string]types.UTXOs
 )
 
@@ -38,7 +40,7 @@ func (txp *TxPool) AddTx(tx *types.Transaction) error {
 	txp.mtx.Lock()
 	defer txp.mtx.Unlock()
 
-	txp.pool[string(tx.GetHash())] = tx
+	txp.pool[tx.ID] = tx
 	return nil
 }
 

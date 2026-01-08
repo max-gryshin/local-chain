@@ -4,10 +4,10 @@ REQUIRED_BUF_VERSION := latest
 REQUIRED_GOLANG_CI_LINT_VERSION := 2.1.6
 INSTALLED_GOLANG_CI_LINT_VERSION := $(shell golangci-lint --version 2> /dev/null | grep -Eo '[0-9]+\.[0-9]+\.[0-9]+' | head -1 )
 CODE := $(shell find . -type f -name '*.go' -not -name '*mock.go' -not -name '*mock_test.go' -not -name '*_gen.go' -not -name '*.pb.go' -not -path "./vendor/*" -not -path "./output/*")
-REQUIRED_JUNITREPORT_VERSION ?= v2.0.0
 REQUIRED_GO_IMPORTS_VERSION ?= v0.3.0
 GO_IMPORTS := $(shell command -v goimports 2> /dev/null)
 REQUIRED_GOFUMPT_VERSION ?= v0.6.0
+REQUIRED_GOTESTSUM_VERSION ?= v1.10.0
 PKGS := $(shell go list ./...)
 CGO_ENABLED ?= 0
 APPS = local-chain
@@ -69,24 +69,12 @@ endif
 clean:
 	@rm -fr gen
 
-.PHONY: test
-test: unit-test
+test: install-gotestsum
+	gotestsum --junitfile junit-report.xml --format pkgname -- -mod=vendor -cover -count=1 -p=4 -covermode atomic -coverprofile=coverage.txt ./...
+	@go tool cover -func=coverage.txt | grep 'total'
 
-.PHONY: unit-test
-unit-test: install-junit-report install-cobertura
-	@go test -short -mod=vendor -cover -count=1 -p=4 -covermode atomic -coverprofile=unit-cover.log $(PWD)/internal \
-	-v $(PKGS) 2>&1 | tee unit-test.log
-	@go tool cover -func=unit-cover.log | grep -E 'total:\s+\(statements\)\s+'
-	@gocover-cobertura < unit-cover.log > unit-coverage.xml
-	@cat unit-test.log | go-junit-report -set-exit-code > unit-junit-report.xml
-
-.PHONY: install-junit-report
-install-junit-report:
-	@go install github.com/jstemmer/go-junit-report/v2@$(REQUIRED_JUNITREPORT_VERSION)
-
-.PHONY: install-cobertura
-install-cobertura:
-	@go install github.com/boumenot/gocover-cobertura@latest
+install-gotestsum:
+	go install gotest.tools/gotestsum@$(REQUIRED_GOTESTSUM_VERSION)
 
 .PHONY: mock
 mock: mockgen format

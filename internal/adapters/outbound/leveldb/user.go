@@ -10,17 +10,17 @@ import (
 	leveldbErrors "github.com/syndtr/goleveldb/leveldb/errors"
 )
 
-type UserStore struct {
+type userS struct {
 	db Database
 }
 
-func NewUserStore(conn Database) *UserStore {
-	return &UserStore{
+func newUserStore(conn Database) *userS {
+	return &userS{
 		db: conn,
 	}
 }
 
-func (s *UserStore) GetAll() ([]*types.User, error) {
+func (s *userS) GetAll() ([]*types.User, error) {
 	keys, err := s.getKeys()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get keys: %w", err)
@@ -28,7 +28,7 @@ func (s *UserStore) GetAll() ([]*types.User, error) {
 	users := make([]*types.User, 0, len(keys))
 	for _, key := range keys {
 		raw, err := s.db.Get(key, nil)
-		if err != nil && !errors.As(err, &leveldbErrors.ErrNotFound) { // nolint:govet
+		if err != nil && !errors.Is(err, leveldbErrors.ErrNotFound) {
 			return nil, fmt.Errorf("UserStore.Get get user error: %w", err)
 		}
 		if raw == nil {
@@ -43,9 +43,9 @@ func (s *UserStore) GetAll() ([]*types.User, error) {
 	return users, nil
 }
 
-func (s *UserStore) Get(username string) (*types.User, error) {
+func (s *userS) Get(username string) (*types.User, error) {
 	raw, err := s.db.Get([]byte(username), nil)
-	if err != nil && !errors.As(err, &leveldbErrors.ErrNotFound) { // nolint:govet
+	if err != nil && !errors.Is(err, leveldbErrors.ErrNotFound) {
 		return nil, fmt.Errorf("UserStore.Get get user error: %w", err)
 	}
 	if raw == nil {
@@ -59,7 +59,7 @@ func (s *UserStore) Get(username string) (*types.User, error) {
 	return user, nil
 }
 
-func (s *UserStore) Put(user *types.User) error {
+func (s *userS) Put(user *types.User) error {
 	existingUser, err := s.Get(user.Username)
 	if err != nil &&
 		!errors.Is(err, leveldbErrors.ErrNotFound) &&
@@ -80,7 +80,7 @@ func (s *UserStore) Put(user *types.User) error {
 	return nil
 }
 
-func (s *UserStore) getKeys() ([][]byte, error) {
+func (s *userS) getKeys() ([][]byte, error) {
 	iterator := s.db.NewIterator(nil, nil)
 	defer iterator.Release()
 

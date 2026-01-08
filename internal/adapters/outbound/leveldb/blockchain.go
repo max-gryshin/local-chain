@@ -11,17 +11,17 @@ import (
 	leveldberrors "github.com/syndtr/goleveldb/leveldb/errors"
 )
 
-type BlockchainStore struct {
+type blockchainS struct {
 	db Database
 }
 
-func NewBlockchainStore(conn Database) *BlockchainStore {
-	return &BlockchainStore{
+func newBlockchainStore(conn Database) *blockchainS {
+	return &blockchainS{
 		db: conn,
 	}
 }
 
-func (s *BlockchainStore) GetAll() (types.Blocks, error) {
+func (s *blockchainS) GetAll() (types.Blocks, error) {
 	keys, err := s.getKeys()
 	if err != nil {
 		return nil, fmt.Errorf("failed to get keys: %w", err)
@@ -29,7 +29,7 @@ func (s *BlockchainStore) GetAll() (types.Blocks, error) {
 	blocks := make(types.Blocks, 0, len(keys))
 	for _, key := range keys {
 		raw, err := s.db.Get(key, nil)
-		if err != nil && !errors.As(err, &leveldberrors.ErrNotFound) { // nolint:govet
+		if err != nil && !errors.Is(err, leveldberrors.ErrNotFound) {
 			return nil, fmt.Errorf("blockchainStore.GetAll get block error: %w", err)
 		}
 		if raw == nil {
@@ -46,9 +46,9 @@ func (s *BlockchainStore) GetAll() (types.Blocks, error) {
 	return blocks, nil
 }
 
-func (s *BlockchainStore) GetByTimestamp(t uint64) (*types.Block, error) {
+func (s *blockchainS) GetByTimestamp(t uint64) (*types.Block, error) {
 	raw, err := s.db.Get([]byte(strconv.Itoa(int(t))), nil)
-	if err != nil && !errors.As(err, &leveldberrors.ErrNotFound) { // nolint:govet
+	if err != nil && !errors.Is(err, leveldberrors.ErrNotFound) {
 		return nil, fmt.Errorf("blockchainStore.GetByTimestamp get block error: %w", err)
 	}
 	if raw == nil {
@@ -63,7 +63,7 @@ func (s *BlockchainStore) GetByTimestamp(t uint64) (*types.Block, error) {
 	return block, nil
 }
 
-func (s *BlockchainStore) Put(block *types.Block) error {
+func (s *blockchainS) Put(block *types.Block) error {
 	existingBlock, err := s.GetByTimestamp(block.Timestamp)
 	if err != nil {
 		return fmt.Errorf("blockchainStore.Put get existing block error: %w", err)
@@ -81,7 +81,7 @@ func (s *BlockchainStore) Put(block *types.Block) error {
 	return nil
 }
 
-func (s *BlockchainStore) Delete() error {
+func (s *blockchainS) Delete() error {
 	keys, err := s.getKeys()
 	if err != nil {
 		return fmt.Errorf("failed to get keys for deletion: %w", err)
@@ -96,7 +96,25 @@ func (s *BlockchainStore) Delete() error {
 	return nil
 }
 
-func (s *BlockchainStore) getKeys() ([][]byte, error) {
+func (s *blockchainS) GetKeys() ([]uint64, error) {
+	keys, err := s.getKeys()
+	if err != nil {
+		return nil, fmt.Errorf("failed to get keys: %w", err)
+	}
+
+	var timestamps []uint64
+	for _, key := range keys {
+		timestamp, err := strconv.ParseUint(string(key), 10, 64)
+		if err != nil {
+			return nil, fmt.Errorf("failed to parse key %s to uint64: %w", string(key), err)
+		}
+		timestamps = append(timestamps, timestamp)
+	}
+
+	return timestamps, nil
+}
+
+func (s *blockchainS) getKeys() ([][]byte, error) {
 	iterator := s.db.NewIterator(nil, nil)
 	defer iterator.Release()
 

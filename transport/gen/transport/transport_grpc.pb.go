@@ -11,6 +11,7 @@ import (
 	grpc "google.golang.org/grpc"
 	codes "google.golang.org/grpc/codes"
 	status "google.golang.org/grpc/status"
+	emptypb "google.golang.org/protobuf/types/known/emptypb"
 )
 
 // This is a compile-time assertion to ensure that this generated file
@@ -29,7 +30,11 @@ type LocalChainClient interface {
 	GetBalance(ctx context.Context, in *GetBalanceRequest, opts ...grpc.CallOption) (*GetBalanceResponse, error)
 	AddUser(ctx context.Context, in *AddUserRequest, opts ...grpc.CallOption) (*AddUserResponse, error)
 	GetUser(ctx context.Context, in *GetUserRequest, opts ...grpc.CallOption) (*GetUserResponse, error)
-	ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error)
+	ListUsers(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListUsersResponse, error)
+	GetBlockKeys(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetBlockKeysResponse, error)
+	GetBlock(ctx context.Context, in *GetBlockRequest, opts ...grpc.CallOption) (*GetBlockResponse, error)
+	GetTransaction(ctx context.Context, in *GetTransactionRequest, opts ...grpc.CallOption) (*GetTransactionResponse, error)
+	VerifyTransaction(ctx context.Context, in *VerifyTransactionRequest, opts ...grpc.CallOption) (*VerifyTransactionResponse, error)
 }
 
 type localChainClient struct {
@@ -103,9 +108,45 @@ func (c *localChainClient) GetUser(ctx context.Context, in *GetUserRequest, opts
 	return out, nil
 }
 
-func (c *localChainClient) ListUsers(ctx context.Context, in *ListUsersRequest, opts ...grpc.CallOption) (*ListUsersResponse, error) {
+func (c *localChainClient) ListUsers(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*ListUsersResponse, error) {
 	out := new(ListUsersResponse)
 	err := c.cc.Invoke(ctx, "/LocalChain/ListUsers", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *localChainClient) GetBlockKeys(ctx context.Context, in *emptypb.Empty, opts ...grpc.CallOption) (*GetBlockKeysResponse, error) {
+	out := new(GetBlockKeysResponse)
+	err := c.cc.Invoke(ctx, "/LocalChain/GetBlockKeys", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *localChainClient) GetBlock(ctx context.Context, in *GetBlockRequest, opts ...grpc.CallOption) (*GetBlockResponse, error) {
+	out := new(GetBlockResponse)
+	err := c.cc.Invoke(ctx, "/LocalChain/GetBlock", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *localChainClient) GetTransaction(ctx context.Context, in *GetTransactionRequest, opts ...grpc.CallOption) (*GetTransactionResponse, error) {
+	out := new(GetTransactionResponse)
+	err := c.cc.Invoke(ctx, "/LocalChain/GetTransaction", in, out, opts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
+func (c *localChainClient) VerifyTransaction(ctx context.Context, in *VerifyTransactionRequest, opts ...grpc.CallOption) (*VerifyTransactionResponse, error) {
+	out := new(VerifyTransactionResponse)
+	err := c.cc.Invoke(ctx, "/LocalChain/VerifyTransaction", in, out, opts...)
 	if err != nil {
 		return nil, err
 	}
@@ -123,7 +164,11 @@ type LocalChainServer interface {
 	GetBalance(context.Context, *GetBalanceRequest) (*GetBalanceResponse, error)
 	AddUser(context.Context, *AddUserRequest) (*AddUserResponse, error)
 	GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error)
-	ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error)
+	ListUsers(context.Context, *emptypb.Empty) (*ListUsersResponse, error)
+	GetBlockKeys(context.Context, *emptypb.Empty) (*GetBlockKeysResponse, error)
+	GetBlock(context.Context, *GetBlockRequest) (*GetBlockResponse, error)
+	GetTransaction(context.Context, *GetTransactionRequest) (*GetTransactionResponse, error)
+	VerifyTransaction(context.Context, *VerifyTransactionRequest) (*VerifyTransactionResponse, error)
 	mustEmbedUnimplementedLocalChainServer()
 }
 
@@ -152,8 +197,20 @@ func (UnimplementedLocalChainServer) AddUser(context.Context, *AddUserRequest) (
 func (UnimplementedLocalChainServer) GetUser(context.Context, *GetUserRequest) (*GetUserResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method GetUser not implemented")
 }
-func (UnimplementedLocalChainServer) ListUsers(context.Context, *ListUsersRequest) (*ListUsersResponse, error) {
+func (UnimplementedLocalChainServer) ListUsers(context.Context, *emptypb.Empty) (*ListUsersResponse, error) {
 	return nil, status.Errorf(codes.Unimplemented, "method ListUsers not implemented")
+}
+func (UnimplementedLocalChainServer) GetBlockKeys(context.Context, *emptypb.Empty) (*GetBlockKeysResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBlockKeys not implemented")
+}
+func (UnimplementedLocalChainServer) GetBlock(context.Context, *GetBlockRequest) (*GetBlockResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetBlock not implemented")
+}
+func (UnimplementedLocalChainServer) GetTransaction(context.Context, *GetTransactionRequest) (*GetTransactionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method GetTransaction not implemented")
+}
+func (UnimplementedLocalChainServer) VerifyTransaction(context.Context, *VerifyTransactionRequest) (*VerifyTransactionResponse, error) {
+	return nil, status.Errorf(codes.Unimplemented, "method VerifyTransaction not implemented")
 }
 func (UnimplementedLocalChainServer) mustEmbedUnimplementedLocalChainServer() {}
 
@@ -295,7 +352,7 @@ func _LocalChain_GetUser_Handler(srv interface{}, ctx context.Context, dec func(
 }
 
 func _LocalChain_ListUsers_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
-	in := new(ListUsersRequest)
+	in := new(emptypb.Empty)
 	if err := dec(in); err != nil {
 		return nil, err
 	}
@@ -307,7 +364,79 @@ func _LocalChain_ListUsers_Handler(srv interface{}, ctx context.Context, dec fun
 		FullMethod: "/LocalChain/ListUsers",
 	}
 	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
-		return srv.(LocalChainServer).ListUsers(ctx, req.(*ListUsersRequest))
+		return srv.(LocalChainServer).ListUsers(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LocalChain_GetBlockKeys_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(emptypb.Empty)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LocalChainServer).GetBlockKeys(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/LocalChain/GetBlockKeys",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LocalChainServer).GetBlockKeys(ctx, req.(*emptypb.Empty))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LocalChain_GetBlock_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetBlockRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LocalChainServer).GetBlock(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/LocalChain/GetBlock",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LocalChainServer).GetBlock(ctx, req.(*GetBlockRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LocalChain_GetTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(GetTransactionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LocalChainServer).GetTransaction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/LocalChain/GetTransaction",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LocalChainServer).GetTransaction(ctx, req.(*GetTransactionRequest))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
+func _LocalChain_VerifyTransaction_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(VerifyTransactionRequest)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(LocalChainServer).VerifyTransaction(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: "/LocalChain/VerifyTransaction",
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(LocalChainServer).VerifyTransaction(ctx, req.(*VerifyTransactionRequest))
 	}
 	return interceptor(ctx, in, info, handler)
 }
@@ -350,6 +479,22 @@ var LocalChain_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "ListUsers",
 			Handler:    _LocalChain_ListUsers_Handler,
+		},
+		{
+			MethodName: "GetBlockKeys",
+			Handler:    _LocalChain_GetBlockKeys_Handler,
+		},
+		{
+			MethodName: "GetBlock",
+			Handler:    _LocalChain_GetBlock_Handler,
+		},
+		{
+			MethodName: "GetTransaction",
+			Handler:    _LocalChain_GetTransaction_Handler,
+		},
+		{
+			MethodName: "VerifyTransaction",
+			Handler:    _LocalChain_VerifyTransaction_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},
