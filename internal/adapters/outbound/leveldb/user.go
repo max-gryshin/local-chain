@@ -28,7 +28,7 @@ func (s *userS) GetAll() ([]*types.User, error) {
 	users := make([]*types.User, 0, len(keys))
 	for _, key := range keys {
 		raw, err := s.db.Get(key, nil)
-		if err != nil && !errors.As(err, &leveldbErrors.ErrNotFound) { // nolint:govet
+		if err != nil && !errors.Is(err, leveldbErrors.ErrNotFound) {
 			return nil, fmt.Errorf("UserStore.Get get user error: %w", err)
 		}
 		if raw == nil {
@@ -45,7 +45,7 @@ func (s *userS) GetAll() ([]*types.User, error) {
 
 func (s *userS) Get(username string) (*types.User, error) {
 	raw, err := s.db.Get([]byte(username), nil)
-	if err != nil && !errors.As(err, &leveldbErrors.ErrNotFound) { // nolint:govet
+	if err != nil && !errors.Is(err, leveldbErrors.ErrNotFound) {
 		return nil, fmt.Errorf("UserStore.Get get user error: %w", err)
 	}
 	if raw == nil {

@@ -24,7 +24,7 @@ func (s *utxoS) Get(pubKey []byte) ([]*types.UTXO, error) {
 	utxos := make([]*types.UTXO, 0)
 	value, err := s.db.Get(pubKey, nil)
 	if err != nil {
-		if errors.As(err, &leveldbErrors.ErrNotFound) { // nolint:govet
+		if errors.Is(err, leveldbErrors.ErrNotFound) {
 			return nil, nil
 		}
 		return utxos, fmt.Errorf("failed to get utxos: %w", err)

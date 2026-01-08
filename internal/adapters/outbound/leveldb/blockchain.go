@@ -29,7 +29,7 @@ func (s *blockchainS) GetAll() (types.Blocks, error) {
 	blocks := make(types.Blocks, 0, len(keys))
 	for _, key := range keys {
 		raw, err := s.db.Get(key, nil)
-		if err != nil && !errors.As(err, &leveldberrors.ErrNotFound) { // nolint:govet
+		if err != nil && !errors.Is(err, leveldberrors.ErrNotFound) {
 			return nil, fmt.Errorf("blockchainStore.GetAll get block error: %w", err)
 		}
 		if raw == nil {
@@ -48,7 +48,7 @@ func (s *blockchainS) GetAll() (types.Blocks, error) {
 
 func (s *blockchainS) GetByTimestamp(t uint64) (*types.Block, error) {
 	raw, err := s.db.Get([]byte(strconv.Itoa(int(t))), nil)
-	if err != nil && !errors.As(err, &leveldberrors.ErrNotFound) { // nolint:govet
+	if err != nil && !errors.Is(err, leveldberrors.ErrNotFound) {
 		return nil, fmt.Errorf("blockchainStore.GetByTimestamp get block error: %w", err)
 	}
 	if raw == nil {

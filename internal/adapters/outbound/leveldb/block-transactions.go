@@ -33,7 +33,7 @@ func (s *blockTransactionsS) Put(envelope *types.BlockTxsEnvelope) error {
 
 func (s *blockTransactionsS) GetByBlockTimestamp(t uint64) (types.Transactions, error) {
 	raw, err := s.db.Get([]byte(strconv.Itoa(int(t))), nil)
-	if err != nil && !errors.As(err, &leveldberrors.ErrNotFound) { // nolint:govet
+	if err != nil && !errors.Is(err, leveldberrors.ErrNotFound) {
 		return nil, fmt.Errorf("blockTransactionsStore.GetByBlockTimestamp get block transactions error: %w", err)
 	}
 	if raw == nil {
