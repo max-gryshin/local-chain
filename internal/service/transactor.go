@@ -4,7 +4,6 @@ import (
 	"crypto/ecdsa"
 	"errors"
 	"fmt"
-	"local-chain/internal/adapters/outbound/leveldb"
 	"local-chain/internal/pkg/merkle"
 	"math/big"
 
@@ -16,14 +15,14 @@ import (
 	"github.com/google/uuid"
 )
 
-//go:generate mockgen -source transactor.go -destination transactor_mock_test.go -package service_test -mock_names TransactionStore=MockTransactionStore,TxPool=MockTxPool,Store=MockStore
+//go:generate mockgen --build_flags=--mod=mod -destination transactor_mock_test.go -package service_test . TransactionStore,BStore,UTXOStore,TxPool,UserStore,BlockTxStore,Store
 
 type Store interface {
-	Transaction() *leveldb.TransactionStore
-	Blockchain() *leveldb.BlockchainStore
-	Utxo() *leveldb.UtxoStore
-	User() *leveldb.UserStore
-	BlockTransactions() *leveldb.BlockTransactionsStore
+	Transaction() TransactionStore
+	Blockchain() BStore
+	Utxo() UTXOStore
+	User() UserStore
+	BlockTransactions() BlockTxStore
 }
 
 type TransactionStore interface {
@@ -34,6 +33,13 @@ type TransactionStore interface {
 type BlockTxStore interface {
 	Put(envelope *types.BlockTxsEnvelope) error
 	GetByBlockTimestamp(t uint64) (types.Transactions, error)
+}
+
+type BStore interface {
+	GetAll() (types.Blocks, error)
+	GetByTimestamp(t uint64) (*types.Block, error)
+	Put(block *types.Block) error
+	GetKeys() ([]uint64, error)
 }
 
 type UTXOStore interface {

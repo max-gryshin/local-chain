@@ -74,7 +74,7 @@ test: unit-test
 
 .PHONY: unit-test
 unit-test: install-junit-report install-cobertura
-	@go test -short -mod=vendor -cover -count=1 -p=4 -covermode atomic -coverprofile=unit-cover.log $(PWD)/internal \
+	@go test -short -mod=vendor -cover -count=1 -p=4 -covermode atomic -coverprofile=unit-cover.log \
 	-v $(PKGS) 2>&1 | tee unit-test.log
 	@go tool cover -func=unit-cover.log | grep -E 'total:\s+\(statements\)\s+'
 	@gocover-cobertura < unit-cover.log > unit-coverage.xml
